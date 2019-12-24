@@ -1,0 +1,106 @@
+[
+    {
+        "name": "psr/log",
+        "version": "1.1.0",
+        "version_normalized": "1.1.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/php-fig/log.git",
+            "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/php-fig/log/zipball/6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+            "reference": "6c001f1daafa3a3ac1d8ff69ee4db8e799a654dd",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "time": "2018-11-20T15:27:04+00:00",
+        "type": "library",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.0.x-dev"
+            }
+        },
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Psr\\Log\\": "Psr/Log/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "PHP-FIG",
+                "homepage": "http://www.php-fig.org/"
+            }
+        ],
+        "description": "Common interface for logging libraries",
+        "homepage": "https://github.com/php-fig/log",
+        "keywords": [
+            "log",
+            "psr",
+            "psr-3"
+        ]
+    },
+    {
+        "name": "aura/sql",
+        "version": "3.0.0",
+        "version_normalized": "3.0.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/auraphp/Aura.Sql.git",
+            "reference": "2be02d5dfd9fdee6df199de1a19572aa490bb744"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/auraphp/Aura.Sql/zipball/2be02d5dfd9fdee6df199de1a19572aa490bb744",
+            "reference": "2be02d5dfd9fdee6df199de1a19572aa490bb744",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.6.0",
+            "psr/log": "^1.0"
+        },
+        "require-dev": {
+            "pds/skeleton": "~1.0",
+            "phpunit/phpunit": "~5.0"
+        },
+        "time": "2018-06-11T12:57:42+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Aura\\Sql\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Aura.Sql Contributors",
+                "homepage": "https://github.com/auraphp/Aura.Sql/contributors"
+            }
+        ],
+        "description": "A PDO extension that provides lazy connections, array quoting, query profiling, value binding, and convenience methods for common fetch styles. Because it extends PDO, existing code that uses PDO can use this without any changes to the existing code.",
+        "homepage": "https://github.com/auraphp/Aura.Sql",
+        "keywords": [
+            "mysql",
+            "pdo",
+            "pgsql",
+            "postgres",
+            "postgresql",
+            "sql server",
+            "sqlite",
+            "sqlserver",
+            "sqlsrv"
+        ]
+    }
+]

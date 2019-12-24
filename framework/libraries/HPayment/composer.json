@@ -1,0 +1,19 @@
+{
+  "name": "heeva/h-payment",
+  "type": "library",
+  "description": "Payment package for persian bank accounts",
+  "keywords": ["bank", "payment", "bank payment", "persian bank payment"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "MMDM",
+      "email": "mmdehghan95@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "HPayment\\":"vendor/src/"
+    }
+  }
+}
