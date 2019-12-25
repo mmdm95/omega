@@ -122,7 +122,7 @@ class Framework
 
         define("HELPER_PATH", BASE_PATH . "helpers" . DS);
 
-        define('BASE_URL', PROTOCOL . $_SERVER['SERVER_NAME']
+        define('BASE_URL', PROTOCOL . $_SERVER['SERVER_NAME'] . ':' . $_SERVER['SERVER_PORT']
             . str_replace($_SERVER['DOCUMENT_ROOT'],
                 '',
                 str_replace('\\',

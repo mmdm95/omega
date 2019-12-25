@@ -13,51 +13,17 @@ class AdminController extends HController
     private $data = [];
     private $setting;
 
-    // Offer save reaction parameters
-    const OFFER_REACTION_SHOW_ERROR = 1;
-    const OFFER_REACTION_DISABLE_OTHERS = 2;
-    protected $offerReactionParams = [
-        self::OFFER_REACTION_SHOW_ERROR,
-        self::OFFER_REACTION_DISABLE_OTHERS,
-    ];
-
-    // Offer activation change to active reaction parameters
-    const OFFER_ACTIVATION_REACTION_SHOW_ERROR = 1;
-    const OFFER_ACTIVATION_REACTION_DEACTIVATE_OTHERS = 2;
-    const OFFER_ACTIVATION_REACTION_DELETE_OTHER_PRODUCTS = 3;
-    protected $offerActivationReactionParams = [
-        self::OFFER_ACTIVATION_REACTION_SHOW_ERROR,
-        self::OFFER_ACTIVATION_REACTION_DEACTIVATE_OTHERS,
-        self::OFFER_ACTIVATION_REACTION_DELETE_OTHER_PRODUCTS
-    ];
-
-    // Define payment tables and codes and functions
-    const PAYMENT_TABLE_MABNA = 'gateway_mabna';
-    const PAYMENT_TABLE_IDPAY = 'gateway_idpay';
-    const PAYMENT_TABLE_ZARINPAL = 'gateway_zarinpal';
-    protected $gatewayTables = [
-        self::PAYMENT_TABLE_IDPAY => [
-            'PAY_74214735',
-            'PAY_32879731',
-        ],
-        self::PAYMENT_TABLE_MABNA => [],
-        self::PAYMENT_TABLE_ZARINPAL => [],
-    ];
-    protected $gatewaySuccessCode;
-
     public function __construct()
     {
         parent::__construct();
 
-        $model = new Model();
+        try {
+//            $this->load->library('HAuthentication/Auth');
+//            $t = new Auth(true);
+        } catch (HAException $e) {
+        }
 
-        // Define gateway table to its success code after load library to access Payment constants
-        $this->load->library('HPayment/vendor/autoload');
-        $this->gatewaySuccessCode = [
-            self::PAYMENT_TABLE_IDPAY => Payment::PAYMENT_STATUS_OK_IDPAY,
-            self::PAYMENT_TABLE_MABNA => Payment::PAYMENT_STATUS_OK_MABNA,
-            self::PAYMENT_TABLE_ZARINPAL => Payment::PAYMENT_STATUS_OK_ZARINPAL,
-        ];
+        $model = new Model();
 
         $this->load->library('HAuthentication/Auth');
         try {

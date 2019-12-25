@@ -38,7 +38,10 @@ return array(
     //    'hello/*' => 'index'
     //);
     'routes' => array(
-        'user' => 'user/profile'
+        'admin' => 'admin/admin',
+        'admin/(:any)' => 'admin/admin/(:any)',
+        'home' => 'home/home',
+        'home/(:any)' => 'home/home/(:any)',
     ),
 
     //===============================================
