@@ -44,12 +44,9 @@ return array(
     'databases' => array(
         'default' => array(
             'type' => 'mysql',
-             'dsn' => 'mysql:host=localhost;dbname=my_shop;charset=utf8',
-//            'dsn' => 'mysql:host=localhost;dbname=spsroham_20tik;charset=utf8',
+             'dsn' => 'mysql:host=localhost;dbname=omega;charset=utf8',
              'username' => 'root',
-//            'username' => 'spsroham_20tik',
              'password' => '',
-//            'password' => 's442g392m9516271',
             'options' => []
         )
     )
