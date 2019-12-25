@@ -4,7 +4,7 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 /** Default page configuration ... */
 
 // DEF_PLATFORM = folder of home page
-defined('DEF_PLATFORM') OR define('DEF_PLATFORM', '');
+defined('DEF_PLATFORM') OR define('DEF_PLATFORM', 'home');
 
 // DEF_CONTROLLER = name of controller class
 defined('DEF_CONTROLLER') OR define('DEF_CONTROLLER', 'Home');
