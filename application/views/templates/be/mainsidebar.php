@@ -11,7 +11,7 @@
                 <div class="media">
                     <a href="<?= base_url() . 'admin/editUser/' . @$identity->id; ?>"
                        class="media-left">
-                        <img src="<?= asset_url("fe/img/avatars/{$identity->image}"); ?>" class="img-fit"
+                        <img src="<?= asset_url($identity->image); ?>" class="img-fit"
                              alt="">
                     </a>
                     <div class="media-body">
@@ -70,161 +70,57 @@
                     <?php endif; ?>
                     <li>
                         <a>
-                            <i class="icon-price-tag2"></i>
+                            <i class="icon-user-block"></i>
                             <span>
-                                برندها
+                                بلاک لیست
                             </span>
                         </a>
                         <ul>
                             <li>
-                                <a href="<?= base_url(); ?>admin/addBrand">
+                                <a href="<?= base_url(); ?>admin/">
                                     <i class="icon-add-to-list" style="font-size: 13px;"></i>
                                     <small>
-                                        افزودن برند
+                                        افزودن
                                     </small>
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= base_url(); ?>admin/manageBrand">
-                                    <i class="icon-price-tags" style="font-size: 13px;"></i>
+                                <a href="<?= base_url(); ?>admin/">
+                                    <i class="icon-blocked" style="font-size: 13px;"></i>
                                     <small>
-                                        مشاهده برندها
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <!--                    <li>-->
-                    <!--                        <a>-->
-                    <!--                            <i class="icon-shield-check"></i>-->
-                    <!--                            <span>-->
-                    <!--                                گارانتی‌ها-->
-                    <!--                            </span>-->
-                    <!--                        </a>-->
-                    <!--                        <ul>-->
-                    <!--                            <li>-->
-                    <!--                                <a href="--><?//= base_url(); ?><!--admin/addGuarantee">-->
-                    <!--                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>-->
-                    <!--                                    <small>-->
-                    <!--                                        افزودن گارانتی-->
-                    <!--                                    </small>-->
-                    <!--                                </a>-->
-                    <!--                            </li>-->
-                    <!--                            <li>-->
-                    <!--                                <a href="--><?//= base_url(); ?><!--admin/manageGuarantee">-->
-                    <!--                                    <i class="icon-table2" style="font-size: 13px;"></i>-->
-                    <!--                                    <small>-->
-                    <!--                                        مشاهده گارانتی‌ها-->
-                    <!--                                    </small>-->
-                    <!--                                </a>-->
-                    <!--                            </li>-->
-                    <!--                        </ul>-->
-                    <!--                    </li>-->
-                    <li>
-                        <a>
-                            <i class="icon-truck"></i>
-                            <span>
-                                روش‌های ارسال
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addShipping">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن روش ارسال
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageShipping">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده روش‌های ارسال
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>
-                            <i class="icon-coin-dollar"></i>
-                            <span>
-                                روش‌های پرداخت
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addPayment">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن روش پرداخت
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/managePayment">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده روش‌های پرداخت
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>
-                            <i class="icon-percent"></i>
-                            <span>
-                                کوپن‌های تخفیف
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addCoupon">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن کوپن تخفیف
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageCoupon">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده کوپن‌های تخفیف
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>
-                            <i class="icon-droplet"></i>
-                            <span>
-                                رنگ‌ها
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addColor">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن رنگ
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageColor">
-                                    <i class="icon-droplets" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده رنگ‌ها
+                                        مشاهده
                                     </small>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li class="navigation-header"><span>نوشته‌ها</span> <i class="icon-menu"></i></li>
+                    <li>
+                        <a>
+                            <i class="icon-notebook"></i>
+                            <span>
+                                نوشته‌ها
+                            </span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/">
+                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
+                                    <small>
+                                        افزودن نوشته
+                                    </small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/">
+                                    <i class="icon-pencil7" style="font-size: 13px;"></i>
+                                    <small>
+                                        مشاهده نوشته‌ها
+                                    </small>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                     <li>
                         <a>
                             <i class="icon-archive"></i>
@@ -251,15 +147,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="navigation-header"><span>فروشگاه</span> <i class="icon-menu"></i></li>
-                    <li>
-                        <a href="<?= base_url(); ?>admin/manageFactor">
-                            <i class="icon-list2"></i>
-                            <span>
-                                سفارشات
-                            </span>
-                        </a>
-                    </li>
+                    <li class="navigation-header"><span>اصلی</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
                             <i class="icon-tree6"></i>
@@ -287,110 +175,6 @@
                         </ul>
                     </li>
                     <li>
-                        <a>
-                            <i class="icon-cart4"></i>
-                            <span>
-                                محصولات
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a>
-                                    <i class="icon-circle"></i>
-                                    <span>
-                                        گروه‌بندی ویژگی‌ها
-                                    </span>
-                                </a>
-                                <ul>
-                                    <li>
-                                        <a href="<?= base_url(); ?>admin/addTitle">
-                                            <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                            <small>
-                                                افزودن گروه‌بندی ویژگی
-                                            </small>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url(); ?>admin/manageTitle">
-                                            <i class="icon-table2" style="font-size: 13px;"></i>
-                                            <small>
-                                                مشاهده گروه‌بندی ویژگی‌ها
-                                            </small>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a>
-                                    <i class="icon-circle"></i>
-                                    <span>
-                                        ویژگی‌ها
-                                    </span>
-                                </a>
-                                <ul>
-                                    <li>
-                                        <a href="<?= base_url(); ?>admin/addProperty">
-                                            <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                            <small>
-                                                افزودن ویژگی
-                                            </small>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="<?= base_url(); ?>admin/manageProperty">
-                                            <i class="icon-table2" style="font-size: 13px;"></i>
-                                            <small>
-                                                مشاهده ویژگی‌ها
-                                            </small>
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addProduct">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن محصول
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageProduct">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده محصولات
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>
-                            <i class="icon-magic-wand2"></i>
-                            <span>
-                                پیشنهادهای شگفت‌انگیز
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addFestival">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن پیشنهاد
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageFestival">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده پیشنهادها
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
                         <a href="<?= base_url(); ?>admin/manageComment">
                             <i class="icon-comment-discussion"></i>
                             <span>
@@ -403,25 +187,25 @@
                     <li class="navigation-header"><span>فرعی</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
-                            <i class="icon-images2"></i>
+                            <i class="icon-question3"></i>
                             <span>
-                                اسلایدر
+                                سؤالات متداول
                             </span>
                         </a>
                         <ul>
                             <li>
-                                <a href="<?= base_url(); ?>admin/addSlider">
+                                <a href="<?= base_url(); ?>admin/addFAQ">
                                     <i class="icon-add-to-list" style="font-size: 13px;"></i>
                                     <small>
-                                        افزودن اسلاید
+                                        افزودن سؤال
                                     </small>
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= base_url(); ?>admin/manageSlider">
-                                    <i class="icon-images3" style="font-size: 13px;"></i>
+                                <a href="<?= base_url(); ?>admin/manageFAQ">
+                                    <i class="icon-table2" style="font-size: 13px;"></i>
                                     <small>
-                                        مشاهده اسلایدها
+                                        مشاهده سؤال‌ها
                                     </small>
                                 </a>
                             </li>

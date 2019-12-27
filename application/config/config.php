@@ -39,9 +39,9 @@ return array(
     //);
     'routes' => array(
         'admin' => 'admin/admin',
-        'admin/(:any)' => 'admin/admin/(:any)',
+        'admin/(:any)' => 'admin/admin/$1',
         'home' => 'home/home',
-        'home/(:any)' => 'home/home/(:any)',
+        'home/(:any)' => 'home/home/$1',
     ),
 
     //===============================================

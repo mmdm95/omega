@@ -4,7 +4,7 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 
-require_once CONTROLLER_PATH . "HomeController.class.php";
+require_once CONTROLLER_PATH . "home/HomeController.class.php";
 
 class ErrorsController extends HomeController
 {

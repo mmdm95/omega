@@ -81,7 +81,7 @@
                                                             <?= $contact['subject']; ?>
                                                         </td>
                                                         <td>
-                                                            <?= jDateTime::date('Y/m/d - H:i', $contact['send_time']); ?>
+                                                            <?= jDateTime::date('Y/m/d - H:i', $contact['sent_at']); ?>
                                                         </td>
                                                         <td>
                                                             <?php if ($contact['status'] == 1): ?>

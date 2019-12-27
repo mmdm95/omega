@@ -3,7 +3,7 @@
         var imgExts = ['svg'];
         var filesBody = $('#files-body'),
             files = filesBody.find('.user-avatar'),
-            avatarsPath = baseUrl + 'public/fe/img/avatars/',
+            avatarsPath = baseUrl + 'public/',
             selectClass = 'selected',
             nameAttr = 'data-name';
         var imageInpPlaceholder = $('.emote-file'),

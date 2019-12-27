@@ -143,9 +143,9 @@
                                                 <div class="panel panel-body">
                                                     <div class="media">
                                                         <div class="media-left">
-                                                            <a href="<?= asset_url('fe/img/avatars/' . $comment['u_image']); ?>"
+                                                            <a href="<?= asset_url($comment['u_image']); ?>"
                                                                data-popup="lightbox">
-                                                                <img src="<?= asset_url('fe/img/avatars/' . $comment['u_image']); ?>"
+                                                                <img src="<?= asset_url($comment['u_image']); ?>"
                                                                      style="width: 70px; height: 70px;"
                                                                      class="img-circle" alt="">
                                                             </a>

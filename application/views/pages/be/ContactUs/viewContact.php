@@ -74,7 +74,7 @@
                                                     </a>
                                                     <span class="text-muted text-small display-inline-block">
                                                         <i class="icon-dash" aria-hidden="true"></i>
-                                                        <?= jDateTime::date('j F Y', $cusVals['send_time']); ?>
+                                                        <?= jDateTime::date('j F Y', $cusVals['sent_at']); ?>
                                                     </span>
                                                 </h5>
                                                 <h6>

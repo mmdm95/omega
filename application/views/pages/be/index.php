@@ -27,7 +27,8 @@
                             </label>
                             <label class="mb-15"
                                    title="پیام‌های خوانده نشده" data-popup="tooltip" data-placement="bottom">
-                                <a href="<?= base_url(); ?>admin/manageContactUs" class="text-white p-10 label bg-orange-600">
+                                <a href="<?= base_url(); ?>admin/manageContactUs"
+                                   class="text-white p-10 label bg-orange-600">
                                     <h6 class="no-margin">
                                         <i class="icon-envelop5 position-left" aria-hidden="true"></i>
                                         <?php if ($unreadContacts != 0): ?>
@@ -63,32 +64,12 @@
                                             </li>
                                         <?php endif; ?>
                                         <li class="col-xs-6 col-sm-4 col-md-3">
-                                            <a href="<?= base_url(); ?>admin/manageFactor" style="min-width: 130px;"
-                                               class="btn btn-info btn-float btn-float-lg border-left border-grey-300
-                                        border-left-info-300 bg-white border-left-lg display-block panel no-border-radius">
-                                                <i class="icon-list2" aria-hidden="true"></i>
-                                                <span>
-                                                    سفارشات
-                                                </span>
-                                            </a>
-                                        </li>
-                                        <li class="col-xs-6 col-sm-4 col-md-3">
                                             <a href="<?= base_url(); ?>admin/manageCategory" style="min-width: 130px;"
                                                class="btn btn-info btn-float btn-float-lg border-left border-grey-300
                                         border-left-info-300 bg-white border-left-lg display-block panel no-border-radius">
                                                 <i class="icon-hash" aria-hidden="true"></i>
                                                 <span>
                                                     مشاهده دسته‌بندی‌ها
-                                                </span>
-                                            </a>
-                                        </li>
-                                        <li class="col-xs-6 col-sm-4 col-md-3">
-                                            <a href="<?= base_url(); ?>admin/manageProduct" style="min-width: 130px;"
-                                               class="btn btn-info btn-float btn-float-lg border-left border-grey-300
-                                        border-left-info-300 bg-white border-left-lg display-block panel no-border-radius">
-                                                <i class="icon-basket" aria-hidden="true"></i>
-                                                <span>
-                                                    مشاهده محصولات
                                                 </span>
                                             </a>
                                         </li>
@@ -152,6 +133,7 @@
                                 </h5>
                             </div>
 
+                            <?php if($identity->role_id <= AUTH_ROLE_ADMIN): ?>
                             <div class="col-sm-6 col-md-3 col-lg-2">
                                 <div class="panel text-pink-400 border-top-lg border-top-pink-400">
                                     <div class="panel-body">
@@ -162,61 +144,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-pink-600 border-top-lg border-top-pink-600">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($brandsCount); ?>
-                                        </h3>
-                                        برند
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-pink-800 border-top-lg border-top-pink-800">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($shippingCount); ?>
-                                        </h3>
-                                        روش ارسال
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-purple-800 border-top-lg border-top-purple-800">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($payMethodsCount); ?>
-                                        </h3>
-                                        روش پرداخت
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-purple-600 border-top-lg border-top-purple-600">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($couponsCount); ?>
-                                        </h3>
-                                        کوپن تخفیف
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-purple-400 border-top-lg border-top-purple-400">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($colorsCount); ?>
-                                        </h3>
-                                        رنگ
-                                    </div>
-                                </div>
-                            </div>
+                            <?php endif; ?>
 
                             <div class="col-sm-6 col-md-3 col-lg-2">
                                 <div class="panel text-indigo-400 border-top-lg border-top-indigo-400">
@@ -235,7 +163,7 @@
                                         <h3 class="no-margin">
                                             <?= convertNumbersToPersian($factorsCount); ?>
                                         </h3>
-                                        کل سفارشات
+                                        فاکتور
                                     </div>
                                 </div>
                             </div>
@@ -252,29 +180,7 @@
                             </div>
 
                             <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-teal-800 border-top-lg border-top-teal-800">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($productsCount); ?>
-                                        </h3>
-                                        محصول
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-teal-600 border-top-lg border-top-teal-600">
-                                    <div class="panel-body">
-                                        <h3 class="no-margin">
-                                            <?= convertNumbersToPersian($fetivalsCount); ?>
-                                        </h3>
-                                        پیشنهاد
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-sm-6 col-md-3 col-lg-2">
-                                <div class="panel text-teal-400 border-top-lg border-top-teal-400">
+                                <div class="panel text-purple-600 border-top-lg border-top-purple-600">
                                     <div class="panel-body">
                                         <h3 class="no-margin">
                                             <?= convertNumbersToPersian($commentsCount); ?>

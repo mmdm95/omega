@@ -4,6 +4,7 @@ namespace HAuthentication;
 
 defined('BASE_PATH') OR exit('No direct script access allowed');
 
+use Aura\Sql\Exception;
 use http\Cookie;
 
 include_once MODEL_PATH . 'CookieModel.class.php';
@@ -240,12 +241,20 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
      * Check if current user is logged in
      *
      * @return bool
-     *
      */
     public function isLoggedIn()
     {
-        if ($this->getIdentity()) {
-            return true;
+        $id = $this->getIdentity();
+        if ($id) {
+            try {
+                $user = $this->_fetchUser($id->id);
+                if(count($user)) {
+                    return true;
+                }
+                return false;
+            } catch (HAException $e) {
+                return false;
+            }
         }
         return false;
     }

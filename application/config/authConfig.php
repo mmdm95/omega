@@ -4,8 +4,10 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 defined('AUTH_ROLE_SUPER_USER') OR define('AUTH_ROLE_SUPER_USER', 1);
 defined('AUTH_ROLE_ADMIN') OR define('AUTH_ROLE_ADMIN', 2);
 defined('AUTH_ROLE_WRITER') OR define('AUTH_ROLE_WRITER', 3);
-defined('AUTH_ROLE_USER') OR define('AUTH_ROLE_USER', 4);
-defined('AUTH_ROLE_GUEST') OR define('AUTH_ROLE_GUEST', 5);
+defined('AUTH_ROLE_STUDENT') OR define('AUTH_ROLE_STUDENT', 4);
+defined('AUTH_ROLE_COLLEGE_STUDENT') OR define('AUTH_ROLE_COLLEGE_STUDENT', 5);
+defined('AUTH_ROLE_GRADUATE') OR define('AUTH_ROLE_GRADUATE', 6);
+defined('AUTH_ROLE_GUEST') OR define('AUTH_ROLE_GUEST', 7);
 
 return array(
     'tables' => [
@@ -50,13 +52,53 @@ return array(
                 'column' => 'password',
                 'type' => 'VARCHAR(128)'
             ],
-            'ip_address' => [
-                'column' => 'ip_address',
-                'type' => 'VARCHAR(45)'
-            ],
             'email' => [
                 'column' => 'email',
                 'type' => 'VARCHAR(255)'
+            ],
+            'full_name' => [
+                'column' => 'full_name',
+                'type' => 'VARCHAR(100)'
+            ],
+            'father_name' => [
+                'column' => 'father_name',
+                'type' => 'VARCHAR(50)'
+            ],
+            'phone' => [
+                'column' => 'phone',
+                'type' => 'VARCHAR(11)'
+            ],
+            'connector_phone' => [
+                'column' => 'connector_phone',
+                'type' => 'VARCHAR(11)'
+            ],
+            'province' => [
+                'column' => 'province',
+                'type' => 'VARCHAR(50)'
+            ],
+            'city' => [
+                'column' => 'city',
+                'type' => 'VARCHAR(50)'
+            ],
+            'address' => [
+                'column' => 'address',
+                'type' => 'TEXT'
+            ],
+            'postal_code' => [
+                'column' => 'postal_code',
+                'type' => 'VARCHAR(10)'
+            ],
+            'n_code' => [
+                'column' => 'n_code',
+                'type' => 'VARCHAR(10)'
+            ],
+            'image' => [
+                'column' => 'image',
+                'type' => 'VARCHAR(100)'
+            ],
+            'ip_address' => [
+                'column' => 'ip_address',
+                'type' => 'VARCHAR(45)'
             ],
             'activation_code' => [
                 'column' => 'activation_code',
@@ -78,26 +120,6 @@ return array(
                 'column' => 'active',
                 'type' => 'tinyint(1)'
             ],
-            'first_name' => [
-                'column' => 'first_name',
-                'type' => 'VARCHAR(50)'
-            ],
-            'last_name' => [
-                'column' => 'last_name',
-                'type' => 'VARCHAR(50)'
-            ],
-            'image' => [
-                'column' => 'image',
-                'type' => 'VARCHAR(100)'
-            ],
-            'n_code' => [
-                'column' => 'n_code',
-                'type' => 'VARCHAR(10)'
-            ],
-            'card_number' => [
-                'column' => 'card_number',
-                'type' => 'VARCHAR(20)'
-            ]
         ],
         'role' => [
             'id' => [
@@ -187,7 +209,7 @@ return array(
     'pages' => [
     ],
     'roles' => [
-        'superUser', 'admin', 'writer', 'user', 'guest'
+        'superUser', 'admin', 'writer', 'student', 'collegeStudent', 'graduate', 'guest'
     ],
     'permissions' => [
         'create', 'read', 'update', 'delete'
