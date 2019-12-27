@@ -143,24 +143,26 @@ class AdminController extends HController
             $this->redirect(base_url('admin/login'));
         }
 
-        if ($this->data['identity']->id != $param[0]) {
-            try {
-                if (!$this->auth->isAllow('user', 3)) {
-                    $this->error->access_denied();
-                }
-            } catch (HAException $e) {
-                echo $e;
-            }
-        }
-
         $model = new Model();
 
         if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('users', 'id=:id', ['id' => $param[0]])) {
             $this->redirect(base_url('admin/manageUser'));
         }
-        $uRole = $model->select_it(null, 'users_roles', 'role_id', 'user_id=:uId', ['uId' => $param[0]]);
-        if (count($uRole) && $uRole[0]['role_id'] <= $this->data['identity']->role_id) {
-            $this->error->access_denied();
+
+        if ($this->data['identity']->id != $param[0]) {
+            try {
+                if (!$this->auth->isAllow('user', 3)) {
+                    $this->error->access_denied();
+                }
+
+                // Prevent users with same or less graded id, access superior or equally graded of them
+                $uRole = $model->select_it(null, 'users_roles', 'role_id', 'user_id=:uId', ['uId' => $param[0]]);
+                if (!count($uRole) || ($uRole[0]['role_id'] <= $this->data['identity']->role_id)) {
+                    $this->error->access_denied();
+                }
+            } catch (HAException $e) {
+                echo $e;
+            }
         }
 
         $this->data['param'] = $param;

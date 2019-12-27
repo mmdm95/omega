@@ -77,7 +77,7 @@
                         </a>
                         <ul>
                             <li>
-                                <a href="<?= base_url(); ?>admin/">
+                                <a href="<?= base_url(); ?>admin/addBlockedUser">
                                     <i class="icon-add-to-list" style="font-size: 13px;"></i>
                                     <small>
                                         افزودن
@@ -85,7 +85,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= base_url(); ?>admin/">
+                                <a href="<?= base_url(); ?>admin/manageBlockedUser">
                                     <i class="icon-blocked" style="font-size: 13px;"></i>
                                     <small>
                                         مشاهده
@@ -104,7 +104,7 @@
                         </a>
                         <ul>
                             <li>
-                                <a href="<?= base_url(); ?>admin/">
+                                <a href="<?= base_url(); ?>admin/addArticle">
                                     <i class="icon-add-to-list" style="font-size: 13px;"></i>
                                     <small>
                                         افزودن نوشته
@@ -112,7 +112,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= base_url(); ?>admin/">
+                                <a href="<?= base_url(); ?>admin/manageArticle">
                                     <i class="icon-pencil7" style="font-size: 13px;"></i>
                                     <small>
                                         مشاهده نوشته‌ها
