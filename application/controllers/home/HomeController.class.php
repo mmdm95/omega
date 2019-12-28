@@ -26,11 +26,11 @@ class HomeController extends HController
         }
 
         // Load file helper .e.g: read_json, etc.
-        $this->load->helper('file');
+//        $this->load->helper('file');
 
         if (!is_ajax()) {
             // Read settings once
-            $this->setting = read_json(CORE_PATH . 'config.json');
+//            $this->setting = read_json(CORE_PATH . 'config.json');
             $this->data['setting'] = $this->setting;
         }
 
@@ -47,9 +47,30 @@ class HomeController extends HController
 
     public function indexAction()
     {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
 
+        $this->_render_page([
+            'pages/fe/index',
+        ]);
     }
 
+    public function allEventsAction()
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
+
+        $this->_render_page([
+            'pages/fe/all-events',
+        ]);
+    }
+
+    public function eventDetailAction()
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح');
+
+        $this->_render_page([
+            'pages/fe/event-detail',
+        ]);
+    }
     //-----
 
     private function _render_page($pages, $loadHeaderAndFooter = true)

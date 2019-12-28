@@ -1743,7 +1743,7 @@
     }), r(y, [f], function (e) {
         return function (t, n) {
             function r(e) {
-                t.getElementsByTagName("head")[0].appendChild(e)
+                t.getElementsByTagName("home-header-part.php.php")[0].appendChild(e)
             }
 
             function i(n, i, l) {
@@ -1994,10 +1994,10 @@
                     if (o = o || [], o[e])return;
                     o[e] = !0, p.DOM.addedStyles = o
                 }
-                i = n.getElementById("mceDefaultStyles"), i || (i = n.createElement("style"), i.id = "mceDefaultStyles", i.type = "text/css", r = n.getElementsByTagName("head")[0], r.firstChild ? r.insertBefore(i, r.firstChild) : r.appendChild(i)), i.styleSheet ? i.styleSheet.cssText += e : i.appendChild(n.createTextNode(e))
+                i = n.getElementById("mceDefaultStyles"), i || (i = n.createElement("style"), i.id = "mceDefaultStyles", i.type = "text/css", r = n.getElementsByTagName("home-header-part.php.php")[0], r.firstChild ? r.insertBefore(i, r.firstChild) : r.appendChild(i)), i.styleSheet ? i.styleSheet.cssText += e : i.appendChild(n.createTextNode(e))
             }, loadCSS: function (e) {
                 var t = this, n = t.doc, r;
-                return t !== p.DOM && n === document ? void p.DOM.loadCSS(e) : (e || (e = ""), r = n.getElementsByTagName("head")[0], void m(e.split(","), function (e) {
+                return t !== p.DOM && n === document ? void p.DOM.loadCSS(e) : (e || (e = ""), r = n.getElementsByTagName("home-header-part.php.php")[0], void m(e.split(","), function (e) {
                         var i;
                         e = c._addCacheSuffix(e), t.files[e] || (t.files[e] = !0, i = t.create("link", {
                             rel: "stylesheet",
@@ -2206,7 +2206,7 @@
                 var a = r, s, l;
                 l = a.uniqueId(), s = document.createElement("script"), s.id = l, s.type = "text/javascript", s.src = t._addCacheSuffix(e), "onreadystatechange" in s ? s.onreadystatechange = function () {
                         /loaded|complete/.test(s.readyState) && i()
-                    } : s.onload = i, s.onerror = o, (document.getElementsByTagName("head")[0] || document.body).appendChild(s)
+                    } : s.onload = i, s.onerror = o, (document.getElementsByTagName("home-header-part.php.php")[0] || document.body).appendChild(s)
             }
 
             var n = 0, a = 1, s = 2, l = {}, c = [], u = {}, d = [], f = 0, h;
@@ -2585,7 +2585,7 @@
                     n(e, "", u)
                 }), f = t("center dir isindex noframes"), c.push.apply(c, f), d = [].concat(c, u), s(f, function (e) {
                     n(e, "", d)
-                })), d = d || [].concat(c, u), n("html", "manifest", "head body"), n("head", "", "base command link meta noscript script style title"), n("title hr noscript br"), n("base", "href target"), n("link", "href rel media hreflang type sizes hreflang"), n("meta", "name http-equiv content charset"), n("style", "media type scoped"), n("script", "src async defer type charset"), n("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus onhashchange onload onmessage onoffline ononline onpagehide onpageshow onpopstate onresize onscroll onstorage onunload", d), n("address dt dd div caption", "", d), n("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", u), n("blockquote", "cite", d), n("ol", "reversed start type", "li"), n("ul", "", "li"), n("li", "value", d), n("dl", "", "dt dd"), n("a", "href target rel media hreflang type", u), n("q", "cite", u), n("ins del", "cite datetime", d), n("img", "src sizes srcset alt usemap ismap width height"), n("iframe", "src name width height", d), n("embed", "src type width height"), n("object", "data type typemustmatch name usemap form width height", d, "param"), n("param", "name value"), n("map", "name", d, "area"), n("area", "alt coords shape href target rel media hreflang type"), n("table", "border", "caption colgroup thead tfoot tbody tr" + ("html4" == e ? " col" : "")), n("colgroup", "span", "col"), n("col", "span"), n("tbody thead tfoot", "", "tr"), n("tr", "", "td th"), n("td", "colspan rowspan headers", d), n("th", "colspan rowspan headers scope abbr", d), n("form", "accept-charset action autocomplete enctype method name novalidate target", d), n("fieldset", "disabled form name", d, "legend"), n("label", "form for", u), n("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"), n("button", "disabled form formaction formenctype formmethod formnovalidate formtarget name type value", "html4" == e ? d : u), n("select", "disabled form multiple name required size", "option optgroup"), n("optgroup", "disabled label", "option"), n("option", "disabled label selected value"), n("textarea", "cols dirname disabled form maxlength name readonly required rows wrap"), n("menu", "type label", d, "li"), n("noscript", "", d), "html4" != e && (n("wbr"), n("ruby", "", u, "rt rp"), n("figcaption", "", d), n("mark rt rp summary bdi", "", u), n("canvas", "width height", d), n("video", "src crossorigin poster preload autoplay mediagroup loop muted controls width height buffered", d, "track source"), n("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume", d, "track source"), n("picture", "", "img source"), n("source", "src srcset type media sizes"), n("track", "kind src srclang label default"), n("datalist", "", u, "option"), n("article section nav aside header footer", "", d), n("hgroup", "", "h1 h2 h3 h4 h5 h6"), n("figure", "", d, "figcaption"), n("time", "datetime", u), n("dialog", "open", d), n("command", "type label icon disabled checked radiogroup command"), n("output", "for form name", u), n("progress", "value max", u), n("meter", "value min max low high optimum", u), n("details", "open", d, "summary"), n("keygen", "autofocus challenge disabled form keytype name")), "html5-strict" != e && (r("script", "language xml:space"), r("style", "xml:space"), r("object", "declare classid code codebase codetype archive standby align border hspace vspace"), r("embed", "align name hspace vspace"), r("param", "valuetype type"), r("a", "charset name rev shape coords"), r("br", "clear"), r("applet", "codebase archive code object alt name width height align hspace vspace"), r("img", "name longdesc align border hspace vspace"), r("iframe", "longdesc frameborder marginwidth marginheight scrolling align"), r("font basefont", "size color face"), r("input", "usemap align"), r("select", "onchange"), r("textarea"), r("h1 h2 h3 h4 h5 h6 div p legend caption", "align"), r("ul", "type compact"), r("li", "type"), r("ol dl menu dir", "compact"), r("pre", "width xml:space"), r("hr", "align noshade size width"), r("isindex", "prompt"), r("table", "summary width frame rules cellspacing cellpadding align bgcolor"), r("col", "width align char charoff valign"), r("colgroup", "width align char charoff valign"), r("thead", "align char charoff valign"), r("tr", "align char charoff valign bgcolor"), r("th", "axis align char charoff valign nowrap bgcolor width height"), r("form", "accept"), r("td", "abbr axis scope align char charoff valign nowrap bgcolor width height"), r("tfoot", "align char charoff valign"), r("tbody", "align char charoff valign"), r("area", "nohref"), r("body", "background bgcolor text link vlink alink")), "html4" != e && (r("input button select textarea", "autofocus"), r("input textarea", "placeholder"), r("a", "download"), r("link script img", "crossorigin"), r("iframe", "sandbox seamless allowfullscreen")), s(t("a form meter progress dfn"), function (e) {
+                })), d = d || [].concat(c, u), n("html", "manifest", "head body"), n("home-header-part.php.php", "", "base command link meta noscript script style title"), n("title hr noscript br"), n("base", "href target"), n("link", "href rel media hreflang type sizes hreflang"), n("meta", "name http-equiv content charset"), n("style", "media type scoped"), n("script", "src async defer type charset"), n("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus onhashchange onload onmessage onoffline ononline onpagehide onpageshow onpopstate onresize onscroll onstorage onunload", d), n("address dt dd div caption", "", d), n("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", u), n("blockquote", "cite", d), n("ol", "reversed start type", "li"), n("ul", "", "li"), n("li", "value", d), n("dl", "", "dt dd"), n("a", "href target rel media hreflang type", u), n("q", "cite", u), n("ins del", "cite datetime", d), n("img", "src sizes srcset alt usemap ismap width height"), n("iframe", "src name width height", d), n("embed", "src type width height"), n("object", "data type typemustmatch name usemap form width height", d, "param"), n("param", "name value"), n("map", "name", d, "area"), n("area", "alt coords shape href target rel media hreflang type"), n("table", "border", "caption colgroup thead tfoot tbody tr" + ("html4" == e ? " col" : "")), n("colgroup", "span", "col"), n("col", "span"), n("tbody thead tfoot", "", "tr"), n("tr", "", "td th"), n("td", "colspan rowspan headers", d), n("th", "colspan rowspan headers scope abbr", d), n("form", "accept-charset action autocomplete enctype method name novalidate target", d), n("fieldset", "disabled form name", d, "legend"), n("label", "form for", u), n("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"), n("button", "disabled form formaction formenctype formmethod formnovalidate formtarget name type value", "html4" == e ? d : u), n("select", "disabled form multiple name required size", "option optgroup"), n("optgroup", "disabled label", "option"), n("option", "disabled label selected value"), n("textarea", "cols dirname disabled form maxlength name readonly required rows wrap"), n("menu", "type label", d, "li"), n("noscript", "", d), "html4" != e && (n("wbr"), n("ruby", "", u, "rt rp"), n("figcaption", "", d), n("mark rt rp summary bdi", "", u), n("canvas", "width height", d), n("video", "src crossorigin poster preload autoplay mediagroup loop muted controls width height buffered", d, "track source"), n("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume", d, "track source"), n("picture", "", "img source"), n("source", "src srcset type media sizes"), n("track", "kind src srclang label default"), n("datalist", "", u, "option"), n("article section nav aside header footer", "", d), n("hgroup", "", "h1 h2 h3 h4 h5 h6"), n("figure", "", d, "figcaption"), n("time", "datetime", u), n("dialog", "open", d), n("command", "type label icon disabled checked radiogroup command"), n("output", "for form name", u), n("progress", "value max", u), n("meter", "value min max low high optimum", u), n("details", "open", d, "summary"), n("keygen", "autofocus challenge disabled form keytype name")), "html5-strict" != e && (r("script", "language xml:space"), r("style", "xml:space"), r("object", "declare classid code codebase codetype archive standby align border hspace vspace"), r("embed", "align name hspace vspace"), r("param", "valuetype type"), r("a", "charset name rev shape coords"), r("br", "clear"), r("applet", "codebase archive code object alt name width height align hspace vspace"), r("img", "name longdesc align border hspace vspace"), r("iframe", "longdesc frameborder marginwidth marginheight scrolling align"), r("font basefont", "size color face"), r("input", "usemap align"), r("select", "onchange"), r("textarea"), r("h1 h2 h3 h4 h5 h6 div p legend caption", "align"), r("ul", "type compact"), r("li", "type"), r("ol dl menu dir", "compact"), r("pre", "width xml:space"), r("hr", "align noshade size width"), r("isindex", "prompt"), r("table", "summary width frame rules cellspacing cellpadding align bgcolor"), r("col", "width align char charoff valign"), r("colgroup", "width align char charoff valign"), r("thead", "align char charoff valign"), r("tr", "align char charoff valign bgcolor"), r("th", "axis align char charoff valign nowrap bgcolor width height"), r("form", "accept"), r("td", "abbr axis scope align char charoff valign nowrap bgcolor width height"), r("tfoot", "align char charoff valign"), r("tbody", "align char charoff valign"), r("area", "nohref"), r("body", "background bgcolor text link vlink alink")), "html4" != e && (r("input button select textarea", "autofocus"), r("input textarea", "placeholder"), r("a", "download"), r("link script img", "crossorigin"), r("iframe", "sandbox seamless allowfullscreen")), s(t("a form meter progress dfn"), function (e) {
                     a[e] && delete a[e].children[e]
                 }), delete a.caption.children.table, delete a.script, i[e] = a, a)
         }
@@ -6409,7 +6409,7 @@
     }), r(de, [ue, se, J, h, oe, Q, u], function (e, t, n, r, i, o, a) {
         function s(e) {
             var t = "width=device-width,initial-scale=1.0,user-scalable=0,minimum-scale=1.0,maximum-scale=1.0", n = r("meta[name=viewport]")[0], i;
-            a.overrideViewPort !== !1 && (n || (n = document.createElement("meta"), n.setAttribute("name", "viewport"), document.getElementsByTagName("head")[0].appendChild(n)), i = n.getAttribute("content"), i && "undefined" != typeof d && (d = i), n.setAttribute("content", e ? t : d))
+            a.overrideViewPort !== !1 && (n || (n = document.createElement("meta"), n.setAttribute("name", "viewport"), document.getElementsByTagName("home-header-part.php.php")[0].appendChild(n)), i = n.getAttribute("content"), i && "undefined" != typeof d && (d = i), n.setAttribute("content", e ? t : d))
         }
 
         function l(e) {
@@ -6475,7 +6475,7 @@
             initLayoutRect: function () {
                 var e = this, t = e._super(), r = 0, i;
                 if (e.settings.title && !e._fullscreen) {
-                    i = e.getEl("head");
+                    i = e.getEl("home-header-part.php.php");
                     var o = n.getSize(i);
                     t.headerW = o.width, t.headerH = o.height, r += t.headerH
                 }
@@ -6505,10 +6505,10 @@
                         y: l.y,
                         w: l.w,
                         h: l.h
-                    }, t.borderBox = o.parseBox("0"), t.getEl("head").style.display = "none", l.deltaH -= l.headerH + 2, r([i, document.body]).addClass(s + "fullscreen"), t.classes.add("fullscreen");
+                    }, t.borderBox = o.parseBox("0"), t.getEl("home-header-part.php.php").style.display = "none", l.deltaH -= l.headerH + 2, r([i, document.body]).addClass(s + "fullscreen"), t.classes.add("fullscreen");
                     var c = n.getWindowSize();
                     t.moveTo(0, 0).resizeTo(c.w, c.h)
-                } else t.borderBox = o.parseBox(t.settings.border), t.getEl("head").style.display = "", l.deltaH += l.headerH, r([i, document.body]).removeClass(s + "fullscreen"), t.classes.remove("fullscreen"), t.moveTo(t._initial.x, t._initial.y).resizeTo(t._initial.w, t._initial.h);
+                } else t.borderBox = o.parseBox(t.settings.border), t.getEl("home-header-part.php.php").style.display = "", l.deltaH += l.headerH, r([i, document.body]).removeClass(s + "fullscreen"), t.classes.remove("fullscreen"), t.moveTo(t._initial.x, t._initial.y).resizeTo(t._initial.w, t._initial.h);
                 return t.reflow()
             },
             postRender: function () {
@@ -9752,7 +9752,7 @@
                 })
             }, initLayoutRect: function () {
                 var e = this, t, r, i;
-                r = n.getSize(e.getEl("head")).width, r = 0 > r ? 0 : r, i = 0, e.items().each(function (e) {
+                r = n.getSize(e.getEl("home-header-part.php.php")).width, r = 0 > r ? 0 : r, i = 0, e.items().each(function (e) {
                     r = Math.max(r, e.layoutRect().minW), i = Math.max(i, e.layoutRect().minH)
                 }), e.items().each(function (e) {
                     e.settings.x = 0, e.settings.y = 0, e.settings.w = r, e.settings.h = i, e.layoutRect({
@@ -9762,7 +9762,7 @@
                         h: i
                     })
                 });
-                var o = n.getSize(e.getEl("head")).height;
+                var o = n.getSize(e.getEl("home-header-part.php.php")).height;
                 return e.settings.minWidth = r, e.settings.minHeight = i + o, t = e._super(), t.deltaH += o, t.innerH = t.h - t.deltaH, t
             }
         })
