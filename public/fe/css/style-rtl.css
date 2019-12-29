@@ -6225,7 +6225,7 @@ p {
     text-align: center;
     padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    min-width: 12rem;
+    min-width: 15rem;
     min-height: 6.66667rem;
     color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;

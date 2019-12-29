@@ -73,6 +73,14 @@ class HomeController extends HController
     }
     //-----
 
+    public function userInformation(){
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'فرم اطلاعات');
+
+        $this->_render_page([
+            'pages/fe/user-information',
+        ]);
+    }
+
     private function _render_page($pages, $loadHeaderAndFooter = true)
     {
         if ($loadHeaderAndFooter) {
