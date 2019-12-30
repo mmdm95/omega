@@ -187,29 +187,37 @@
                     <li class="navigation-header"><span>فرعی</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
+                            <i class="icon-link"></i>
+                            <span>
+                                لینک‌های مفید
+                            </span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/addUsefulLink">
+                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
+                                    <small>
+                                        افزودن لینک
+                                    </small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/manageUsefulLink">
+                                    <i class="icon-table2" style="font-size: 13px;"></i>
+                                    <small>
+                                        مشاهده لینک‌ها
+                                    </small>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="<?= base_url(); ?>admin/manageFAQ">
                             <i class="icon-question3"></i>
                             <span>
                                 سؤالات متداول
                             </span>
                         </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addFAQ">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن سؤال
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageFAQ">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده سؤال‌ها
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
                     </li>
                     <li>
                         <a href="<?= base_url(); ?>admin/manageContactUs">

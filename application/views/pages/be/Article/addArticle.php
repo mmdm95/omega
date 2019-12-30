@@ -101,7 +101,7 @@
                                                     <?php foreach ($categories as $key => $category): ?>
                                                         <option value="<?= $category['id']; ?>"
                                                             <?= set_value($atcVals['category'] ?? '', $category['id'], 'selected', '', '=='); ?>>
-                                                            <?= $category['fa_slug']; ?>
+                                                            <?= $category['category_name']; ?>
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>

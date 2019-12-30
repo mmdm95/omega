@@ -41,6 +41,7 @@ return array(
         'admin' => 'admin/admin',
         'admin/(:any)' => 'admin/admin/$1',
         'admin/(:any)/(:any)' => 'admin/admin/$1/$2',
+        'admin/(:any)/(:any)/(:any)' => 'admin/admin/$1/$2/$3',
     ),
 
     //===============================================

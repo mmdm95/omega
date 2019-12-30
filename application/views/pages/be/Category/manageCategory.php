@@ -60,8 +60,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>عنوان فارسی دسته‌بندی</th>
-                                                    <th>عنوان انگلیسی دسته‌بندی</th>
+                                                    <th>عنوان دسته‌بندی</th>
                                                     <th>وضعیت نمایش</th>
                                                     <th>عملیات</th>
                                                 </tr>
@@ -74,10 +73,7 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <?= $category['fa_slug']; ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $category['en_slug']; ?>
+                                                            <?= $category['category_name']; ?>
                                                         </td>
                                                         <td>
                                                             <?php if ($category['status'] == 1): ?>

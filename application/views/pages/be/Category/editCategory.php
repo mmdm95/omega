@@ -89,17 +89,10 @@
 
                                             <div class="form-group col-lg-6">
                                                 <span class="text-danger">*</span>
-                                                <label>عنوان فارسی دسته:</label>
-                                                <input name="fa_name" type="text" class="form-control"
+                                                <label>عنوان دسته:</label>
+                                                <input name="name" type="text" class="form-control"
                                                        placeholder="اجباری"
-                                                       value="<?= set_value($catVals['fa_slug'] ?? ''); ?>">
-                                            </div>
-                                            <div class="form-group col-lg-6">
-                                                <span class="text-danger">*</span>
-                                                <label>عنوان انگلیسی دسته:</label>
-                                                <input name="en_name" type="text" class="form-control"
-                                                       placeholder="اجباری"
-                                                       value="<?= set_value($catVals['en_slug'] ?? ''); ?>">
+                                                       value="<?= set_value($catVals['category_name'] ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-12">
                                                 <label>کلمات کلیدی:</label>
