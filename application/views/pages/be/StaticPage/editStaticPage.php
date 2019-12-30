@@ -103,15 +103,15 @@
                                                     </div>
                                                     <div class="col-xs-8 ltr mt-10">
                                                         <span class="text-muted border-bottom border-default display-block pb-5">
-                                                            www.20tik.ir/pages/
+                                                            <?= base_url('pages'); ?>/
                                                         </span>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row p-20 no-padding-top">
+                                            <div class="row pt-20 no-padding-top">
                                                 <div class="form-group col-md-12 mt-12">
                                                     <span class="text-danger">*</span>
-                                                    <label>متن توضیحات محصول:</label>
+                                                    <label>متن توضیحات:</label>
                                                     <textarea
                                                             id="cntEditor"
                                                             class="form-control"

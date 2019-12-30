@@ -6,8 +6,8 @@
     <?= convertNumbersToPersian(date('Y')); ?>
     _
     توسعه داده شده توسط
-    <a href="http://www.spsroham.ir" target="_blank" class="text-orange">
-        داده افزار رهام
+    <a href="#" target="_blank" class="text-purple">
+        تیم هیوا
     </a>
 </div>
 <!-- /footer -->

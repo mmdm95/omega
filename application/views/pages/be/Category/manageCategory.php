@@ -44,20 +44,6 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <div class="row">
-                            <?php foreach ($levels as $level): ?>
-                                <div class="col-lg-4 col-md-6">
-                                    <a href="<?= base_url("admin/managePriority/level/{$level['level']}"); ?>"
-                                       class="panel shadow-depth2 btn btn-lg btn-info btn-block">
-                                        <h6>
-                                            <i class="icon-list-ordered mr-10 img-sm p-10 img-circle bg-orange"
-                                               aria-hidden="true"></i>
-                                            تغییر اولویت دسته سطح
-                                            <?= convertNumbersToPersian($level['level']); ?>
-                                        </h6>
-                                    </a>
-                                </div>
-                            <?php endforeach; ?>
-
                             <div class="col-sm-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
@@ -74,11 +60,9 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>عنوان دسته‌بندی</th>
-                                                    <th>دسته‌بندی والد</th>
-                                                    <th>سطح</th>
+                                                    <th>عنوان فارسی دسته‌بندی</th>
+                                                    <th>عنوان انگلیسی دسته‌بندی</th>
                                                     <th>وضعیت نمایش</th>
-                                                    <th>نمایش در منوها</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
@@ -90,22 +74,10 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <?= $category['category_name']; ?>
+                                                            <?= $category['fa_slug']; ?>
                                                         </td>
                                                         <td>
-                                                            <?= $category['parent']; ?>
-                                                        </td>
-                                                        <td>
-                                                            <?php if ($category['level'] == 1): ?>
-                                                                سطح ۱
-                                                            <?php elseif ($category['level'] == 2): ?>
-                                                                سطح ۲
-                                                            <?php elseif ($category['level'] == 3): ?>
-                                                                سطح ۳
-                                                            <?php else: ?>
-                                                                <i class="icon-dash text-grey-300"
-                                                                   aria-hidden="true"></i>
-                                                            <?php endif; ?>
+                                                            <?= $category['en_slug']; ?>
                                                         </td>
                                                         <td>
                                                             <?php if ($category['status'] == 1): ?>
@@ -116,36 +88,23 @@
                                                                  border-left-lg border-left-danger">غیر فعال</span>
                                                             <?php endif; ?>
                                                         </td>
-                                                        <td width="150px">
-                                                            <?php if ($category['deletable'] == 1): ?>
-                                                                <input type="hidden" value="<?= $category['id']; ?>">
-                                                                <input type="checkbox" class="switchery showInMenuParts"
-                                                                    <?= set_value($category['show_in_menu'] ?? '', 1, 'checked', '', '=='); ?> />
-                                                            <?php else: ?>
-                                                                <i class="icon-minus2 text-grey-300"></i>
-                                                            <?php endif; ?>
-                                                        </td>
                                                         <td style="width: 115px;" class="text-center">
-                                                            <?php if ($category['deletable'] == 1): ?>
-                                                                <ul class="icons-list">
-                                                                    <li class="text-primary-600">
-                                                                        <a href="<?= base_url(); ?>admin/editCategory/<?= $category['id']; ?>"
-                                                                           title="ویرایش" data-popup="tooltip">
-                                                                            <i class="icon-pencil7"></i>
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="text-danger-600">
-                                                                        <a class="deleteCategoryBtn"
-                                                                           title="حذف" data-popup="tooltip">
-                                                                            <input type="hidden"
-                                                                                   value="<?= $category['id']; ?>">
-                                                                            <i class="icon-trash"></i>
-                                                                        </a>
-                                                                    </li>
-                                                                </ul>
-                                                            <?php else: ?>
-                                                                <i class="icon-minus2 text-grey-300"></i>
-                                                            <?php endif; ?>
+                                                            <ul class="icons-list">
+                                                                <li class="text-primary-600">
+                                                                    <a href="<?= base_url(); ?>admin/editCategory/<?= $category['id']; ?>"
+                                                                       title="ویرایش" data-popup="tooltip">
+                                                                        <i class="icon-pencil7"></i>
+                                                                    </a>
+                                                                </li>
+                                                                <li class="text-danger-600">
+                                                                    <a class="deleteCategoryBtn"
+                                                                       title="حذف" data-popup="tooltip">
+                                                                        <input type="hidden"
+                                                                               value="<?= $category['id']; ?>">
+                                                                        <i class="icon-trash"></i>
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

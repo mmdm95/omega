@@ -89,47 +89,17 @@
 
                                             <div class="form-group col-lg-6">
                                                 <span class="text-danger">*</span>
-                                                <label>عنوان دسته:</label>
-                                                <input name="name" type="text" class="form-control"
+                                                <label>عنوان فارسی دسته:</label>
+                                                <input name="fa_name" type="text" class="form-control"
                                                        placeholder="اجباری"
-                                                       value="<?= set_value($catVals['category_name'] ?? ''); ?>">
+                                                       value="<?= set_value($catVals['fa_slug'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-4">
+                                            <div class="form-group col-lg-6">
                                                 <span class="text-danger">*</span>
-                                                <label>دسته‌بندی والد:</label>
-                                                <select class="select-rtl" name="parent">
-                                                    <option value="0"
-                                                        <?= set_value($catVals['parent'] ?? '', 0, 'selected', '', '=='); ?>>
-                                                        دسته اصلی
-                                                    </option>
-                                                    <?php foreach ($categories as $key => $category): ?>
-                                                        <option value="<?= $category['id']; ?>"
-                                                            <?= set_value($catVals['parent_id'] ?? '', $category['id'], 'selected', '', '=='); ?>>
-                                                            <?php for($i = 1; $i < $category['level']; $i++): ?>
-                                                                -
-                                                            <?php endfor; ?>
-                                                            <?= $category['category_name']; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                            <div class="form-group col-lg-2">
-                                                <span class="text-danger">*</span>
-                                                <label>سطح دسته:</label>
-                                                <select class="select-no-search" name="level">
-                                                    <option value="1"
-                                                        <?= set_value($catVals['level'] ?? '', 1, 'selected', '', '=='); ?>>
-                                                        سطح ۱
-                                                    </option>
-                                                    <option value="2"
-                                                        <?= set_value($catVals['level'] ?? '', 2, 'selected', '', '=='); ?>>
-                                                        سطح ۲
-                                                    </option>
-                                                    <option value="3"
-                                                        <?= set_value($catVals['level'] ?? '', 3, 'selected', '', '=='); ?>>
-                                                        سطح ۳
-                                                    </option>
-                                                </select>
+                                                <label>عنوان انگلیسی دسته:</label>
+                                                <input name="en_name" type="text" class="form-control"
+                                                       placeholder="اجباری"
+                                                       value="<?= set_value($catVals['en_slug'] ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-12">
                                                 <label>کلمات کلیدی:</label>
@@ -140,8 +110,8 @@
                                             </div>
                                             <div class="form-group col-lg-12 text-right">
                                                 <label for="catStatus">وضعیت نمایش:</label>
-                                                <input type="checkbox" name="status" id="catStatus"
-                                                       class="switchery" <?= set_value($catVals['status'] ?? '', 1, 'checked', '', '=='); ?> />
+                                                <input type="checkbox" name="publish" id="catStatus"
+                                                       class="switchery" <?= set_value($catVals['publish'] ?? '', 1, 'checked', '', '=='); ?> />
                                             </div>
 
                                             <div class="text-right col-md-12 mt-20">

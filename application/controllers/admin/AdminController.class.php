@@ -4,7 +4,6 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 use HForm\Form;
-use HPayment\Payment;
 use voku\helper\AntiXSS;
 
 class AdminController extends HController
@@ -358,7 +357,7 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
-    public function addPaymentAction()
+    public function addBlockedUserAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -367,40 +366,22 @@ class AdminController extends HController
         $model = new Model();
 
         $this->data['errors'] = [];
-        $this->data['payVals'] = [];
+        $this->data['blkVals'] = [];
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addPayment');
-        $form->setFieldsName(['title', 'image', 'status'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post', [], ['status']);
+        $this->data['form_token'] = $form->csrfToken('addBlocked');
+        $form->setFieldsName(['nCode'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($model->is_exist('payment_methods', 'method_title=:name', ['name' => $values['title']])) {
-                    $form->setError('این روش پرداخت وجود دارد. لطفا دوباره تلاش کنید.');
-                }
-                if ($values['image'] != '' && !file_exists($values['image'])) {
-                    $form->setError('تصویر انتخاب شده، نامعتبر است.');
+                $form->isRequired(['nCode'], 'فیلدهای ضروری را خالی نگذارید.')
+                    ->validateNationalCode('nCode');
+                if ($model->is_exist('block_list', 'n_code=:nCode', ['nCode' => $values['nCode']])) {
+                    $form->setError('این کد ملی وجود دارد. لطفا دوباره تلاش کنید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $common = new CommonModel();
-                $code = $common->generate_random_unique_code('payment_methods', 'method_code', 'PAY_', 8, 15, 10, CommonModel::DIGITS);
-
-                if (empty($code)) {
-                    $form->setError('مشکل در ایجاد کد اختصاصی پیش آمده است. لطفا مجددا تلاش نمایید!');
-                    return;
-                }
-
-                $code = 'PAY_' . $code;
-
-                $res = $model->insert_it('payment_methods', [
-                    'method_code' => $code,
-                    'method_title' => trim($values['title']),
-                    'image' => $values['image'],
-                    'status' => $form->isChecked('status') ? 1 : 0,
-                    'deletable' => 1,
+                $res = $model->insert_it('block_list', [
+                    'n_code' => trim($values['nCode']),
                 ]);
 
                 if (!$res) {
@@ -417,33 +398,65 @@ class AdminController extends HController
                 $this->data['success'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors'] = $form->getError();
-                $this->data['payVals'] = $form->getValues();
+                $this->data['blkVals'] = $form->getValues();
             }
         }
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن روش پرداخت');
-
-        $this->load->helper('easy file manager');
-        //Security options
-        $this->data['upload']['allow_upload'] = allow_upload(false);
-        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
-        $this->data['upload']['allow_direct_link'] = allow_direct_link();
-        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
-
-        // Extra css
-        $this->data['css'][] = $this->asset->css('be/css/efm.css');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن به لیست کاربران مسدود');
 
         $this->_render_page([
-            'pages/be/Payment-method/addPayment',
-            'templates/be/efm'
+            'pages/be/BlockUser/addBlockedUser',
         ]);
     }
 
-    public function editPaymentAction($param)
+    public function manageBlockedUserAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['blocked'] = $model->select_it(null, 'block_list');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده کاربران مسدود شده');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/BlockUser/manageBlockedUser');
+    }
+
+    public function deleteBlockedUserAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'block_list';
+        if (!isset($id)) {
+            message('error', 200, 'آیتم نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'مورد وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'مورد با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function addArticleAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -451,41 +464,32 @@ class AdminController extends HController
 
         $model = new Model();
 
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('payment_methods', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/managePayment'));
-        }
-
-        $this->data['param'] = $param;
+        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'fa_slug']);
 
         $this->data['errors'] = [];
-        $this->data['payVals'] = [];
-
-        $this->data['payVals'] = $model->select_it(null, 'payment_methods', ['method_title'], 'id=:id', ['id' => $param[0]])[0];
+        $this->data['atcVals'] = [];
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editPayment');
-        $form->setFieldsName(['title', 'image', 'status'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post', [], ['status']);
+        $this->data['form_token'] = $form->csrfToken('addArticle');
+        $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
+            ->setDefaults('publish', 'off')
+            ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->setMethod('post', [], ['publish']);
+
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
-                if ($this->data['payVals']['method_title'] != $values['title']) {
-                    if ($model->is_exist('payment_methods', 'method_title=:name', ['name' => $values['title']])) {
-                        $form->setError('این روش پرداخت وجود دارد. لطفا دوباره تلاش کنید.');
-                    }
-                }
-                if ($values['image'] != '' && !file_exists($values['image'])) {
-                    $form->setError('تصویر انتخاب شده، نامعتبر است.');
+                if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                    $form->setError('این آدرس وجود دارد. لطفا دوباره تلاش کنید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->update_it('payment_methods', [
-                    'method_title' => trim($values['title']),
-                    'image' => $values['image'],
-                    'status' => $form->isChecked('status') ? 1 : 0,
-                ], 'id=:id', ['id' => $this->data['param'][0]]);
+                $res = $model->insert_it('articles', [
+                    'title' => trim($values['title']),
+                    'body' => $values['body'],
+                    'url_name' => trim($values['url_name'])
+                ]);
 
                 if (!$res) {
                     $form->setError('خطا در انجام عملیات!');
@@ -501,44 +505,34 @@ class AdminController extends HController
                 $this->data['success'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors'] = $form->getError();
+                $this->data['atcVals'] = $form->getValues();
             }
         }
 
-        $this->data['payVals'] = $model->select_it(null, 'payment_methods', '*', 'id=:id', ['id' => $param[0]])[0];
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش روش پرداخت', $this->data['payVals']['method_title']);
-
-        $this->load->helper('easy file manager');
-        //Security options
-        $this->data['upload']['allow_upload'] = allow_upload(false);
-        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
-        $this->data['upload']['allow_direct_link'] = allow_direct_link();
-        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
-
-        // Extra css
-        $this->data['css'][] = $this->asset->css('be/css/efm.css');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن نوشته جدید');
 
         $this->_render_page([
-            'pages/be/Payment-method/editPayment',
-            'templates/be/efm'
+            'pages/be/Article/addArticle',
+            'templates/be/browser-tiny-func'
         ]);
     }
 
-    public function managePaymentAction()
+    public function manageArticleAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
         }
 
         $model = new Model();
-        $this->data['payments'] = $model->select_it(null, 'payment_methods');
+        $this->data['blocked'] = $model->select_it(null, 'articles');
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده روش‌های پرداخت');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نوشته‌ها');
 
         $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
@@ -546,35 +540,7 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
         $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
 
-        $this->_render_page('pages/be/Payment-method/managePayment');
-    }
-
-    public function deletePaymentAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = @$_POST['postedId'];
-        $table = 'payment_methods';
-        if (!isset($id)) {
-            message('error', 200, 'روش پرداخت نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'روش پرداخت وجود ندارد.');
-        }
-        if ($model->select_it(null, $table, ['deletable'], 'id=:id', ['id' => $id])[0]['deletable'] != 1) {
-            message('error', 200, 'اجازه حذف برای این روش پرداخت داده نشد.');
-        }
-
-        $res = $model->delete_it($table, 'id=:id AND deletable=:del', ['id' => $id, 'del' => 1]);
-        if ($res) {
-            message('success', 200, 'روش پرداخت با موفقیت حذف شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
+        $this->_render_page('pages/be/Article/manageArticle');
     }
 
     public function addStaticPageAction()
@@ -902,58 +868,25 @@ class AdminController extends HController
         $this->data['errors'] = [];
         $this->data['catVals'] = [];
 
-        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name', 'level'], null, [], null, 'level ASC');
-
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addCategory');
-        $form->setFieldsName(['name', 'parent', 'level', 'keywords', 'status'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post', [], ['status']);
+        $form->setFieldsName(['fa_name', 'en_name', 'keywords', 'publish'])
+            ->setDefaults('publish', 'off')
+            ->setMethod('post', [], ['publish']);
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'parent', 'level', 'status'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                $form->isRequired(['fa_name', 'en_name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($model->is_exist('categories', 'en_slug=:enName AND fa_slug=:faName',
+                    ['enName' => $values['en_name'], 'faName' => $values['fa_name']])) {
                     $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
                 }
-                $form->isIn('parent', array_merge([0], array_column($this->data['categories'], 'id')), 'دسته‌بندی والد نامعتبر است.')
-                    ->isIn('level', [1, 2, 3], 'سطح دسته نامعتبر است.');
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $common = new CommonModel();
-                $code = $common->generate_random_unique_code('categories', 'category_code', 'CAT_', 8, 15, 10, CommonModel::DIGITS);
-
-                if (empty($code)) {
-                    $form->setError('مشکل در ایجاد کد اختصاصی پیش آمده است. لطفا مجددا تلاش نمایید!');
-                    return;
-                }
-
-                $code = 'CAT_' . $code;
-
-                // TODO: remove while. It could be sooo simpler
-                $allParents = '';
-                $category = trim($values['parent']);
-                while ($model->it_count('categories', 'id=:id AND parent_id!=:parent', ['id' => $category, 'parent' => 0])) {
-                    $res = $model->select_it(null, 'categories', ['id', 'parent_id'],
-                        'id=:id', ['id' => $category])[0];
-                    $allParents .= $res['id'] . ',';
-                    $category = $res['parent_id'];
-                }
-                $t = $model->select_it(null, 'categories', 'id',
-                    'id=:id', ['id' => $category]);
-                if (count($t)) {
-                    $allParents .= $t[0]['id'];
-                }
-                //
-
                 $res = $model->insert_it('categories', [
-                    'category_code' => $code,
-                    'category_name' => trim($values['name']),
-                    'parent_id' => trim($values['parent']),
-                    'all_parents' => $allParents,
-                    'level' => trim($values['level']),
+                    'fa_slug' => trim($values['fa_name']),
+                    'en_slug' => trim($values['en_name']),
                     'keywords' => trim($values['keywords']),
-                    'deletable' => 1,
-                    'status' => $form->isChecked('status') ? 1 : 0
+                    'publish' => $form->isChecked('publish') ? 1 : 0
                 ]);
 
                 if (!$res) {
@@ -973,8 +906,6 @@ class AdminController extends HController
                 $this->data['catVals'] = $form->getValues();
             }
         }
-
-        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name', 'level'], null, [], null, 'level ASC');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن دسته‌بندی');
@@ -1001,54 +932,29 @@ class AdminController extends HController
         $this->data['param'] = $param;
 
         $this->data['errors'] = [];
-        $this->data['catVals'] = [];
-
-        $this->data['catVals'] = $model->select_it(null, 'categories', ['category_name'], 'id=:id', ['id' => $param[0]])[0];
-        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name', 'level'], null, [], null, 'level ASC');
+        $this->data['catVals'] = $model->select_it(null, 'categories', ['fa_slug', 'en_slug'], 'id=:id', ['id' => $param[0]])[0];
 
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editCategory');
-        $form->setFieldsName(['name', 'parent', 'level', 'keywords', 'status'])
+        $form->setFieldsName(['fa_name', 'en_name', 'keywords', 'publish'])
             ->setDefaults('status', 'off')
             ->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'parent', 'level', 'status'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($this->data['catVals']['category_name'] != $values['name']) {
-                    if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                $form->isRequired(['fa_name', 'en_name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($this->data['catVals']['fa_slug'] != $values['fa_name'] || $this->data['catVals']['en_slug'] != $values['en_name']) {
+                    if ($model->is_exist('categories', 'en_slug=:enName AND fa_slug=:faName',
+                        ['enName' => $values['en_name'], 'faName' => $values['fa_name']])) {
                         $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
                     }
                 }
-                $form->isIn('parent', array_merge([0], array_column($this->data['categories'], 'id')), 'دسته‌بندی والد نامعتبر است.')
-                    ->isIn('level', [1, 2, 3], 'سطح دسته نامعتبر است.');
-                if ($values['parent'] == $this->data['param'][0]) {
-                    $form->setError('دسته نمی‌تواند والد خود باشد.');
-                }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                // TODO: remove while. It could be sooo simpler
-                $allParents = '';
-                $category = trim($values['parent']);
-                while ($model->it_count('categories', 'id=:id AND parent_id!=:parent', ['id' => $category, 'parent' => 0])) {
-                    $res = $model->select_it(null, 'categories', ['id', 'parent_id'],
-                        'id=:id', ['id' => $category])[0];
-                    $allParents .= $res['id'] . ',';
-                    $category = $res['parent_id'];
-                }
-                $t = $model->select_it(null, 'categories', 'id',
-                    'id=:id', ['id' => $category]);
-                if (count($t)) {
-                    $allParents .= $t[0]['id'];
-                }
-                //
-
                 $res = $model->update_it('categories', [
-                    'category_name' => trim($values['name']),
-                    'parent_id' => trim($values['parent']),
-                    'all_parents' => $allParents,
-                    'level' => trim($values['level']),
+                    'fa_slug' => trim($values['fa_name']),
+                    'en_slug' => trim($values['en_name']),
                     'keywords' => trim($values['keywords']),
-                    'status' => $form->isChecked('status') ? 1 : 0
+                    'publish' => $form->isChecked('publish') ? 1 : 0
                 ], 'id=:id', ['id' => $this->data['param'][0]]);
 
                 if (!$res) {
@@ -1072,7 +978,7 @@ class AdminController extends HController
         $this->data['catVals'] = $model->select_it(null, 'categories', '*', 'id=:id', ['id' => $param[0]])[0];
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['category_name']);
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['en_slug']);
 
         $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
 
@@ -1086,19 +992,7 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, [
-            'level ASC', 'priority ASC', 'id ASC'
-        ]);
-
-        for ($i = 0; $i < count($this->data['categories']); $i++) {
-            $this->data['categories'][$i]['parent'] = !is_null($this->data['categories'][$i]['parent_id']) ?
-                ($this->data['categories'][$i]['parent_id'] != 0 ?
-                    $model->select_it(null, 'categories', 'category_name',
-                        'id=:pid', ['pid' => $this->data['categories'][$i]['parent_id']])[0]['category_name'] : 'دسته اصلی') :
-                "<i class='icon-dash text-grey-300' aria-hidden='true'></i>";
-        }
-
-        $this->data['levels'] = $model->select_it(null, 'categories', 'level', 'level!=:lvl', ['lvl' => 0], ['level']);
+        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, ['id ASC']);
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده دسته‌بندی‌ها');
