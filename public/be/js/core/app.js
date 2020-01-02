@@ -943,123 +943,130 @@ $(function () {
             });
         });
 
-        var to, from;
-        var rt, rf;
+        var rtAll, rfAll;
 
-        rt = $(".range-to");
-        rf = $(".range-from");
+        rtAll = $(".range-to");
+        rfAll = $(".range-from");
 
-        to = rt.persianDatepicker({
-            inline: false,
-            altField: rt.attr('data-alt-field'),
-            format: !!rt.attr('data-format') ? rt.attr('data-format') : 'L',
-            initialValue: true,
-            onSelect: function (unix) {
-                to.touched = true;
-                if (from && from.options && from.options.maxDate != unix) {
-                    var cachedValue = from.getState().selected.unixDate;
-                    from.options = {maxDate: unix};
-                    if (from.touched) {
-                        from.setDate(cachedValue);
+        rfAll.each(function (i) {
+            var to, from;
+            var rt, rf;
+
+            rt = rtAll.eq(i);
+            rf = $(this);
+
+            to = rt.persianDatepicker({
+                inline: false,
+                altField: rt.attr('data-alt-field'),
+                format: !!rt.attr('data-format') ? rt.attr('data-format') : 'L',
+                initialValue: true,
+                onSelect: function (unix) {
+                    to.touched = true;
+                    if (from && from.options && from.options.maxDate != unix) {
+                        var cachedValue = from.getState().selected.unixDate;
+                        from.options = {maxDate: unix};
+                        if (from.touched) {
+                            from.setDate(cachedValue);
+                        }
+                    }
+                },
+                "minDate": 0,
+                "maxDate": 0,
+                "autoClose": true,
+                "position": "auto",
+                "onlyTimePicker": false,
+                "onlySelectOnDate": false,
+                "calendarType": "persian",
+                "altFormat": 'X',
+                "inputDelay": 800,
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "locale": "fa",
+                        "showHint": true,
+                        "leapYearMode": "algorithmic"
+                    },
+                    "gregorian": {
+                        "locale": "en",
+                        "showHint": true
+                    }
+                },
+                "timePicker": {
+                    "enabled": !!rt.attr('data-time'),
+                    "step": 1,
+                    "hour": {
+                        "enabled": true,
+                        "step": null
+                    },
+                    "minute": {
+                        "enabled": true,
+                        "step": null
+                    },
+                    "second": {
+                        "enabled": false,
+                        "step": null
+                    },
+                    "meridian": {
+                        "enabled": false
                     }
                 }
-            },
-            "minDate": 0,
-            "maxDate": 0,
-            "autoClose": true,
-            "position": "auto",
-            "onlyTimePicker": false,
-            "onlySelectOnDate": false,
-            "calendarType": "persian",
-            "altFormat": 'X',
-            "inputDelay": 800,
-            "observer": true,
-            "calendar": {
-                "persian": {
-                    "locale": "fa",
-                    "showHint": true,
-                    "leapYearMode": "algorithmic"
+            });
+            from = rf.persianDatepicker({
+                inline: false,
+                altField: rf.attr('data-alt-field'),
+                format: !!rf.attr('data-format') ? rf.attr('data-format') : 'L',
+                initialValue: true,
+                onSelect: function (unix) {
+                    from.touched = true;
+                    if (to && to.options && to.options.minDate != unix) {
+                        var cachedValue = to.getState().selected.unixDate;
+                        to.options = {minDate: unix};
+                        if (to.touched) {
+                            to.setDate(cachedValue);
+                        }
+                    }
                 },
-                "gregorian": {
-                    "locale": "en",
-                    "showHint": true
-                }
-            },
-            "timePicker": {
-                "enabled": !!rt.attr('data-time'),
-                "step": 1,
-                "hour": {
-                    "enabled": true,
-                    "step": null
+                "minDate": 0,
+                "maxDate": 0,
+                "autoClose": true,
+                "position": "auto",
+                "onlyTimePicker": false,
+                "onlySelectOnDate": false,
+                "calendarType": "persian",
+                "altFormat": 'X',
+                "inputDelay": 800,
+                "observer": true,
+                "calendar": {
+                    "persian": {
+                        "locale": "fa",
+                        "showHint": true,
+                        "leapYearMode": "algorithmic"
+                    },
+                    "gregorian": {
+                        "locale": "en",
+                        "showHint": true
+                    }
                 },
-                "minute": {
-                    "enabled": true,
-                    "step": null
-                },
-                "second": {
-                    "enabled": false,
-                    "step": null
-                },
-                "meridian": {
-                    "enabled": false
-                }
-            }
-        });
-        from = rf.persianDatepicker({
-            inline: false,
-            altField: rf.attr('data-alt-field'),
-            format: !!rf.attr('data-format') ? rf.attr('data-format') : 'L',
-            initialValue: true,
-            onSelect: function (unix) {
-                from.touched = true;
-                if (to && to.options && to.options.minDate != unix) {
-                    var cachedValue = to.getState().selected.unixDate;
-                    to.options = {minDate: unix};
-                    if (to.touched) {
-                        to.setDate(cachedValue);
+                "timePicker": {
+                    "enabled": !!rf.attr('data-time'),
+                    "step": 1,
+                    "hour": {
+                        "enabled": true,
+                        "step": null
+                    },
+                    "minute": {
+                        "enabled": true,
+                        "step": null
+                    },
+                    "second": {
+                        "enabled": false,
+                        "step": null
+                    },
+                    "meridian": {
+                        "enabled": false
                     }
                 }
-            },
-            "minDate": 0,
-            "maxDate": 0,
-            "autoClose": true,
-            "position": "auto",
-            "onlyTimePicker": false,
-            "onlySelectOnDate": false,
-            "calendarType": "persian",
-            "altFormat": 'X',
-            "inputDelay": 800,
-            "observer": true,
-            "calendar": {
-                "persian": {
-                    "locale": "fa",
-                    "showHint": true,
-                    "leapYearMode": "algorithmic"
-                },
-                "gregorian": {
-                    "locale": "en",
-                    "showHint": true
-                }
-            },
-            "timePicker": {
-                "enabled": !!rf.attr('data-time'),
-                "step": 1,
-                "hour": {
-                    "enabled": true,
-                    "step": null
-                },
-                "minute": {
-                    "enabled": true,
-                    "step": null
-                },
-                "second": {
-                    "enabled": false,
-                    "step": null
-                },
-                "meridian": {
-                    "enabled": false
-                }
-            }
+            });
         });
 
 

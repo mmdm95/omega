@@ -40,6 +40,23 @@
         });
         //**********
 
+        //********** ManageNewsletter Action
+        $('.deleteNewsletterBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deleteNewsletter', function () {
+                $(del_btn).closest('tr').fadeOut(800, function () {
+                    if ($.fn.DataTable) {
+                        dataTable.DataTable().row($(this)).remove().draw();
+                    } else {
+                        $(this).remove();
+                    }
+                });
+            });
+        });
+        //**********
+
         //********** ManageStaticPage Action
         $('.deleteStaticPageBtn').on('click', function (e) {
             e.preventDefault();
@@ -126,6 +143,23 @@
                 setTimeout(function () {
                     window.location.reload();
                 }, 2000);
+            });
+        });
+        //**********
+
+        //********** ManageUsefulLink Action
+        $('.deleteUsefulLinkBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deleteUsefulLink', function () {
+                $(del_btn).closest('tr').fadeOut(800, function () {
+                    if ($.fn.DataTable) {
+                        dataTable.DataTable().row($(this)).remove().draw();
+                    } else {
+                        $(this).remove();
+                    }
+                });
             });
         });
         //**********

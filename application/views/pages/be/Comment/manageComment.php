@@ -61,8 +61,8 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>کاربر</th>
-                                                    <th>تصویر محصول</th>
-                                                    <th>عنوان محصول</th>
+                                                    <th>تصویر نوشته</th>
+                                                    <th>عنوان نوشته</th>
                                                     <th>تاریخ ارسال نظر</th>
                                                     <th>وضعیت نظر</th>
                                                     <th>عملیات</th>
@@ -76,12 +76,13 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <?php if (!$comment['first_name'] && !$comment['last_name']): ?>
-                                                                <?= $comment['first_name'] . ' ' . $comment['last_name']; ?>
+                                                            <?php if (!empty($comment['user_id'])): ?>
+                                                                <a href="<?= base_url('admin/editUser/' . $comment['user_id']); ?>"
+                                                                   class="btn-link">
+                                                                    <?= $comment['name']; ?>
+                                                                </a>
                                                             <?php else: ?>
-                                                                <?= is_numeric($comment['username']) && mb_strlen($comment['username']) == 11 ?
-                                                                    convertNumbersToPersian($comment['username']) :
-                                                                    $comment['username']; ?>
+                                                                <?= $comment['name']; ?>
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>
@@ -94,13 +95,13 @@
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('product/' . $comment['product_code'] . '/' . url_title($comment['product_title'])); ?>"
+                                                            <a href="<?= base_url('article/' . url_title($comment['title'])); ?>"
                                                                target="_blank">
-                                                                <?= $comment['product_title']; ?>
+                                                                <?= $comment['title']; ?>
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <?= jDateTime::date('Y/m/d - H:i', $comment['comment_date']); ?>
+                                                            <?= jDateTime::date('Y/m/d - H:i', $comment['created_on']); ?>
                                                         </td>
                                                         <td>
                                                             <?php if ($comment['status'] == 2): ?>

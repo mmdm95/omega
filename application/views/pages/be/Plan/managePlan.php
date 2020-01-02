@@ -21,7 +21,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                    class="text-semibold">لینک‌های مفید</span>
+                                class="text-semibold">نوشته‌ها</span>
                         </h5>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                                 داشبورد
                             </a>
                         </li>
-                        <li class="active">لینک‌های مفید</li>
+                        <li class="active">نوشته‌ها</li>
                     </ul>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                             <div class="col-sm-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
-                                        <h6 class="panel-title">لیست لینک‌های مفید</h6>
+                                        <h6 class="panel-title">نوشته‌ها</h6>
                                         <div class="heading-elements">
                                             <ul class="icons-list">
                                                 <li><a data-action="collapse"></a></li>
@@ -60,47 +60,35 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>تصویر</th>
-                                                    <th>عنوان</th>
-                                                    <th>لینک</th>
+                                                    <th>عنوان نوشته</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 <!-- Load categories data -->
-                                                <?php foreach ($links as $key => $link): ?>
+                                                <?php foreach ($articles as $key => $article): ?>
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
-                                                        <td width="100px">
-                                                            <a data-url="<?= base_url() . $link['image']; ?>"
-                                                               data-popup="lightbox">
-                                                                <img src=""
-                                                                     data-src="<?= base_url() . $link['image']; ?>"
-                                                                     alt="<?= $link['title']; ?>"
-                                                                     class="img-rounded img-preview lazy">
+                                                        <td>
+                                                            <a href="<?= base_url('article/' . $article['title']); ?>">
+                                                                <?= $article['title']; ?>
                                                             </a>
-                                                        </td>
-                                                        <td>
-                                                            <?= $link['title']; ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= $link['link']; ?>
                                                         </td>
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
                                                                 <li class="text-primary-600">
-                                                                    <a href="<?= base_url(); ?>admin/editUsefulLink/<?= $link['id']; ?>"
+                                                                    <a href="<?= base_url(); ?>admin/editArticle/<?= $article['id']; ?>"
                                                                        title="ویرایش" data-popup="tooltip">
                                                                         <i class="icon-pencil7"></i>
                                                                     </a>
                                                                 </li>
                                                                 <li class="text-danger-600">
-                                                                    <a class="deleteUsefulLinkBtn"
+                                                                    <a class="deleteStaticPageBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
-                                                                               value="<?= $link['id']; ?>">
+                                                                               value="<?= $article['id']; ?>">
                                                                         <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>

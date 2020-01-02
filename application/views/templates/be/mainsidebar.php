@@ -94,6 +94,14 @@
                             </li>
                         </ul>
                     </li>
+                    <li>
+                        <a href="<?= base_url(); ?>admin/manageNewsletter">
+                            <i class="icon-envelop5"></i>
+                            <span>
+                                خبرنامه
+                            </span>
+                        </a>
+                    </li>
                     <li class="navigation-header"><span>نوشته‌ها</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
@@ -147,6 +155,14 @@
                             </li>
                         </ul>
                     </li>
+                    <li>
+                        <a href="<?= base_url(); ?>admin/manageComment">
+                            <i class="icon-comment-discussion"></i>
+                            <span>
+                                نظرات
+                            </span>
+                        </a>
+                    </li>
                     <li class="navigation-header"><span>اصلی</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
@@ -175,12 +191,30 @@
                         </ul>
                     </li>
                     <li>
-                        <a href="<?= base_url(); ?>admin/manageComment">
-                            <i class="icon-comment-discussion"></i>
+                        <a>
+                            <i class="icon-map4"></i>
                             <span>
-                                نظرات
+                                مدیریت طرح
                             </span>
                         </a>
+                        <ul>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/addPlan">
+                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
+                                    <small>
+                                        افزودن طرح
+                                    </small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/managePlan">
+                                    <i class="icon-table2" style="font-size: 13px;"></i>
+                                    <small>
+                                        مشاهده طرح‌ها
+                                    </small>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                     <!-- /main -->
                     <!-- فرعی -->
@@ -221,7 +255,7 @@
                     </li>
                     <li>
                         <a href="<?= base_url(); ?>admin/manageContactUs">
-                            <i class="icon-envelop5"></i>
+                            <i class="icon-phone2"></i>
                             <span>
                                 تماس با ما
                             </span>

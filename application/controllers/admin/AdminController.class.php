@@ -265,7 +265,7 @@ class AdminController extends HController
 
         $model = new Model();
         $this->data['users'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
-            ['u.id', 'u.username', 'CONCAT(u.first_name, " ", u.last_name) AS full_name', 'u.created_on', 'u.active'], 'u.id=r.user_id',
+            ['u.id', 'u.username', 'u.full_name', 'u.created_on', 'u.active'], 'u.id=r.user_id',
             'r.role_id>:id AND u.id!=:curId', ['id' => $this->data['identity']->role_id, 'curId' => $this->data['identity']->id],
             null, 'u.id DESC', null, null, false, 'LEFT');
 
@@ -456,6 +456,52 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
+    public function manageNewsletterAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['newsletters'] = $model->select_it(null, 'newsletters');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده خبرنامه');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Newsletter/manageNewsletter');
+    }
+
+    public function deleteNewsletterAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'newsletters';
+        if (!isset($id)) {
+            message('error', 200, 'آیتم نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'مورد وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'مورد با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
     public function addArticleAction()
     {
         if (!$this->auth->isLoggedIn()) {
@@ -490,6 +536,7 @@ class AdminController extends HController
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->insert_it('articles', [
                     'title' => trim($values['title']),
+                    'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
                     'writer' => $this->data['identity']->username,
@@ -572,6 +619,7 @@ class AdminController extends HController
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->update_it('articles', [
                     'title' => trim($values['title']),
+                    'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
                     'updater' => $this->data['identity']->username,
@@ -809,6 +857,148 @@ class AdminController extends HController
         $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
         if ($res) {
             message('success', 200, 'نوشته با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function manageCommentAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $cmtPr = $model->join_it(null, 'comments AS c', 'articles AS a', [
+            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
+        ], 'c.article_id=a.id', null, [], null, null, null, null, true, 'LEFT');
+        $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
+            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
+        ], 'c.mobile=u.username', null, [], null, 'c.created_on DESC', null, null, false, 'RIGHT');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مدیریت نظرات');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Comment/manageComment');
+    }
+
+    public function viewCommentAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('comments', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageComment'));
+        }
+
+        $cmtPr = $model->join_it(null, 'comments AS c', 'products AS p', [
+            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'p.product_title', 'p.image', 'p.product_code',
+            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.body'
+        ], 'c.product_id=p.id', null, [], null, null, null, null, true, 'LEFT');
+        $this->data['comment'] = $model->join_it($cmtPr, 'users AS u', 'c', [
+            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'c.product_title', 'c.image', 'c.body', 'u.image AS u_image',
+            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.product_code', 'u.username', 'u.first_name', 'u.last_name'
+        ], 'c.user_id=u.id', 'c.id=:id', ['id' => $param[0]], null, 'c.comment_date DESC', null, null, false, 'RIGHT')[0];
+
+        if ($this->data['comment']['status'] == 0) {
+            $model->update_it('comments', ['status' => 1], 'id=:id', ['id' => $param[0]]);
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نظر');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+
+        $this->_render_page('pages/be/Comment/viewComment');
+    }
+
+    public function deleteCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'comments';
+        if (!isset($id)) {
+            message('error', 200, 'نظر نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'نظر با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function acceptCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $table = 'comments';
+        if (!isset($id)) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
+        $newStat = $curStat < 2 ? 2 : $curStat;
+        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'نظر تایید شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function declineCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $table = 'comments';
+        if (!isset($id)) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
+        $newStat = $curStat == 2 ? 1 : $curStat;
+        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'عدم تایید نظر با موفقیت انجام شد.');
         }
 
         message('error', 200, 'عملیات با خطا مواجه شد.');
@@ -1225,34 +1415,7 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
-    public function manageCommentAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-        $cmtPr = $model->join_it(null, 'comments AS c', 'products AS p', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'p.product_title', 'p.image', 'p.product_code'
-        ], 'c.product_id=p.id', null, [], null, null, null, null, true, 'LEFT');
-        $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'c.product_title', 'c.image',
-            'c.product_code', 'u.username', 'u.first_name', 'u.last_name'
-        ], 'c.user_id=u.id', null, [], null, 'c.comment_date DESC', null, null, false, 'RIGHT');
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مدیریت نظرات');
-
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
-
-        $this->_render_page('pages/be/Comment/manageComment');
-    }
-
-    public function viewCommentAction($param)
+    public function addPlanAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -1260,156 +1423,39 @@ class AdminController extends HController
 
         $model = new Model();
 
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('comments', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageComment'));
-        }
-
-        $cmtPr = $model->join_it(null, 'comments AS c', 'products AS p', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'p.product_title', 'p.image', 'p.product_code',
-            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.body'
-        ], 'c.product_id=p.id', null, [], null, null, null, null, true, 'LEFT');
-        $this->data['comment'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'c.product_title', 'c.image', 'c.body', 'u.image AS u_image',
-            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.product_code', 'u.username', 'u.first_name', 'u.last_name'
-        ], 'c.user_id=u.id', 'c.id=:id', ['id' => $param[0]], null, 'c.comment_date DESC', null, null, false, 'RIGHT')[0];
-
-        if ($this->data['comment']['status'] == 0) {
-            $model->update_it('comments', ['status' => 1], 'id=:id', ['id' => $param[0]]);
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نظر');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
-
-        $this->_render_page('pages/be/Comment/viewComment');
-    }
-
-    public function deleteCommentAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = @$_POST['postedId'];
-        $table = 'comments';
-        if (!isset($id)) {
-            message('error', 200, 'نظر نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'نظر وجود ندارد.');
-        }
-
-        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'نظر با موفقیت حذف شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function acceptCommentAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = $_POST['postedId'];
-        $table = 'comments';
-        if (!isset($id)) {
-            message('error', 200, 'ورودی نامعتبر است.');
-        }
-
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'نظر وجود ندارد.');
-        }
-
-        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
-        $newStat = $curStat < 2 ? 2 : $curStat;
-        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'نظر تایید شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function declineCommentAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = $_POST['postedId'];
-        $table = 'comments';
-        if (!isset($id)) {
-            message('error', 200, 'ورودی نامعتبر است.');
-        }
-
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'نظر وجود ندارد.');
-        }
-
-        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
-        $newStat = $curStat == 2 ? 1 : $curStat;
-        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'عدم تایید نظر با موفقیت انجام شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    // TODO: edit all useful links actions
-    public function addUsefulLinkAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
+        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name']);
 
         $this->data['errors'] = [];
-        $this->data['brandVals'] = [];
+        $this->data['planVals'] = [];
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addBrand');
-        $form->setFieldsName(['image', 'brand', 'keywords', 'desc'])->setMethod('post');
+        $this->data['form_token'] = $form->csrfToken('addPlan');
+        $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
+            ->setDefaults('publish', 'off')
+            ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->setMethod('post', [], ['publish']);
+
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['brand', 'image'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($model->is_exist('helpful_links', 'brand_name=:name', ['name' => $values['brand']])) {
-                    $form->setError('این برند وجود دارد. لطفا دوباره تلاش کنید.');
+                $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+
+                if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                    $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                 }
-                if (!file_exists($values['image'])) {
-                    $form->setError('تصویر انتخاب شده، نامعتبر است.');
+                if (!in_array($values['category'], array_column($this->data['categories'], 'id'))) {
+                    $form->setError('دسته‌بندی نامعتبر است.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $common = new CommonModel();
-                $code = $common->generate_random_unique_code('helpful_links', 'brand_code', 'BRD_', 8, 15, 10, CommonModel::DIGITS);
-
-                if (empty($code)) {
-                    $form->setError('مشکل در ایجاد کد اختصاصی پیش آمده است. لطفا مجددا تلاش نمایید!');
-                    return;
-                }
-
-                $code = 'BRD_' . $code;
-
-                $res = $model->insert_it('helpful_links', [
-                    'brand_code' => $code,
-                    'brand_name' => trim($values['brand']),
-                    'image' => trim($values['image']),
-                    'description' => trim($values['desc']),
-                    'keywords' => trim($values['keywords'])
+                $res = $model->insert_it('articles', [
+                    'title' => trim($values['title']),
+                    'body' => $values['body'],
+                    'category_id' => $values['category'],
+                    'writer' => $this->data['identity']->username,
+                    'updater' => null,
+                    'keywords' => $values['keywords'],
+                    'publish' => $form->isChecked('publish') ? 1 : 0,
+                    'created_at' => time(),
                 ]);
 
                 if (!$res) {
@@ -1426,7 +1472,119 @@ class AdminController extends HController
                 $this->data['success'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors'] = $form->getError();
-                $this->data['brandVals'] = $form->getValues();
+                $this->data['planVals'] = $form->getValues();
+            }
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن طرح جدید');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
+        $this->_render_page([
+            'pages/be/Plan/addPlan',
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
+        ]);
+    }
+
+    public function editPlanAction($param)
+    {
+
+    }
+
+    public function managePlanAction()
+    {
+
+    }
+
+    public function deletePlanAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'plans';
+        if (!isset($id)) {
+            message('error', 200, 'طرح نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'طرح با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function addUsefulLinkAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        $this->data['errors'] = [];
+        $this->data['uslVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addUsefulLink');
+        $form->setFieldsName(['image', 'title', 'link'])->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['image', 'title', 'link'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($model->is_exist('helpful_links', 'title=:name', ['name' => $values['title']])) {
+                    $form->setError('این لینک وجود دارد. لطفا دوباره تلاش کنید.');
+                }
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر انتخاب شده، نامعتبر است.');
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('helpful_links', [
+                    'image' => trim($values['image']),
+                    'title' => trim($values['title']),
+                    'link' => trim($values['link']),
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['uslVals'] = $form->getValues();
             }
         }
 
@@ -1462,26 +1620,24 @@ class AdminController extends HController
         $model = new Model();
 
         if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('helpful_links', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageBrand'));
+            $this->redirect(base_url('admin/manageUsefulLink'));
         }
 
         $this->data['param'] = $param;
 
         $this->data['errors'] = [];
-        $this->data['brandVals'] = [];
-
-        $this->data['brandVals'] = $model->select_it(null, 'helpful_links', ['brand_name'], 'id=:id', ['id' => $param[0]])[0];
+        $this->data['uslVals'] = $model->select_it(null, 'helpful_links', ['title'], 'id=:id', ['id' => $param[0]])[0];
 
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editBrand');
-        $form->setFieldsName(['image', 'brand', 'keywords', 'desc'])->setMethod('post');
+        $form->setFieldsName(['image', 'title', 'link'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['brand', 'image'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($this->data['brandVals']['brand_name'] != $values['brand']) {
-                    if ($model->is_exist('helpful_links', 'brand_name=:name', ['name' => $values['brand']])) {
-                        $form->setError('این برند وجود دارد. لطفا دوباره تلاش کنید.');
+                $form->isRequired(['image', 'title', 'link'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($this->data['uslVals']['title'] != $values['title']) {
+                    if ($model->is_exist('helpful_links', 'title=:name', ['name' => $values['title']])) {
+                        $form->setError('این لینک وجود دارد. لطفا دوباره تلاش کنید.');
                     }
                 }
                 if (!file_exists($values['image'])) {
@@ -1489,10 +1645,9 @@ class AdminController extends HController
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->update_it('helpful_links', [
-                    'brand_name' => trim($values['brand']),
                     'image' => trim($values['image']),
-                    'description' => trim($values['desc']),
-                    'keywords' => trim($values['keywords']),
+                    'title' => trim($values['title']),
+                    'link' => trim($values['link']),
                 ], 'id=:id', ['id' => $this->data['param'][0]]);
 
                 if (!$res) {
@@ -1512,10 +1667,10 @@ class AdminController extends HController
             }
         }
 
-        $this->data['brandVals'] = $model->select_it(null, 'helpful_links', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['uslVals'] = $model->select_it(null, 'helpful_links', '*', 'id=:id', ['id' => $param[0]])[0];
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش لینک مفید', $this->data['brandVals']['brand_name']);
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش لینک مفید', $this->data['uslVals']['title']);
 
         $this->load->helper('easy file manager');
         //Security options
@@ -1544,7 +1699,7 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $this->data['brands'] = $model->select_it(null, 'helpful_links');
+        $this->data['links'] = $model->select_it(null, 'helpful_links');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده لینک‌های مفید');
