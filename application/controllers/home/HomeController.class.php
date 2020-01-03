@@ -81,6 +81,15 @@ class HomeController extends HController
         ]);
     }
 
+    public function dashboard(){
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'داشبورد');
+
+        $this->_render_page([
+            'pages/fe/user-profile',
+        ]);
+    }
+
+
     private function _render_page($pages, $loadHeaderAndFooter = true)
     {
         if ($loadHeaderAndFooter) {

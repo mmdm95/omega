@@ -75,7 +75,7 @@
         items: 1,
         dots: false,
         nav: true,
-        navText: ['<span class="i la la-long-arrow-left"></span>', '<span class="i la la-long-arrow-right"></span>']
+        navText: ['<span class="i la la-long-arrow-right"></span>', '<span class="i la la-long-arrow-left"></span>']
     });
 
     // logo carousel

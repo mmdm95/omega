@@ -4557,7 +4557,7 @@ input[type="button"].btn-block {
   display: inline-block;
   padding-left: 0.5rem;
   color: #f5f7fc;
-  content: "";
+  content: "\f111";
 }
 
 .breadcrumb-item + .breadcrumb-item:hover::before {
