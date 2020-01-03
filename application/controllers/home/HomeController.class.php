@@ -73,7 +73,7 @@ class HomeController extends HController
     }
     //-----
 
-    public function userInformation(){
+    public function userInformationAction(){
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'فرم اطلاعات');
 
         $this->_render_page([
@@ -81,7 +81,7 @@ class HomeController extends HController
         ]);
     }
 
-    public function dashboard(){
+    public function dashboardAction(){
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'داشبورد');
 
         $this->_render_page([
@@ -89,6 +89,13 @@ class HomeController extends HController
         ]);
     }
 
+    public function blogAction(){
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'بلاگ');
+
+        $this->_render_page([
+            'pages/fe/blog',
+        ]);
+    }
 
     private function _render_page($pages, $loadHeaderAndFooter = true)
     {
