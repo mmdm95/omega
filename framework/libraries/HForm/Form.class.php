@@ -10,15 +10,15 @@ use voku\helper\AntiXSS;
 include_once LIB_PATH . 'Maer-CSRF/vendor/autoload.php';
 include_once LIB_PATH . 'XSS/vendor/autoload.php';
 
-//spl_autoload_register(function ($class_name) {
-//    $fileToTest = str_replace('\\', DS, LIB_PATH . $class_name . '.class.php');
-//    $file = str_replace('\\', DS, LIB_PATH . $class_name . '.php');
-//    if (file_exists($fileToTest)) {
-//        include $fileToTest;
-//    } else if (file_exists($file)) {
-//        include $file;
-//    }
-//});
+spl_autoload_register(function ($class_name) {
+    $fileToTest = str_replace('\\', DS, LIB_PATH . $class_name . '.class.php');
+    $file = str_replace('\\', DS, LIB_PATH . $class_name . '.php');
+    if (file_exists($fileToTest)) {
+        include $fileToTest;
+    } else if (file_exists($file)) {
+        include $file;
+    }
+});
 
 // TODO: replace array_filter with some of codes and reduce code lines
 class Form implements HIForm

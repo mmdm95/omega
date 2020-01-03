@@ -11,11 +11,13 @@
             addProperty = '.property-operation-add',
             deleteProperty = '.property-operation-delete',
 
-            successClass = 'btn-success',
-            dangerClass = 'btn-danger',
+            successClass = 'bg-success-400',
+            dangerClass = 'bg-danger-400',
 
             addIcon = 'icon-plus2',
             deleteIcon = 'icon-trash',
+
+            radioName = 'option_choice_',
 
             animateTime = 400;
 
@@ -75,11 +77,16 @@
             item.find('.bootstrap-tagsinput').remove();
             item.find('.p-item-select').removeAttr('selected').first().attr('selected', 'selected');
             item.find('.p-item-input').val('');
+            item.find('input[type=radio]')
+                .prop('checked', false).attr('checked', false)
+                .first().prop('checked', 'checked').attr('checked', 'checked');
 
             // Remove button
             deleteBtn = item.children(btnPropertyContainer).find(addProperty);
             deleteBtn.removeClass(addProperty.substr(1))
+                .removeClass('bg-blue')
                 .addClass(deleteProperty.substr(1))
+                .addClass('btn-default')
                 .attr('title', 'حذف ویژگی');
             deleteBtn.find('i').removeClass(addIcon).addClass(deleteIcon);
 
@@ -127,7 +134,7 @@
         };
 
         $(addProperty).on('click', function (e) {
-            e.stopPropagation();
+            e.preventDefault();
 
             // Check clicked button parent to see what add to container
             if($(this).closest(btnPropertyContainer).parent().hasClass(propertyItem.substr(1))) {
@@ -138,7 +145,7 @@
         });
 
         $(deleteProperty).on('click', function (e) {
-            e.stopPropagation();
+            e.preventDefault();
 
             // Check clicked button parent to see what add to container
             if($(this).closest(btnPropertyContainer).parent().hasClass(propertyItem.substr(1))) {

@@ -1495,6 +1495,7 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
         $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
 
         $this->_render_page([

@@ -243,28 +243,14 @@
                                                 </ul>
                                             </div>
                                         </div>
-                                        <div class="panel-body">
-                                            <div class="row pt-20 no-padding-top">
-                                                <div class="form-group col-md-12 mt-12">
-                                                    <span class="text-danger">*</span>
-                                                    <label>سوال:</label>
-                                                    <textarea
-                                                            style="min-height: 100px; height: 120px; resize: vertical;"
-                                                            class="form-control"
-                                                            placeholder="سوال"
-                                                            name="rules_q"
-                                                            rows="10"><?= set_value($planVals['rules_q'] ?? ''); ?></textarea>
-                                                </div>
-                                                <div class="form-group col-md-12 mt-12">
-                                                    <span class="text-danger">*</span>
-                                                    <label>جواب:</label>
-                                                    <textarea
-                                                            style="min-height: 100px; height: 120px; resize: vertical;"
-                                                            class="form-control"
-                                                            placeholder="جواب"
-                                                            name="rules_a"
-                                                            rows="10"><?= set_value($planVals['rules_a'] ?? ''); ?></textarea>
-                                                </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mt-12">
+                                                <textarea
+                                                        id="cntEditor"
+                                                        class="form-control"
+                                                        placeholder="سوال"
+                                                        name="rules"
+                                                        rows="10"><?= set_value($planVals['rules'] ?? ''); ?></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -386,24 +372,113 @@
                                             </div>
                                         </div>
                                         <div class="panel-body">
-                                            <div class="row pt-20 no-padding-top">
-                                                <div class="form-group col-md-12 mt-12">
+                                            <div class="form-group">
+                                                <div class="help-block alert alert-info no-border-right no-border-top no-border-bottom border-lg p-10">
+                                                    <h5>
+                                                        توجه:
+                                                    </h5>
+                                                    <p>
+                                                        <i class="icon-dash" aria-hidden="true"></i>
+                                                        برای افزودن گروه‌بندی جدید، دکمه
+                                                        <span class="text-success-600">
+                                                            سبز رنگ
+                                                        </span>
+                                                        را فشار دهید.
+                                                    </p>
+                                                    <p>
+                                                        <i class="icon-dash" aria-hidden="true"></i>
+                                                        همچنین برای افزودن آپشن جدید، دکمه
+                                                        <span class="text-blue">
+                                                            آبی رنگ
+                                                        </span>
+                                                        در هر آپشن را فشار دهید.
+                                                    </p>
+                                                </div>
+                                            </div>
 
+                                            <div class="property-items">
+                                                <div class="col-md-12 form-group position-relative property-item
+                                                        border border-dashed border-default border-radius p-20 mt-10">
+                                                    <div class="property-operation-container"
+                                                         style="top: -15px; left: -15px;">
+                                                        <a href="javascript:void(0);"
+                                                           title="افزودن گروه‌بندی"
+                                                           class="btn bg-success-400 btn-icon btn-rounded shadow-depth1
+                                                                          property-operation-add no-margin">
+                                                            <i class="icon-plus2" aria-hidden="true"></i>
+                                                        </a>
+                                                    </div>
+
+                                                    <div class="row position-relative mb-20">
+                                                        <div class="form-group col-xs-6 col-sm-6 mt-12">
+                                                            <label>عنوان گروه:</label>
+                                                            <input type="text" name="option_group[]"
+                                                                   class="form-control p-item-input">
+                                                        </div>
+                                                        <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                            <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    چند انتخابی
+                                                                </span>
+                                                                <input type="radio" class="" checked="checked"
+                                                                       name="option_choice_0" value="1">
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                            <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    تک انتخابی
+                                                                </span>
+                                                                <input type="radio" class=""
+                                                                       name="option_choice_0" value="2">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row position-relative property-each-item"
+                                                         style="padding-left: 40px;">
+                                                        <div class="col-xs-12"></div>
+                                                        <div class="form-group col-xs-4 mt-12">
+                                                            <label>نام آپشن:</label>
+                                                            <input type="text" name="option_name[]"
+                                                                   class="form-control p-item-input">
+                                                        </div>
+                                                        <div class="form-group col-xs-4 mt-12">
+                                                            <label>توضیحات:</label>
+                                                            <input type="text" name="option_desc[]"
+                                                                   class="form-control p-item-input">
+                                                        </div>
+                                                        <div class="form-group col-xs-4 mt-12">
+                                                            <label>قیمت آپشن:</label>
+                                                            <input type="text" name="option_price[]"
+                                                                   class="form-control p-item-input">
+                                                        </div>
+
+                                                        <div class="property-operation-container">
+                                                            <a href="javascript:void(0);"
+                                                               title="ویژگی جدید"
+                                                               class="btn bg-blue btn-icon shadow-depth1 property-operation-add">
+                                                                <i class="icon-plus2"
+                                                                   aria-hidden="true"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="clearfix"></div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
                                     <div class="panel panel-white">
-                                        <a href="<?= base_url('admin/managePlan'); ?>"
-                                           class="col-sm-6 btn btn-default bg-white submit-button pt-15 pb-15 no-border-radius-right">
-                                            بازگشت
-                                        </a>
                                         <button type="submit"
-                                                class="col-sm-6 btn btn-primary submit-button pt-15 pb-15 no-border-radius-left">
+                                                class="col-xs-12 col-sm-6 col-sm-push-6 btn btn-primary submit-button pt-15 pb-15 no-border-radius-left">
                                             افزودن طرح
                                             <i class="icon-arrow-left12 position-right"></i>
                                         </button>
+                                        <a href="<?= base_url('admin/managePlan'); ?>"
+                                           class="col-xs-12 col-sm-6 col-sm-pull-6 btn btn-default bg-white submit-button pt-15 pb-15 no-border-radius-right">
+                                            بازگشت
+                                        </a>
                                     </div>
                                 </div>
                             </div>
