@@ -11,11 +11,13 @@
             </div>
             <div class="modal-body">
                 <form action="/" id="signup-form">
-                    <input type="text" class="form-control" placeholder="شماره موبایل" required>
-                    <input type="password" class="form-control" placeholder="رمز عبور" required>
+                    <?= $form_token_register; ?>
+                    <input name="mobile" type="text" class="form-control" placeholder="شماره موبایل" required>
+                    <input name="password" type="password" class="form-control" placeholder="رمز عبور" required>
+                    <input name="re_password" type="password" class="form-control" placeholder="تکرار رمز عبور" required>
                     <label>نقش خود را انتخاب کنید:</label>
                     <div class="custom-control custom-radio">
-                        <input type="radio" id="student" name="role"
+                        <input value="<?= AUTH_ROLE_STUDENT ?>" type="radio" id="student" name="role"
                                class="custom-control-input" required>
                         <label class="custom-control-label iranyekan-light"
                                for="student">
@@ -23,7 +25,7 @@
                         </label>
                     </div>
                     <div class="custom-control custom-radio">
-                        <input type="radio" id="collegian" name="role"
+                        <input value="<?= AUTH_ROLE_COLLEGE_STUDENT ; ?>" type="radio" id="collegian" name="role"
                                class="custom-control-input">
                         <label class="custom-control-label iranyekan-light"
                                for="collegian">
@@ -31,7 +33,7 @@
                         </label>
                     </div>
                     <div class="custom-control custom-radio">
-                        <input type="radio" id="graduate" name="role"
+                        <input value="<?= AUTH_ROLE_GRADUATE ; ?>" type="radio" id="graduate" name="role"
                                class="custom-control-input">
                         <label class="custom-control-label iranyekan-light"
                                for="graduate">

@@ -1,6 +1,7 @@
-*{
+* {
     font-family: IRANYekanFN;
 }
+
 .rtl {
     direction: rtl !important;
 }
@@ -2113,7 +2114,7 @@ p {
     margin-bottom: 0.33333rem;
 }
 
-.atbd_listing_data_list ul li p{
+.atbd_listing_data_list ul li p {
     font-family: 'IRANYekanFN Light' !important;
 }
 
@@ -3427,6 +3428,10 @@ p {
     opacity: 1;
 }
 
+.widget-wrapper {
+    background-color: white;
+}
+
 .widget-wrapper .widget-default {
     border-radius: 0.26667rem;
     border: 1px solid #e3e6ef;
@@ -3467,7 +3472,7 @@ p {
 .search-widget .input-group input {
     width: 100%;
     border-radius: 1.66667rem;
-    background: #f5f4f7;
+    background: #fff;
     border: 0 none;
     height: 3.33333rem;
     padding: 0 1.66667rem 0 4rem;
@@ -3506,7 +3511,7 @@ p {
 
 .category-widget ul .arrow-list4:before {
     position: absolute;
-    content: '\f186';
+    content: '\f273';
     font-family: "LineAwesome";
     right: 0;
     top: 2px;
@@ -4651,7 +4656,7 @@ p {
 }
 
 .menu-area .top-menu-area .logo-top img {
-    width:  70px;
+    width: 70px;
     height: auto;
 }
 
@@ -7632,4 +7637,16 @@ p {
     .dashboard-nav .dashboard-nav-area .nav .nav-link {
         padding: 10px 0;
     }
+}
+
+
+/* Author: Saeed*/
+
+.font-size-sm {
+    font-size: 0.85rem;
+}
+
+.blog-card-size {
+    height: 230px;
+    overflow: hidden;
 }
