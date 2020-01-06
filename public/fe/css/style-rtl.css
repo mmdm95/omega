@@ -1,3 +1,7 @@
+* {
+    font-family: IRANYekanFN;
+}
+
 .rtl {
     direction: rtl !important;
 }
@@ -2110,6 +2114,11 @@ p {
     margin-bottom: 0.33333rem;
 }
 
+.atbd_listing_data_list ul li p {
+    font-family: 'IRANYekanFN Light' !important;
+}
+
+
 .atbd_listing_data_list ul li:last-child {
     margin-bottom: 0;
 }
@@ -2796,7 +2805,7 @@ p {
     padding: 6.66667rem 0 6.66667rem;
     position: relative;
     text-align: center;
-    background: url("img/svg/sb-shape.svg");
+    background: url("../img/svg/sb-shape.svg");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -3419,6 +3428,10 @@ p {
     opacity: 1;
 }
 
+.widget-wrapper {
+    background-color: white;
+}
+
 .widget-wrapper .widget-default {
     border-radius: 0.26667rem;
     border: 1px solid #e3e6ef;
@@ -3459,7 +3472,7 @@ p {
 .search-widget .input-group input {
     width: 100%;
     border-radius: 1.66667rem;
-    background: #f5f4f7;
+    background: #fff;
     border: 0 none;
     height: 3.33333rem;
     padding: 0 1.66667rem 0 4rem;
@@ -3498,7 +3511,7 @@ p {
 
 .category-widget ul .arrow-list4:before {
     position: absolute;
-    content: '\f186';
+    content: '\f273';
     font-family: "LineAwesome";
     right: 0;
     top: 2px;
@@ -4642,6 +4655,11 @@ p {
     text-align: center;
 }
 
+.menu-area .top-menu-area .logo-top img {
+    width: 70px;
+    height: auto;
+}
+
 .menu-area .top-menu-area .logo-top a {
     display: block;
     padding: 19px 20px 19px 35px;
@@ -4747,6 +4765,7 @@ p {
 
 .menu-area.menu--light .mainmenu__menu .navbar-nav > li > a {
     color: #fff;
+    font-family: "IRANYekanFN Light";
 }
 
 .menu-area.menu--light .mainmenu__menu .navbar-nav > li.has_dropdown .dropdown-menu a {
@@ -5033,7 +5052,7 @@ p {
 }
 
 .author__access_area ul li {
-    margin-left: 2rem;
+    margin-left: 1rem;
 }
 
 .author__access_area ul li:last-child {
@@ -6140,6 +6159,7 @@ p {
     line-height: 4.13333rem;
     font-size: 2.66667rem;
     font-weight: 700;
+    font-family: 'aviny';
 }
 
 .directory_content_area .search_title_area .sub_title {
@@ -6210,7 +6230,7 @@ p {
     text-align: center;
     padding: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    min-width: 7.66667rem;
+    min-width: 13rem;
     min-height: 6.66667rem;
     color: rgba(255, 255, 255, 0.8);
     transition: all 0.3s ease;
@@ -6236,9 +6256,10 @@ p {
 
 .section-title h2 {
     margin: 0 0 0.86667rem;
-    font-size: 2rem;
+    font-size: 4rem;
     font-weight: 700;
     line-height: 2.93333rem;
+    font-family: 'aviny';
 }
 
 .section-title h2 span {
@@ -7616,4 +7637,16 @@ p {
     .dashboard-nav .dashboard-nav-area .nav .nav-link {
         padding: 10px 0;
     }
+}
+
+
+/* Author: Saeed*/
+
+.font-size-sm {
+    font-size: 0.85rem;
+}
+
+.blog-card-size {
+    height: 230px;
+    overflow: hidden;
 }

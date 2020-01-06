@@ -43,7 +43,7 @@ $(function () {
         if (current === "" || current === 'http:' || current === 'https:') {
             //for root url
             if (href) {
-                if (href.indexOf("index") !== -1) {
+                if (href.indexOf("index.php") !== -1) {
                     $this.closest('li').addClass('active');
                 }
             }
