@@ -235,7 +235,7 @@ class AdminController extends HController
         }
 
         $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS ur', [
-            'u.id', 'u.username', 'CONCAT(u.first_name, " ", u.last_name) AS full_name', 'ur.role_id'
+            'u.id', 'u.username', 'full_name', 'ur.role_id'
         ], 'u.id=ur.user_id', 'u.id=:id', ['id' => $param[0]]);
         if (!count($this->data['userVals'])) {
             $this->data['errors'][] = 'خطا در یافتن کاربر';
@@ -266,8 +266,11 @@ class AdminController extends HController
         $model = new Model();
         $this->data['users'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
             ['u.id', 'u.username', 'u.full_name', 'u.created_on', 'u.active'], 'u.id=r.user_id',
-            'r.role_id>:id AND u.id!=:curId', ['id' => $this->data['identity']->role_id, 'curId' => $this->data['identity']->id],
-            null, 'u.id DESC', null, null, false, 'LEFT');
+            '(r.role_id>:id OR r.role_id=:id2) AND u.id!=:curId', [
+                'id' => $this->data['identity']->role_id,
+                'id2' => AUTH_ROLE_SUPER_USER,
+                'curId' => $this->data['identity']->id,
+            ], null, 'u.id DESC', null, null, false, 'LEFT');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده کاربران');
@@ -2278,8 +2281,6 @@ class AdminController extends HController
             echo $e;
         }
 
-        $model = new Model();
-
         $this->load->library('HForm/Form');
 
         $this->data['setting'] = [];
@@ -2330,75 +2331,24 @@ class AdminController extends HController
         $this->data['errors_images'] = [];
         $this->data['form_token_images'] = $formImages->csrfToken('settingImages');
         $formImages->setFieldsName([
-            'imgTop', 'imgTopLink', 'imgNext', 'imgNextLink', 'imgSide', 'imgSideLink', 'imgFourImages',
-            'imgFourImagesLink', 'imgTwoImages', 'imgTwoImagesLink', 'imgOneImage', 'imgOneImageLink',
-            'sliderTitle', 'sliderViewAll', 'sliderCategory', 'sliderItemsCount', 'showBrands'
-        ])->setDefaults('showBrands', 'off')
-            ->setDefaults('sliderCategory', [])->setMethod('post', [], ['showBrands']);
+            'imgTop', 'imgTopLink', 'imgMiddle', 'imgMiddleLink'
+        ])->setMethod('post');
         try {
             $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
                 if ($values['imgTop'] != '' && !file_exists($values['imgTop'])) {
 //                    $formImages->setError('تصویر انتخاب شده برای بالای اسلایدر اصلی، نامعتبر است.');
                     $values['imgTop'] = '';
                 }
-                if ($values['imgNext'] != '' && !file_exists($values['imgNext'])) {
+                if ($values['imgMiddle'] != '' && !file_exists($values['imgMiddle'])) {
 //                    $formImages->setError('تصویر انتخاب شده برای کنار اسلایدر اصلی، نامعتبر است.');
-                    $values['imgNext'] = '';
+                    $values['imgMiddle'] = '';
                 }
-                $values['imgSide'] = array_filter($values['imgSide'], function ($value, $key) use ($values) {
-                    $res = $value != '' && file_exists($value);
-                    if ($res) {
-                        unset($values['imgSideLink'][$key]);
-                        return $res;
-                    }
-                    return false;
-                }, ARRAY_FILTER_USE_BOTH);
-
-                $values['imgFourImages'] = array_filter($values['imgFourImages'], function ($value) {
-                    return $value == '' || file_exists($value);
-                });
-                $values['imgTwoImages'] = array_filter($values['imgTwoImages'], function ($value) {
-                    return $value == '' || file_exists($value);
-                });
-                if ($values['imgOneImage'] != '' && !file_exists($values['imgOneImage'])) {
-//                    $formImages->setError('تصویر انتخاب شده برای تصویر تکی، نامعتبر است.');
-                    $values['imgOneImage'] = '';
-                }
-
-                $values['sliderCategory'] = array_map(function ($value) {
-                    $catCols = array_column($this->data['categories'], 'id');
-                    if (in_array($value, $catCols) === false) return -1;
-                    return $value;
-                }, $values['sliderCategory']);
-                $values['sliderItemsCount'] = array_map(function ($value) {
-                    if ($value < 10 || $value > 30) return 10;
-                    return $value;
-                }, $values['sliderItemsCount']);
             })->afterCheckCallback(function ($values) use ($formImages) {
-                $this->data['setting']['pages']['index']['showBrands'] = $formImages->isChecked('showBrands') ? 1 : 0;
-
                 $this->data['setting']['pages']['index']['topImage']['image'] = $values['imgTop'];
                 $this->data['setting']['pages']['index']['topImage']['link'] = $values['imgTopLink'];
 
-                $this->data['setting']['pages']['index']['nextToSliderImage']['image'] = $values['imgNext'];
-                $this->data['setting']['pages']['index']['nextToSliderImage']['link'] = $values['imgNextLink'];
-
-                $this->data['setting']['pages']['index']['sideImages']['images'] = $values['imgSide'];
-                $this->data['setting']['pages']['index']['sideImages']['links'] = $values['imgSideLink'];;
-
-                $this->data['setting']['pages']['index']['fourImages']['images'] = $values['imgFourImages'];
-                $this->data['setting']['pages']['index']['fourImages']['links'] = $values['imgFourImagesLink'];
-
-                $this->data['setting']['pages']['index']['twoImages']['images'] = $values['imgTwoImages'];
-                $this->data['setting']['pages']['index']['twoImages']['links'] = $values['imgTwoImagesLink'];
-
-                $this->data['setting']['pages']['index']['oneImage']['image'] = $values['imgOneImage'];
-                $this->data['setting']['pages']['index']['oneImage']['link'] = $values['imgOneImageLink'];
-
-                $this->data['setting']['pages']['index']['sliders']['title'] = $values['sliderTitle'];
-                $this->data['setting']['pages']['index']['sliders']['viewAllLink'] = $values['sliderViewAll'];
-                $this->data['setting']['pages']['index']['sliders']['category'] = $values['sliderCategory'];
-                $this->data['setting']['pages']['index']['sliders']['count'] = $values['sliderItemsCount'];
+                $this->data['setting']['pages']['index']['middleImage']['image'] = $values['imgMiddle'];
+                $this->data['setting']['pages']['index']['middleImage']['link'] = $values['imgMiddleLink'];
 
                 $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
                 $res = write_json(CORE_PATH . 'config.json', $this->setting);
@@ -2439,25 +2389,18 @@ class AdminController extends HController
                     return ['text' => $val1, 'link' => $val2];
                 }, $values['footer_1_text'][2], $values['footer_1_link'][2]);
 
-                $this->data['setting']['footer']['footer_1']['sections']['section_1']['title'] = $values['footer_1_title'][0];
-                $this->data['setting']['footer']['footer_1']['sections']['section_1']['links'] = $sec1;
+                $this->data['setting']['footer']['sections']['section_1']['title'] = $values['footer_1_title'][0];
+                $this->data['setting']['footer']['sections']['section_1']['links'] = $sec1;
 
-                $this->data['setting']['footer']['footer_1']['sections']['section_2']['title'] = $values['footer_1_title'][1];
-                $this->data['setting']['footer']['footer_1']['sections']['section_2']['links'] = $sec2;
+                $this->data['setting']['footer']['sections']['section_2']['title'] = $values['footer_1_title'][1];
+                $this->data['setting']['footer']['sections']['section_2']['links'] = $sec2;
 
-                $this->data['setting']['footer']['footer_1']['sections']['section_3']['title'] = $values['footer_1_title'][2];
-                $this->data['setting']['footer']['footer_1']['sections']['section_3']['links'] = $sec3;
+                $this->data['setting']['footer']['sections']['section_3']['title'] = $values['footer_1_title'][2];
+                $this->data['setting']['footer']['sections']['section_3']['links'] = $sec3;
 
-                $this->data['setting']['footer']['footer_1']['socials']['instagram'] = $values['instagram'];
-
-                $this->data['setting']['footer']['footer_2']['section_1'] = $values['information_1'];
-                $this->data['setting']['footer']['footer_2']['section_2'] = $values['information_2'];
-                $this->data['setting']['footer']['footer_2']['section_3'] = $values['information_3'];
-
-                $this->data['setting']['footer']['footer_3']['description']['title'] = $values['descTitle'];
-                $this->data['setting']['footer']['footer_3']['description']['description'] = $values['desc'];
-                $this->data['setting']['footer']['footer_3']['namad']['namad_1'] = $values['namad_1'];
-                $this->data['setting']['footer']['footer_3']['namad']['namad_2'] = $values['namad_2'];
+                $this->data['setting']['footer']['socials']['telegram'] = $values['telegram'];
+                $this->data['setting']['footer']['socials']['instagram'] = $values['instagram'];
+                $this->data['setting']['footer']['socials']['facebook'] = $values['facebook'];
 
                 $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
                 $res = write_json(CORE_PATH . 'config.json', $this->setting);
@@ -2476,44 +2419,6 @@ class AdminController extends HController
                 $this->data['success_footer'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors_footer'] = $form->getError();
-            }
-        }
-
-        // Footer panel setting form submit
-        $formAdmin = new Form();
-        $this->data['errors_admin'] = [];
-        $this->data['form_token_admin'] = $formAdmin->csrfToken('settingAdmin');
-        $formAdmin->setFieldsName(['offerReaction', 'offerActivationReaction'])
-            ->setMethod('post');
-        try {
-            $formAdmin->afterCheckCallback(function (&$values) use ($formAdmin) {
-                if (!in_array($values['offerReaction'], $this->offerReactionParams)) {
-                    $values['offerReaction'] = self::OFFER_REACTION_SHOW_ERROR;
-                }
-                if (!in_array($values['offerActivationReaction'], $this->offerActivationReactionParams)) {
-                    $values['offerActivationReaction'] = self::OFFER_ACTIVATION_REACTION_SHOW_ERROR;
-                }
-
-                $this->data['setting']['admin']['panel']['offer_reaction'] = $values['offerReaction'];
-                $this->data['setting']['admin']['panel']['offer_activation_reaction'] = $values['offerActivationReaction'];
-
-                $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
-                $res = write_json(CORE_PATH . 'config.json', $this->setting);
-
-                if (!$res) {
-                    $formAdmin->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $formAdmin->checkForm()->isSuccess();
-        if ($formAdmin->isSubmit()) {
-            if ($res) {
-                $this->data['success_admin'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors_admin'] = $formAdmin->getError();
             }
         }
 
