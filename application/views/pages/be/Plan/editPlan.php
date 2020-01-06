@@ -22,7 +22,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                class="text-semibold">ویرایش نوشته</span>
+                                    class="text-semibold">ویرایش طرح</span>
                         </h5>
                     </div>
                 </div>
@@ -35,11 +35,11 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= base_url(); ?>admin/manageArticle">
-                                نوشته‌ها
+                            <a href="<?= base_url(); ?>admin/managePlan">
+                                مدیریت طرح‌ها
                             </a>
                         </li>
-                        <li class="active">ویرایش نوشته</li>
+                        <li class="active">ویرایش طرح</li>
                     </ul>
 
                 </div>
@@ -51,14 +51,14 @@
                 <!-- Centered forms -->
                 <div class="row">
                     <div class="col-md-12">
-                        <form action="<?= base_url(); ?>admin/editArticle/<?= $param[0]; ?>" method="post">
+                        <form action="<?= base_url(); ?>admin/addPlan" method="post">
                             <?= $data['form_token']; ?>
 
                             <div class="row">
                                 <div class="col-md-9">
                                     <div class="panel panel-white">
                                         <div class="panel-heading">
-                                            <h6 class="panel-title">مشخصات نوشته</h6>
+                                            <h6 class="panel-title">مشخصات طرح</h6>
                                             <div class="heading-elements">
                                                 <ul class="icons-list">
                                                     <li><a data-action="collapse"></a></li>
@@ -87,66 +87,520 @@
                                                 </div>
                                             <?php endif; ?>
 
+                                            <div class="col-lg-12 mb-15">
+                                                <div class="cursor-pointer pick-file border border-lg border-default"
+                                                     data-toggle="modal"
+                                                     data-target="#modal_full"
+                                                     style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                    <input class="image-file" type="hidden"
+                                                           name="image"
+                                                           value="<?= set_value($planVals['image'] ?? ''); ?>">
+                                                    <div class="media stack-media-on-mobile">
+                                                        <div class="media-left">
+                                                            <div class="thumb">
+                                                                <a class="display-inline-block"
+                                                                   style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                    <img
+                                                                            src="<?= set_value($planVals['image'] ?? '', '', base_url($planVals['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                            class="img-rounded" alt=""
+                                                                            style="width: 100px; height: 100px; object-fit: contain;"
+                                                                            data-base-url="<?= base_url(); ?>">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="media-body">
+                                                            <h6 class="media-heading">
+                                                                <a class="text-grey-300">
+                                                                    <span class="text-danger">*</span>
+                                                                    انتخاب تصویر شاخص:
+                                                                </a>
+                                                                <a class="io-image-name display-block">
+                                                                    <?= basename(set_value($planVals['image'] ?? '')); ?>
+                                                                </a>
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="form-group col-lg-8">
                                                 <span class="text-danger">*</span>
-                                                <label>عنوان نوشته:</label>
+                                                <label>عنوان طرح:</label>
                                                 <input name="title" type="text" class="form-control"
-                                                       placeholder="اجباری"
-                                                       value="<?= set_value($atcVals['title'] ?? ''); ?>">
+                                                       placeholder="اجباری" required
+                                                       value="<?= set_value($planVals['title'] ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>دسته‌بندی والد:</label>
-                                                <select class="select-rtl" name="category">
-                                                    <?php foreach ($categories as $key => $category): ?>
-                                                        <option value="<?= $category['id']; ?>"
-                                                            <?= set_value($atcVals['category_id'] ?? '', $category['id'], 'selected', '', '=='); ?>>
-                                                            <?= $category['category_name']; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <label>ظرفیت:</label>
+                                                <input name="capacity" type="text" class="form-control"
+                                                       maxlength="4"
+                                                       placeholder="مثال: ۳۰" required
+                                                       value="<?= set_value($planVals['capacity'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>قیمت طرح (تومان):</label>
+                                                <input name="base_price" type="text" class="form-control"
+                                                       placeholder="مثال: ۱۰۰۰۰۰۰" required
+                                                       value="<?= set_value($planVals['base_price'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>قیمت پرداخت (تومان):</label>
+                                                <input name="min_price" type="text" class="form-control"
+                                                       placeholder="مثال: ۳۰۰۰۰۰" required
+                                                       value="<?= set_value($planVals['min_price'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>تاریخ شروع ثبت نام طرح:</label>
+                                                <input type="hidden" name="active_date" id="altDateFieldActive">
+                                                <input type="text" class="form-control range-from"
+                                                       placeholder="تاریخ شروع ثبت نام طرح" readonly data-time="true"
+                                                       data-alt-field="#altDateFieldActive"
+                                                       data-format="YYYY/MM/DD - HH:mm" required
+                                                       value="<?= set_value(date('Y/m/d H:i', $planVals['active_at']) ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>تاریخ پایان ثبت نام طرح:</label>
+                                                <input type="hidden" name="deactive_date" id="altDateFieldDeactive">
+                                                <input type="text" class="form-control range-to"
+                                                       placeholder="تاریخ پایان ثبت نام طرح" readonly data-time="true"
+                                                       data-alt-field="#altDateFieldDeactive"
+                                                       data-format="YYYY/MM/DD - HH:mm" required
+                                                       value="<?= set_value(date('Y/m/d H:i', $planVals['deactive_at']) ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>تاریخ شروع طرح:</label>
+                                                <input type="hidden" name="start_date" id="altDateFieldStart">
+                                                <input type="text" class="form-control range-from"
+                                                       placeholder="تاریخ شروع طرح" readonly data-time="true"
+                                                       data-alt-field="#altDateFieldStart"
+                                                       data-format="YYYY/MM/DD - HH:mm" required
+                                                       value="<?= set_value(date('Y/m/d H:i', $planVals['start_at']) ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-6">
+                                                <span class="text-danger">*</span>
+                                                <label>تاریخ پایان طرح:</label>
+                                                <input type="hidden" name="end_date" id="altDateFieldEnd">
+                                                <input type="text" class="form-control range-to"
+                                                       placeholder="تاریخ پایان طرح" readonly data-time="true"
+                                                       data-alt-field="#altDateFieldEnd"
+                                                       data-format="YYYY/MM/DD - HH:mm" required
+                                                       value="<?= set_value(date('Y/m/d H:i', $planVals['end_at']) ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-12">
-                                                <label>کلمات کلیدی:</label>
-                                                <input name="keywords" type="text"
+                                                <span class="text-danger">*</span>
+                                                <label>مخاطب طرح:</label>
+                                                <input name="audience" type="text"
                                                        class="form-control" placeholder="Press Enter"
-                                                       data-role="tagsinput"
-                                                       value="<?= set_value($atcVals['keywords'] ?? ''); ?>">
+                                                       data-role="tagsinput" required
+                                                       value="<?= set_value($planVals['contact'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-12 text-right">
-                                                <label for="catStatus">وضعیت انتشار:</label>
-                                                <input type="checkbox" name="publish" id="catStatus"
-                                                       class="switchery" <?= set_value($atcVals['publish'] ?? '', 'off', '', 'checked', '=='); ?> />
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">محل برگزاری</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
                                             </div>
-                                            <div class="row pt-20 no-padding-top">
-                                                <div class="form-group col-md-12 mt-12">
-                                                    <span class="text-danger">*</span>
-                                                    <label>متن توضیحات:</label>
-                                                    <textarea
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group col-md-12 mt-12">
+                                                <span class="text-danger">*</span>
+                                                <label>محل برگزاری:</label>
+                                                <textarea
+                                                        style="min-height: 100px; height: 120px; resize: vertical;"
+                                                        class="form-control"
+                                                        placeholder="محل برگزاری"
+                                                        name="place" required
+                                                        rows="10"><?= set_value($planVals['place'] ?? ''); ?></textarea>
+                                            </div>
+                                            <div class="form-group col-lg-12">
+                                                <span class="text-danger">*</span>
+                                                <label>شماره‌های پشتیبانی:</label>
+                                                <input name="support_phone" type="text"
+                                                       class="form-control" placeholder="Press Enter"
+                                                       data-role="tagsinput" required
+                                                       value="<?= set_value($planVals['support_phone'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-md-12 mt-12">
+                                                <label>مکان پشتیبانی:</label>
+                                                <textarea
+                                                        style="min-height: 100px; height: 120px; resize: vertical;"
+                                                        class="form-control"
+                                                        placeholder="مکان پشتیبانی"
+                                                        name="support_place"
+                                                        rows="10"><?= set_value($planVals['support_place'] ?? ''); ?></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">قوانین طرح</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mt-12">
+                                                <textarea
                                                         id="cntEditor"
                                                         class="form-control"
-                                                        name="body"
-                                                        rows="10"><?= set_value($atcVals['body'] ?? ''); ?></textarea>
+                                                        placeholder="سوال"
+                                                        name="rules"
+                                                        rows="10"><?= set_value($planVals['rules'] ?? ''); ?></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">گالری تصاویر</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body slide-items">
+                                            <div class="col-sm-12 mb-20 text-left">
+                                                <div class="display-inline-block alert alert-primary
+                                                no-border-right no-border-top no-border-bottom border-lg p-10 no-margin-bottom"
+                                                     style="width: calc(100% - 50px);">
+                                                    انتخاب حداقل یک تصویر اجباری است
+                                                </div>
+                                                <a href="javascript:void(0);"
+                                                   class="btn btn-primary btn-icon add-slide-image ml-5"
+                                                   title="اضافه کردن تصویر جدید" data-popup="tooltip">
+                                                    <i class="icon-plus2" aria-hidden="true"></i>
+                                                </a>
+                                            </div>
+
+                                            <?php if (@count($planVals['image_gallery'])): ?>
+                                                <?php foreach ($planVals['image_gallery'] as $key => $img): ?>
+                                                    <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                        <div class="cursor-pointer pick-file border border-lg border-default"
+                                                             data-toggle="modal"
+                                                             data-target="#modal_full"
+                                                             style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                            <input class="image-file" type="hidden"
+                                                                   name="image_gallery[]"
+                                                                   value="<?= set_value($img ?? ''); ?>">
+                                                            <div class="media stack-media-on-mobile">
+                                                                <div class="media-left">
+                                                                    <div class="thumb">
+                                                                        <a class="display-inline-block"
+                                                                           style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                            <img
+                                                                                    src="<?= set_value($img ?? '', '', base_url($img ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                                    class="img-rounded" alt=""
+                                                                                    style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                    data-base-url="<?= base_url(); ?>">
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body">
+                                                                    <h6 class="media-heading">
+                                                                        <a class="io-image-lbl text-grey-300">
+                                                                            انتخاب تصویر <?= ($key + 1); ?>
+                                                                        </a>
+                                                                        <a class="io-image-name display-block">
+                                                                            <?= basename($img); ?>
+                                                                        </a>
+                                                                    </h6>
+                                                                </div>
+                                                                <?php if ($key == 0): ?>
+                                                                    <small class="clear-img-val">&times;</small>
+                                                                <?php else: ?>
+                                                                    <small class="delete-new-image btn btn-danger">
+                                                                        &times;
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                    <div class="cursor-pointer pick-file border border-lg border-default"
+                                                         data-toggle="modal"
+                                                         data-target="#modal_full"
+                                                         style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                        <input class="image-file" type="hidden"
+                                                               name="image_gallery[]"
+                                                               value="">
+                                                        <div class="media stack-media-on-mobile">
+                                                            <div class="media-left">
+                                                                <div class="thumb">
+                                                                    <a class="display-inline-block"
+                                                                       style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                        <img
+                                                                                src="<?= asset_url('be/images/placeholder.jpg'); ?>"
+                                                                                class="img-rounded" alt=""
+                                                                                style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                data-base-url="<?= base_url(); ?>">
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading">
+                                                                    <a class="io-image-lbl text-grey-300">
+                                                                        انتخاب تصویر 1
+                                                                    </a>
+                                                                    <a class="io-image-name display-block">
+                                                                    </a>
+                                                                </h6>
+                                                            </div>
+                                                            <small class="clear-img-val">&times;</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">آپشن‌های طرح</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="help-block alert alert-info no-border-right no-border-top no-border-bottom border-lg p-10">
+                                                    <h5>
+                                                        توجه:
+                                                    </h5>
+                                                    <p>
+                                                        <i class="icon-dash" aria-hidden="true"></i>
+                                                        برای افزودن گروه‌بندی جدید، دکمه
+                                                        <span class="text-success-600">
+                                                            سبز رنگ
+                                                        </span>
+                                                        را فشار دهید.
+                                                    </p>
+                                                    <p>
+                                                        <i class="icon-dash" aria-hidden="true"></i>
+                                                        همچنین برای افزودن آپشن جدید، دکمه
+                                                        <span class="text-blue">
+                                                            آبی رنگ
+                                                        </span>
+                                                        در هر آپشن را فشار دهید.
+                                                    </p>
                                                 </div>
                                             </div>
 
-                                            <div class="text-right col-md-12 mt-20">
-                                                <a href="<?= base_url('admin/manageArticle'); ?>"
-                                                   class="btn btn-default mr-5">
-                                                    بازگشت
-                                                </a>
-                                                <button type="submit" class="btn btn-primary submit-button">
-                                                    ویرایش
-                                                    <i class="icon-arrow-left12 position-right"></i>
-                                                </button>
+                                            <div class="property-items">
+                                                <?php if (@count($planVals['options'])): ?>
+                                                    <?php foreach ($planVals['options'] as $k => $val): ?>
+                                                        <div class="col-md-12 form-group position-relative property-item
+                                                        border border-dashed border-default border-radius p-20 mt-10">
+                                                            <div class="property-operation-container"
+                                                                 style="top: -15px; left: -15px;">
+                                                                <?php if ($k == 0): ?>
+                                                                    <a href="javascript:void(0);"
+                                                                       title="افزودن گروه‌بندی"
+                                                                       class="btn bg-success-400 btn-icon btn-rounded shadow-depth1
+                                                                          property-operation-add no-margin">
+                                                                        <i class="icon-plus2" aria-hidden="true"></i>
+                                                                    </a>
+                                                                <?php else: ?>
+                                                                    <a href="javascript:void(0);" title="حذف گروه‌بندی"
+                                                                       class="btn btn-danger btn-icon btn-rounded shadow-depth1
+                                                                          property-operation-delete no-margin">
+                                                                        <i class="icon-trash" aria-hidden="true"></i>
+                                                                    </a>
+                                                                <?php endif; ?>
+                                                            </div>
+
+                                                            <div class="row position-relative mb-20">
+                                                                <div class="form-group col-xs-6 col-sm-6 mt-12">
+                                                                    <label>عنوان گروه:</label>
+                                                                    <input type="text"
+                                                                           name="option_group[<?= $k; ?>][title]"
+                                                                           class="form-control p-item-input"
+                                                                           value="<?= set_value($val['title'] ?? ''); ?>">
+                                                                </div>
+                                                                <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                                    <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    چند انتخابی
+                                                                </span>
+                                                                        <input type="radio" class="" checked="checked"
+                                                                               name="option_group[<?= $k; ?>][radio]"
+                                                                               value="1"
+                                                                            <?= set_value($val['radio'] ?? '', '1', 'checked', '', '=='); ?>>
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                                    <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    تک انتخابی
+                                                                </span>
+                                                                        <input type="radio" class=""
+                                                                               name="option_group[<?= $k; ?>][radio]"
+                                                                               value="2"
+                                                                            <?= set_value($val['radio'] ?? '', '2', 'checked', '', '=='); ?>>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
+                                                            <?php foreach ($val['name'] as $k2 => $v): ?>
+                                                                <div class="row position-relative property-each-item"
+                                                                     style="padding-left: 40px;">
+                                                                    <div class="col-xs-12"></div>
+                                                                    <div class="form-group col-xs-4 mt-12">
+                                                                        <label>نام آپشن:</label>
+                                                                        <input type="text"
+                                                                               name="option_group[<?= $k; ?>][name][]"
+                                                                               class="form-control p-item-input"
+                                                                               value="<?= set_value($v ?? ''); ?>">
+                                                                    </div>
+                                                                    <div class="form-group col-xs-4 mt-12">
+                                                                        <label>توضیحات:</label>
+                                                                        <input type="text"
+                                                                               name="option_group[<?= $k; ?>][desc][]"
+                                                                               class="form-control p-item-input"
+                                                                               value="<?= set_value($val['desc'][$k2] ?? ''); ?>">
+                                                                    </div>
+                                                                    <div class="form-group col-xs-4 mt-12">
+                                                                        <label>قیمت آپشن:</label>
+                                                                        <input type="text"
+                                                                               name="option_group[<?= $k; ?>][price][]"
+                                                                               class="form-control p-item-input"
+                                                                               value="<?= set_value($val['price'][$k2] ?? ''); ?>">
+                                                                    </div>
+
+                                                                    <div class="property-operation-container">
+                                                                        <?php if ($k2 == 0): ?>
+                                                                            <a href="javascript:void(0);"
+                                                                               title="آپشن جدید"
+                                                                               class="btn bg-blue btn-icon shadow-depth1 property-operation-add">
+                                                                                <i class="icon-plus2"
+                                                                                   aria-hidden="true"></i>
+                                                                            </a>
+                                                                        <?php else: ?>
+                                                                            <a href="javascript:void(0);"
+                                                                               title="حذف آپشن"
+                                                                               class="btn btn-default btn-icon shadow-depth1 property-operation-delete">
+                                                                                <i class="icon-trash"
+                                                                                   aria-hidden="true"></i>
+                                                                            </a>
+                                                                        <?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+
+                                                            <div class="clearfix"></div>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                <?php else: ?>
+                                                    <div class="col-md-12 form-group position-relative property-item
+                                                        border border-dashed border-default border-radius p-20 mt-10">
+                                                        <div class="property-operation-container"
+                                                             style="top: -15px; left: -15px;">
+                                                            <a href="javascript:void(0);"
+                                                               title="افزودن گروه‌بندی"
+                                                               class="btn bg-success-400 btn-icon btn-rounded shadow-depth1
+                                                                          property-operation-add no-margin">
+                                                                <i class="icon-plus2" aria-hidden="true"></i>
+                                                            </a>
+                                                        </div>
+
+                                                        <div class="row position-relative mb-20">
+                                                            <div class="form-group col-xs-6 col-sm-6 mt-12">
+                                                                <label>عنوان گروه:</label>
+                                                                <input type="text" name="option_group[0][title]"
+                                                                       class="form-control p-item-input">
+                                                            </div>
+                                                            <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                                <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    چند انتخابی
+                                                                </span>
+                                                                    <input type="radio" class="" checked="checked"
+                                                                           name="option_group[0][radio]" value="1">
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
+                                                                <label class="form-check-label ltr">
+                                                                <span class="rtl text-indigo">
+                                                                    تک انتخابی
+                                                                </span>
+                                                                    <input type="radio" class=""
+                                                                           name="option_group[0][radio]" value="2">
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row position-relative property-each-item"
+                                                             style="padding-left: 40px;">
+                                                            <div class="col-xs-12"></div>
+                                                            <div class="form-group col-xs-4 mt-12">
+                                                                <label>نام آپشن:</label>
+                                                                <input type="text" name="option_group[0][name][]"
+                                                                       class="form-control p-item-input">
+                                                            </div>
+                                                            <div class="form-group col-xs-4 mt-12">
+                                                                <label>توضیحات:</label>
+                                                                <input type="text" name="option_group[0][desc][]"
+                                                                       class="form-control p-item-input">
+                                                            </div>
+                                                            <div class="form-group col-xs-4 mt-12">
+                                                                <label>قیمت آپشن:</label>
+                                                                <input type="text" name="option_group[0][price][]"
+                                                                       class="form-control p-item-input">
+                                                            </div>
+
+                                                            <div class="property-operation-container">
+                                                                <a href="javascript:void(0);"
+                                                                   title="آپشن جدید"
+                                                                   class="btn bg-blue btn-icon shadow-depth1 property-operation-add">
+                                                                    <i class="icon-plus2"
+                                                                       aria-hidden="true"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="clearfix"></div>
+                                                    </div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <button type="submit"
+                                                class="col-xs-12 col-sm-6 col-sm-push-6 btn btn-primary submit-button pt-15 pb-15 no-border-radius-left">
+                                            افزودن طرح
+                                            <i class="icon-arrow-left12 position-right"></i>
+                                        </button>
+                                        <a href="<?= base_url('admin/managePlan'); ?>"
+                                           class="col-xs-12 col-sm-6 col-sm-pull-6 btn btn-default bg-white submit-button pt-15 pb-15 no-border-radius-right">
+                                            بازگشت
+                                        </a>
                                     </div>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
+
+                <!-- Standard width modal -->
+                <?php $this->view('templates/be/file-picker', $data) ?>
+                <!-- /standard width modal -->
 
                 <!-- Footer -->
                 <?php $this->view("templates/be/copyright", $data); ?>

@@ -20,6 +20,12 @@ defined('ASSURED_KEY') OR define('ASSURED_KEY','EZ44mFi3TlAey1b2w4Y7lVDuqO+SRxGX
 
 //===============================================
 
+// My custom plan status
+defined('PLAN_STATUS_ACTIVATE') OR define('PLAN_STATUS_ACTIVATE', 1);
+defined('PLAN_STATUS_DEACTIVATE') OR define('PLAN_STATUS_DEACTIVATE', 2);
+defined('PLAN_STATUS_FULL') OR define('PLAN_STATUS_FULL', 3);
+defined('PLAN_STATUS_CLOSED') OR define('PLAN_STATUS_CLOSED', 4);
+
 // My custom payment status
 defined('OWN_PAYMENT_STATUS_SUCCESSFUL') OR define('OWN_PAYMENT_STATUS_SUCCESSFUL', 1);
 defined('OWN_PAYMENT_STATUS_FAILED') OR define('OWN_PAYMENT_STATUS_FAILED', 0);

@@ -1423,42 +1423,131 @@ class AdminController extends HController
 
         $model = new Model();
 
-        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name']);
-
         $this->data['errors'] = [];
         $this->data['planVals'] = [];
 
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
-            ->setDefaults('publish', 'off')
-            ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
-            ->setMethod('post', [], ['publish']);
+        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->setMethod('post');
 
         try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
+                    , 'فیلدهای ضروری را خالی نگذارید.');
 
-                if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
-                    $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
+                // Check plan duplicate
+                if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
+                    $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
                 }
-                if (!in_array($values['category'], array_column($this->data['categories'], 'id'))) {
-                    $form->setError('دسته‌بندی نامعتبر است.');
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
                 }
+                // Validate capacity
+                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
+                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
+                // Validate prices
+                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['base_price'] < (int)$values['min_price']) {
+                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                }
+                // Validate date timestamps
+                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
+                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
+                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
+                } else {
+                    if ($values['start_date'] > $values['end_date']) {
+                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                    if ($values['active_date'] > $values['deactive_date']) {
+                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                }
+                // Validate image gallery
+                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
+                if (!count($values['image_gallery'])) {
+                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
+                }
+                // Validate options structure
+                $values['option_group'] = $_POST['option_group'] ?? [];
+                $newOpt = [];
+                $k = 0;
+                if (is_array($values['option_group'])) {
+                    foreach ($values['option_group'] as $key => $value) {
+                        if (is_array($value)) {
+                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
+                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                                $newOpt[$k]['title'] = $value['title'];
+                                $newOpt[$k]['radio'] = $value['radio'];
+                                foreach ($value['name'] as $idx => $name) {
+                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
+                                        !empty($value['name'][$idx])) {
+                                        $newOpt[$k]['name'][] = $value['name'][$idx];
+                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
+                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                                ? convertNumbersToPersian($value['price'][$idx], true)
+                                                : 0)
+                                            : '';
+                                    }
+                                }
+                                // If there is no name values
+                                if (!isset($newOpt[$k]['name'])) {
+                                    unset($newOpt[$k]);
+                                    --$k;
+                                }
+                                // Default behavior
+                                ++$k;
+                            }
+                        }
+                    }
+                }
+                $values['option_group'] = $newOpt; // Assign new option groups
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('articles', [
-                    'title' => trim($values['title']),
-                    'body' => $values['body'],
-                    'category_id' => $values['category'],
-                    'writer' => $this->data['identity']->username,
-                    'updater' => null,
-                    'keywords' => $values['keywords'],
-                    'publish' => $form->isChecked('publish') ? 1 : 0,
-                    'created_at' => time(),
-                ]);
+                $model->transactionBegin();
 
-                if (!$res) {
+                $res = $model->insert_it('plans', [
+                    'title' => trim($values['title']),
+                    'slug' => trim(url_title($values['title'])),
+                    'contact' => trim($values['audience']),
+                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
+                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
+                    'image' => trim($values['image']),
+                    'rules' => trim($values['rules']),
+                    'start_at' => convertNumbersToPersian($values['start_date'], true),
+                    'end_at' => convertNumbersToPersian($values['end_date'], true),
+                    'active_at' => convertNumbersToPersian($values['active_date'], true),
+                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
+                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
+                    'support_phone' => trim($values['support_phone']),
+                    'place' => trim($values['place']),
+                    'options' => json_encode($values['option_group']),
+                    'status' => PLAN_STATUS_DEACTIVATE,
+                ], [], true);
+
+                // Insert images to gallery table
+                $res2 = false;
+                foreach ($values['image_gallery'] as $img) {
+                    $res2 = $model->insert_it('plan_images', [
+                        'plan_id' => $res,
+                        'image' => $img,
+                    ]);
+                    if (!$res2) break;
+                }
+
+                if ($res && $res2) {
+                    $model->transactionComplete();
+                } else {
+                    $model->transactionRollback();
                     $form->setError('خطا در انجام عملیات!');
                 }
             });
@@ -1507,10 +1596,221 @@ class AdminController extends HController
 
     public function editPlanAction($param)
     {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
 
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/managePlan'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+        $this->data['planVals'] = $model->select_it(null, 'plans', ['title'], 'id=:id', ['id' => $param[0]])[0];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addPlan');
+        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->setMethod('post');
+
+        try {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
+                    , 'فیلدهای ضروری را خالی نگذارید.');
+
+                // Check plan duplicate
+                if ($this->data['planVals']['title'] != $values['title']) {
+                    if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
+                        $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
+                    }
+                }
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
+                }
+                // Validate capacity
+                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
+                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
+                // Validate prices
+                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['base_price'] < (int)$values['min_price']) {
+                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                }
+                // Validate date timestamps
+                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
+                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
+                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
+                } else {
+                    if ($values['start_date'] > $values['end_date']) {
+                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                    if ($values['active_date'] > $values['deactive_date']) {
+                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                }
+                // Validate image gallery
+                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
+                if (!count($values['image_gallery'])) {
+                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
+                }
+                // Validate options structure
+                $values['option_group'] = $_POST['option_group'] ?? [];
+                $newOpt = [];
+                $k = 0;
+                if (is_array($values['option_group'])) {
+                    foreach ($values['option_group'] as $key => $value) {
+                        if (is_array($value)) {
+                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
+                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                                $newOpt[$k]['title'] = $value['title'];
+                                $newOpt[$k]['radio'] = $value['radio'];
+                                foreach ($value['name'] as $idx => $name) {
+                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
+                                        !empty($value['name'][$idx])) {
+                                        $newOpt[$k]['name'][] = $value['name'][$idx];
+                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
+                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                                ? convertNumbersToPersian($value['price'][$idx], true)
+                                                : 0)
+                                            : '';
+                                    }
+                                }
+                                // If there is no name values
+                                if (!isset($newOpt[$k]['name'])) {
+                                    unset($newOpt[$k]);
+                                    --$k;
+                                }
+                                // Default behavior
+                                ++$k;
+                            }
+                        }
+                    }
+                }
+                $values['option_group'] = $newOpt; // Assign new option groups
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $model->transactionBegin();
+
+                $res = $model->update_it('plans', [
+                    'title' => trim($values['title']),
+                    'slug' => trim(url_title($values['title'])),
+                    'contact' => trim($values['audience']),
+                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
+                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
+                    'image' => trim($values['image']),
+                    'rules' => trim($values['rules']),
+                    'start_at' => convertNumbersToPersian($values['start_date'], true),
+                    'end_at' => convertNumbersToPersian($values['end_date'], true),
+                    'active_at' => convertNumbersToPersian($values['active_date'], true),
+                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
+                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
+                    'support_phone' => trim($values['support_phone']),
+                    'place' => trim($values['place']),
+                    'options' => json_encode($values['option_group']),
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                // Delete previous gallery images
+                $res3 = $model->delete_it('plan_images', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
+                // Insert images to gallery table
+                $res2 = false;
+                foreach ($values['image_gallery'] as $img) {
+                    $res2 = $model->insert_it('plan_images', [
+                        'plan_id' => $this->data['param'][0],
+                        'image' => $img,
+                    ]);
+                    if (!$res2) break;
+                }
+
+                if ($res && $res2 && $res3) {
+                    $model->transactionComplete();
+                } else {
+                    $model->transactionRollback();
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['planVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['planVals'] = $model->select_it(null, 'plans', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
+        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=pId', ['pId' => $param[0]]), 'image');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش طرح');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
+        $this->_render_page([
+            'pages/be/Plan/editPlan',
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
+        ]);
     }
 
     public function managePlanAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['plans'] = $model->select_it(null, 'plans');
+        foreach ($this->data['plans'] as &$plan) {
+            $plan['filled'] = $model->it_count('factors', 'plan_id=:pId', ['pId' => $plan['id']]);
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده طرح‌ها');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Plan/managePlan');
+    }
+
+    public function detailPlanAction($param)
     {
 
     }
@@ -1979,8 +2279,6 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name', 'level'],
-            'level!=:lvl', ['lvl' => 0], null, 'level ASC');
 
         $this->load->library('HForm/Form');
 

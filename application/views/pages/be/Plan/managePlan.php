@@ -21,7 +21,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                class="text-semibold">نوشته‌ها</span>
+                                    class="text-semibold">مدیریت طرح‌ها</span>
                         </h5>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                                 داشبورد
                             </a>
                         </li>
-                        <li class="active">نوشته‌ها</li>
+                        <li class="active">طرح‌ها</li>
                     </ul>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                             <div class="col-sm-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
-                                        <h6 class="panel-title">نوشته‌ها</h6>
+                                        <h6 class="panel-title">طرح‌ها</h6>
                                         <div class="heading-elements">
                                             <ul class="icons-list">
                                                 <li><a data-action="collapse"></a></li>
@@ -60,35 +60,93 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>عنوان نوشته</th>
+                                                    <th>تصویر</th>
+                                                    <th>عنوان</th>
+                                                    <th>تاریخ شروع طرح</th>
+                                                    <th>تاریخ پایان طرح</th>
+                                                    <th>پر شده / ظرفیت کل</th>
+                                                    <th>هزینه طرح</th>
+                                                    <th>وضعیت</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 <!-- Load categories data -->
-                                                <?php foreach ($articles as $key => $article): ?>
+                                                <?php foreach ($plans as $key => $plan): ?>
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
-                                                        <td>
-                                                            <a href="<?= base_url('article/' . $article['title']); ?>">
-                                                                <?= $article['title']; ?>
+                                                        <td width="100px">
+                                                            <a data-url="<?= base_url() . $plan['image']; ?>"
+                                                               data-popup="lightbox">
+                                                                <img src=""
+                                                                     data-src="<?= base_url() . $plan['image']; ?>"
+                                                                     alt="<?= $plan['title']; ?>"
+                                                                     class="img-rounded img-preview lazy">
                                                             </a>
                                                         </td>
+                                                        <td>
+                                                            <a href="<?= base_url('plan/' . $plan['title']); ?>">
+                                                                <?= $plan['title']; ?>
+                                                            </a>
+                                                        </td>
+
+                                                        <?php
+                                                        $dateType = 'warning';
+                                                        if ($plan['start_at'] >= time() && $plan['end_at'] <= time()) {
+                                                            $dateType = 'success';
+                                                        }
+                                                        ?>
+                                                        <td class="<?= $dateType; ?>">
+                                                            <?= jDateTime::date('Y/m/d - H:i', $plan['start_at']); ?>
+                                                        </td>
+                                                        <td class="<?= $dateType; ?>">
+                                                            <?= jDateTime::date('Y/m/d - H:i', $plan['end_at']); ?>
+                                                        </td>
+
+                                                        <td class="info">
+                                                            <?= $plan['filled']; ?> / <?= $plan['capacity']; ?>
+                                                        </td>
+                                                        <td>
+                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['base_price'], true))); ?>
+                                                        </td>
+                                                        <td>
+                                                            <?php switch ($plan['status']):
+                                                                case PLAN_STATUS_ACTIVATE: ?>
+
+                                                                    <?php break; ?>
+                                                                <?php case PLAN_STATUS_DEACTIVATE: ?>
+
+                                                                    <?php break; ?>
+                                                                <?php case PLAN_STATUS_FULL: ?>
+
+                                                                    <?php break; ?>
+                                                                <?php case PLAN_STATUS_CLOSED: ?>
+
+                                                                    <?php break; ?>
+                                                                <?php endswitch; ?>
+                                                        </td>
+
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
+                                                                <li class="text-black">
+                                                                    <a href="<?= base_url(); ?>admin/detailPlan/<?= $plan['id']; ?>"
+                                                                       title="جزئیات" data-popup="tooltip">
+                                                                        <i class="icon-eye"></i>
+                                                                    </a>
+                                                                </li>
                                                                 <li class="text-primary-600">
-                                                                    <a href="<?= base_url(); ?>admin/editArticle/<?= $article['id']; ?>"
+                                                                    <a href="<?= base_url(); ?>admin/editPlan/<?= $plan['id']; ?>"
                                                                        title="ویرایش" data-popup="tooltip">
                                                                         <i class="icon-pencil7"></i>
                                                                     </a>
                                                                 </li>
                                                                 <li class="text-danger-600">
-                                                                    <a class="deleteStaticPageBtn"
+                                                                    <a class="deletePlanBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
-                                                                               value="<?= $article['id']; ?>">
+                                                                               value="<?= $plan['id']; ?>">
                                                                         <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>
