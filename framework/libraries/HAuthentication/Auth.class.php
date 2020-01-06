@@ -143,11 +143,13 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
      * @param $password
      * @param bool $remember
      * @param bool $checkAdminRoles
+     * @param string $extraWhere
+     * @param array $extraParams
      * @return array|Auth
      *
      * @throws HAException
      */
-    public function login($username, $password, $remember = false, $checkAdminRoles = false)
+    public function login($username, $password, $remember = false, $checkAdminRoles = false, $extraWhere = '', $extraParams = [])
     {
         if (!$remember) {
             $this->storageType = self::session;
@@ -157,8 +159,12 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
         $this->_removeStoredStorageType();
         $this->_storeStorageType();
 
+        $extraWhere = is_string($extraWhere) ? $extraWhere : '';
+        $extraParams = is_array($extraParams) ? $extraParams : [];
+
         $row = $this->getDataFromDB($this->authData->tables->user, '*',
-            "{$this->authData->columns->user->username->column}=:username", ['username' => $username]);
+            "{$this->authData->columns->user->username->column}=:username AND (" . $extraWhere . ")",
+            array_merge(['username' => $username], $extraParams));
 
         if (!count($row)) {
             return ['err' => 'نام کاربری یا کلمه عبور اشتباه است.'];
@@ -248,7 +254,7 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
         if ($id) {
             try {
                 $user = $this->_fetchUser($id->id);
-                if(count($user)) {
+                if (count($user)) {
                     return true;
                 }
                 return false;

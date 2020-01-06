@@ -74,7 +74,8 @@ class AdminController extends HController
             ->setMethod('post', [], ['remember']);
         try {
             $form->afterCheckCallback(function ($values) use ($model, $form) {
-                $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'), true);
+                $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'), true,
+                    'active=:active', ['active' => 1]);
                 if (is_array($login)) {
                     $form->setError($login['err']);
                 }
@@ -169,7 +170,12 @@ class AdminController extends HController
         $this->data['errors'] = [];
         $this->data['userVals'] = [];
 
-        $this->data['userVals'] = $model->select_it(null, 'users', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
+            '*', 'u.id=r.user_id',
+            'u.id=:id', [
+                'id' => $param[0],
+            ], null, 'u.id DESC', null, null, false, 'LEFT')[0];
+
         $this->data['roles'] = $model->select_it(null, 'roles', '*', 'id>:id AND id!=:id2', ['id' => $this->data['identity']->role_id, 'id2' => AUTH_ROLE_GUEST]);
 
         $this->load->library('HForm/Form');
@@ -234,9 +240,8 @@ class AdminController extends HController
             }
         }
 
-        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS ur', [
-            'u.id', 'u.username', 'full_name', 'ur.role_id'
-        ], 'u.id=ur.user_id', 'u.id=:id', ['id' => $param[0]]);
+        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS ur',
+            '*', 'u.id=ur.user_id', 'u.id=:id', ['id' => $param[0]]);
         if (!count($this->data['userVals'])) {
             $this->data['errors'][] = 'خطا در یافتن کاربر';
         } else {

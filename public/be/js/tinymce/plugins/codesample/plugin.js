@@ -1320,7 +1320,7 @@ define(
             href: contentCss ? contentCss : pluginUrl + '/css/prism.css'
           });
 
-          editor.getDoc().getElementsByTagName('home-header-part.php.php')[0].appendChild(linkElm);
+          editor.getDoc().getElementsByTagName('head')[0].appendChild(linkElm);
         }
       }
 
