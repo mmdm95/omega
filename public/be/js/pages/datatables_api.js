@@ -66,7 +66,7 @@ $(function() {
     var table = $('.datatable-column-search-inputs').DataTable();
     table.columns().every( function () {
         var that = this;
-        $('input', this.home()).on('keyup change', function () {
+        $('input', this.footer()).on('keyup change', function () {
             that.search(this.value).draw();
         });
     });
@@ -78,7 +78,7 @@ $(function() {
             this.api().columns().every( function() {
                 var column = this;
                 var select = $('<select class="filter-select" data-placeholder="Filter"><option value=""></option></select>')
-                    .appendTo($(column.home()).not(':last-child').empty())
+                    .appendTo($(column.footer()).not(':last-child').empty())
                     .on('change', function() {
                         var val = $.fn.dataTable.util.escapeRegex(
                             $(this).val()
