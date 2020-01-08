@@ -2,8 +2,11 @@
     <div class="menu-fullwidth">
         <div class="logo-wrapper order-lg-0 order-sm-1">
             <div class="logo logo-top">
-                <a href="index.php"><img src="<?= asset_url('fe/images/omega-logo-S.png') ?>" alt="logo image"
-                                         class="img-fluid"></a>
+                <a href="<?= base_url('index'); ?>">
+                    <img src="<?= $logo; ?>"
+                         alt="<?= $setting['main']['title'] ?? ''; ?>"
+                         class="img-fluid">
+                </a>
             </div>
         </div><!-- ends: .logo-wrapper -->
         <div class="menu-container order-lg-1 order-sm-0">
@@ -13,37 +16,22 @@
                             data-target="#direo-navbar-collapse"
                             aria-controls="direo-navbar-collapse" aria-expanded="false"
                             aria-label="Toggle navigation">
-                                                <span class="navbar-toggler-icon icon-menu"><i
-                                                            class="la la-reorder"></i></span>
+                        <span class="navbar-toggler-icon icon-menu">
+                            <i class="la la-reorder"></i>
+                        </span>
                     </button>
                     <!-- Collect the nav links, forms, and other content for toggling -->
                     <div class="collapse navbar-collapse" id="direo-navbar-collapse">
                         <ul class="navbar-nav">
                             <li>
-                                <a href="index.php">صفحه اصلی</a>
+                                <a href="<?= base_url('index'); ?>">صفحه اصلی</a>
                             </li>
                             <li>
-                                <a href="allEvents">طرح‌ها</a>
+                                <a href="<?= base_url('events'); ?>">طرح‌ها</a>
                             </li>
-
                             <li>
-                                <a href="index.php">اخبار و اطلاعیه‌ها</a>
+                                <a href="<?= base_url('articles'); ?>">اخبار و اطلاعیه‌ها</a>
                             </li>
-
-                            <li>
-                                <a href="index.php">فایل‌های آموزشی</a>
-                            </li>
-<!--                            <li class="dropdown has_dropdown">-->
-<!--                                <a href="#" class="dropdown-toggle" id="drop3" role="button"-->
-<!--                                   data-toggle="dropdown" aria-haspopup="true"-->
-<!--                                   aria-expanded="false">طرح‌ها</a>-->
-<!--                                <ul class="dropdown-menu" aria-labelledby="drop3">-->
-<!--                                    <li><a href="all-listings-grid.html">Listing Grid</a></li>-->
-<!--                                    <li><a href="all-listings-list.html">Listing List</a></li>-->
-<!--                                    <li><a href="listing-details.html">Listing Details</a></li>-->
-<!--                                    <li><a href="add-listing.html">Add Listing</a></li>-->
-<!--                                </ul>-->
-<!--                            </li>-->
                         </ul>
                     </div>
                     <!-- /.navbar-collapse -->
@@ -56,16 +44,17 @@
                 <div class="author__access_area">
                     <ul class="d-flex list-unstyled align-items-center">
                         <li>
-                            <a href="" class="access-link"
+                            <a href="javascript:void(0);" class="access-link"
                                data-toggle="modal"
                                data-target="#login_modal">ورود</a>
                         </li>
                         <li>
-                            <a href=""
+                            <a href="javascript:void(0);"
                                data-toggle="modal"
                                data-target="#signup_modal"
                                class="btn btn-xs btn-gradient btn-gradient-two">
-                                <i class="la la-user"></i>ثبت نام
+                                <i class="la la-user mr-1"></i>
+                                ثبت نام
                             </a>
                         </li>
 

@@ -1,10 +1,10 @@
 <?php
+defined('BASE_PATH') OR exit('No direct script access allowed');
 
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 use HForm\Form;
 
-defined('BASE_PATH') OR exit('No direct script access allowed');
 
 class HomeController extends HController
 {
@@ -30,11 +30,11 @@ class HomeController extends HController
         }
 
         // Load file helper .e.g: read_json, etc.
-//        $this->load->helper('file');
+        $this->load->helper('file');
 
         if (!is_ajax()) {
             // Read settings once
-//            $this->setting = read_json(CORE_PATH . 'config.json');
+            $this->setting = read_json(CORE_PATH . 'config.json');
             $this->data['setting'] = $this->setting;
         }
 
@@ -49,7 +49,6 @@ class HomeController extends HController
         }
 
         $this->data['form_token_register'] = $form->csrfToken('register');
-
     }
 
     public function indexAction()
@@ -77,7 +76,7 @@ class HomeController extends HController
         $form->setFieldsName(['mobile', 'password', 're_password', 'role'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['mobile', 'password' , 're_password'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['mobile', 'password', 're_password'], 'فیلدهای ضروری را خالی نگذارید.');
                 if ($model->is_exist('users', 'username=:name AND active=:a',
                     ['name' => $values['mobile'], 'a' => 1])) {
                     $form->setError('این شماره تلفن وجود دارد. لطفا دوباره تلاش کنید.');
@@ -135,7 +134,7 @@ class HomeController extends HController
 
     }
 
-    public function allEventsAction()
+    public function eventsAction()
     {
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
 

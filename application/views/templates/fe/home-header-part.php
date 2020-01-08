@@ -1,11 +1,19 @@
+<?php defined('BASE_PATH') OR exit('No direct script access allowed'); ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= LANGUAGE; ?>">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title><?= $title; ?></title>
+
+    <link rel="apple-touch-icon" sizes="76x76" href="<?= $favIcon ?? ''; ?>">
+    <link rel="icon" type="image/png" href="<?= $favIcon ?? ''; ?>">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no'
+          name='viewport' />
+
+    <title><?= $title ?? ''; ?></title>
+
     <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,600,700" rel="stylesheet">
     <!-- inject:css-->
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/bootstrap/bootstrap-rtl.css">
@@ -20,6 +28,19 @@
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/slick.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/style-rtl.css">
     <!-- endinject -->
-    <link rel="icon" type="image/png" sizes="32x32" href="<?= asset_url(); ?>fe/img/fevicon.png">
+
+    <!-- plugin css for this page -->
+    <?php if (isset($css) && is_array(@$css) && count(@$css) > 0): ?>
+        <?php foreach (@$css as $css): ?>
+            <?= $css; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+    <!-- End plugin css for this page -->
 </head>
 <body class="rtl">
+<script>
+    var baseUrl = '<?= base_url(); ?>';
+    var siteLogo = '<?= $logo ?? ''; ?>';
+    //-----
+    var siteAction = '<?= ACTION; ?>';
+</script>

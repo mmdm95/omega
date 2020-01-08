@@ -8,7 +8,7 @@
             case status_deactivate:
                 return 'غیر فعال';
             case status_full:
-                return 'پر شده';
+                return 'ظرفیت تکمیل';
             case status_closed:
                 return 'بسته شده';
         }

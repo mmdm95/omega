@@ -55,16 +55,14 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="footer-bottom--content">
-<!--                        <a href="" class="footer-logo"><img src="img/logo.png" alt=""></a>-->
                         <p class="m-0 copy-text">
-                            ©2019 امگا. طراحی و توسعه توسط
+                            ©
+                            <?= convertNumbersToPersian(date('Y')); ?>
+                            امگا. طراحی و توسعه توسط
                             <a href="">
                                     هیوا
                             </a>
                         </p>
-<!--                        <ul class="list-unstyled lng-list">-->
-<!--                            <li><a href="">English</a></li>-->
-<!--                        </ul>-->
                     </div>
                 </div>
             </div>

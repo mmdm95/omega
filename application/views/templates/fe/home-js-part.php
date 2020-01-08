@@ -17,3 +17,11 @@
 <script src="<?= asset_url(); ?>fe/js/main.js"></script>
 <script src="<?= asset_url(); ?>fe/js/map.js"></script>
 <!-- endinject-->
+
+<!-- plugins:js -->
+<?php if (isset($data['js']) && is_array(@$data['js']) && count(@$data['js']) > 0): ?>
+    <?php foreach (@$data['js'] as $js): ?>
+        <?= $js; ?>
+    <?php endforeach; ?>
+<?php endif; ?>
+<!-- endinject -->
