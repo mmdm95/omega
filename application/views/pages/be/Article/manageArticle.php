@@ -72,7 +72,7 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('article/' . $article['title']); ?>">
+                                                            <a href="<?= base_url('article/' . $article['slug']); ?>">
                                                                 <?= $article['title']; ?>
                                                             </a>
                                                         </td>

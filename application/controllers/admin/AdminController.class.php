@@ -510,6 +510,150 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
+    public function addCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        $this->data['errors'] = [];
+        $this->data['catVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addCategory');
+        $form->setFieldsName(['name', 'keywords', 'publish'])
+            ->setDefaults('publish', 'off')
+            ->setMethod('post', [], ['publish']);
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                    $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('categories', [
+                    'category_name' => trim($values['name']),
+                    'keywords' => trim($values['keywords']),
+                    'publish' => $form->isChecked('publish') ? 1 : 0
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['catVals'] = $form->getValues();
+            }
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن دسته‌بندی');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->_render_page('pages/be/Category/addCategory');
+
+    }
+
+    public function editCategoryAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('categories', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageCategory'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+        $this->data['catVals'] = $model->select_it(null, 'categories', ['category_name'], 'id=:id', ['id' => $param[0]])[0];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('editCategory');
+        $form->setFieldsName(['name', 'keywords', 'publish'])
+            ->setDefaults('status', 'off')
+            ->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($this->data['catVals']['category_name'] != $values['name']) {
+                    if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                        $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
+                    }
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('categories', [
+                    'category_name' => trim($values['name']),
+                    'keywords' => trim($values['keywords']),
+                    'publish' => $form->isChecked('publish') ? 1 : 0
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['catVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['catVals'] = $model->select_it(null, 'categories', '*', 'id=:id', ['id' => $param[0]])[0];
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['category_name']);
+
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->_render_page('pages/be/Category/editCategory');
+    }
+
+    public function manageCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, ['id ASC']);
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده دسته‌بندی‌ها');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Category/manageCategory');
+    }
+
     public function addArticleAction()
     {
         if (!$this->auth->isLoggedIn()) {
@@ -657,6 +801,7 @@ class AdminController extends HController
 
         // Extra js
         $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش نوشته');
@@ -1012,282 +1157,6 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
-    public function manageFactorAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-        $this->data['factors'] = $model->select_it(null, 'factors AS f', [
-            'f.id', 'f.factor_code', 'f.first_name', 'f.last_name', 'f.mobile', 'f.payment_title', 'f.payment_status', 'f.shipping_title',
-            'f.send_status', 'f.final_amount', 'f.want_factor', 'f.payment_date', 'f.order_date'
-        ]);
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارشات');
-
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
-
-        $this->_render_page('pages/be/Factor/manageFactor');
-    }
-
-    public function viewFactorAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('factors', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageFactor'));
-        }
-
-        // Select all send status labels
-        $this->data['allSendStatus'] = $model->select_it(null, 'send_status', '*', null, [], null, 'priority ASC');
-
-        // Select current send_status from factor
-        $sendStatus = $model->select_it(null, 'factors', 'send_status', 'id=:id', ['id' => $param[0]])[0]['send_status'];
-
-        // Submit a form for change send status code
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['errors'] = [];
-        $this->data['form_token'] = $form->csrfToken('sendStatus');
-        $form->setFieldsName(['send-status'])->setMethod('post');
-        try {
-            $form->beforeCheckCallback(function ($values) use ($form, $sendStatus) {
-                if (!in_array($values['send-status'], array_column($this->data['allSendStatus'], 'id'))) {
-                    $form->setError('وضعیت ارسال انتخاب شده نامعتبر است.');
-                }
-
-                if ($sendStatus != $values['send_status']) {
-                    // Send SMS to user to notify its factor status has changed
-
-                }
-            })->afterCheckCallback(function ($values) use ($form, $model, $param) {
-                $res = $model->update_it('factors', [
-                    'send_status' => (int)$values['send-status']
-                ], 'id=:id', ['id' => $param[0]]);
-
-                if (!$res) {
-                    $form->setError('بروزرسانی وضعیت ارسال با خطا مواجه شد.');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'وضعیت ارسال برورسانی شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['statusVals'] = $form->getValues();
-            }
-        }
-
-        // Select current factor
-        $this->data['factor'] = $model->join_it(null, 'factors AS f', 'users AS u', [
-            'f.id', 'f.factor_code', 'f.user_id', 'f.first_name', 'f.last_name', 'f.mobile', 'f.method_code', 'f.payment_title', 'f.payment_status',
-            'f.send_status', 'f.amount', 'f.shipping_title', 'f.shipping_price', 'f.final_amount', 'f.coupon_title', 'f.coupon_amount', 'f.coupon_unit',
-            'f.discount_price', 'f.shipping_address', 'f.shipping_receiver', 'f.shipping_province', 'f.shipping_city', 'f.shipping_postal_code',
-            'f.shipping_phone', 'f.want_factor', 'f.payment_date', 'f.shipping_date', 'f.order_date', 'u.id AS u_id'
-        ], 'f.user_id=u.id', 'f.id=:id', ['id' => $param[0]],
-            null, 'f.id DESC', null, null, false, 'LEFT')[0];
-        // Select current factor status label
-        $this->data['factorStatus'] = $model->select_it(null, 'send_status', ['name', 'badge'],
-            'id=:id', ['id' => $this->data['factor']['send_status']])[0];
-        // Select gateway table if gateway code is one of the bank payment gateway's code
-        foreach ($this->gatewayTables as $table => $codeArr) {
-            if (array_search($this->data['factor']['method_code'], $codeArr) !== false) {
-                $gatewayTable = $table;
-                break;
-            }
-        }
-        if (isset($gatewayTable)) {
-            $successCode = $this->gatewaySuccessCode[$gatewayTable];
-            if ($model->is_exist($gatewayTable, 'factor_code=:fc AND status=:s',
-                ['fc' => $this->data['factor']['factor_code'], 's' => $successCode])) {
-                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
-                    'factor_code=:fc AND status=:s', ['fc' => $this->data['factor']['factor_code'], 's' => $successCode],
-                    null, 'payment_date DESC');
-            } else {
-                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
-                    'factor_code=:fc', ['fc' => $this->data['factor']['factor_code']], null, 'payment_date DESC');
-            }
-            if (count($this->data['factor']['payment_info'])) {
-                $this->data['factor']['payment_info'] = $this->data['factor']['payment_info'][0];
-            } else {
-                unset($this->data['factor']['payment_info']);
-            }
-        }
-        // Select current factor item(s)
-        $this->data['factorItems'] = $model->join_it(null, 'factors_item AS fi', 'products AS p', [
-            'fi.product_color', 'fi.product_color_hex', 'fi.product_count', 'fi.product_unit_price', 'fi.product_price',
-            'p.product_title', 'p.image', 'p.product_code',
-        ], 'fi.product_code=p.product_code', 'fi.factor_code=:fc', ['fc' => $this->data['factor']['factor_code']],
-            null, 'fi.id DESC', null, null, false, 'LEFT');
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارش');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
-
-        $this->_render_page('pages/be/Factor/viewFactor');
-    }
-
-    public function addCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        $this->data['errors'] = [];
-        $this->data['catVals'] = [];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addCategory');
-        $form->setFieldsName(['name', 'keywords', 'publish'])
-            ->setDefaults('publish', 'off')
-            ->setMethod('post', [], ['publish']);
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['en_name']])) {
-                    $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('categories', [
-                    'category_name' => trim($values['name']),
-                    'keywords' => trim($values['keywords']),
-                    'publish' => $form->isChecked('publish') ? 1 : 0
-                ]);
-
-                if (!$res) {
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['catVals'] = $form->getValues();
-            }
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن دسته‌بندی');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
-        $this->_render_page('pages/be/Category/addCategory');
-
-    }
-
-    public function editCategoryAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('categories', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageCategory'));
-        }
-
-        $this->data['param'] = $param;
-
-        $this->data['errors'] = [];
-        $this->data['catVals'] = $model->select_it(null, 'categories', ['category_name'], 'id=:id', ['id' => $param[0]])[0];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editCategory');
-        $form->setFieldsName(['name', 'keywords', 'publish'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post');
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($this->data['catVals']['category_name'] != $values['name']) {
-                    if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
-                        $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
-                    }
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->update_it('categories', [
-                    'category_name' => trim($values['name']),
-                    'keywords' => trim($values['keywords']),
-                    'publish' => $form->isChecked('publish') ? 1 : 0
-                ], 'id=:id', ['id' => $this->data['param'][0]]);
-
-                if (!$res) {
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['catVals'] = $form->getValues();
-            }
-        }
-
-        $this->data['catVals'] = $model->select_it(null, 'categories', '*', 'id=:id', ['id' => $param[0]])[0];
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['en_slug']);
-
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
-        $this->_render_page('pages/be/Category/editCategory');
-    }
-
-    public function manageCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, ['id ASC']);
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده دسته‌بندی‌ها');
-
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
-
-        $this->_render_page('pages/be/Category/manageCategory');
-    }
-
     public function managePriorityAction($param)
     {
         if (!$this->auth->isLoggedIn()) {
@@ -1444,6 +1313,10 @@ class AdminController extends HController
 
         try {
             $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $values['audience'] = array_filter($values['audience'], function ($val) {
+                    return in_array($val, array_keys(EDU_GRADES));
+                });
+
                 $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
                         'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
@@ -1505,6 +1378,7 @@ class AdminController extends HController
                                                 ? convertNumbersToPersian($value['price'][$idx], true)
                                                 : 0)
                                             : '';
+                                        $newOpt[$k]['desc'][] = $value['desc'][$idx] ?? '';
                                     }
                                 }
                                 // If there is no name values
@@ -1525,7 +1399,7 @@ class AdminController extends HController
                 $res = $model->insert_it('plans', [
                     'title' => trim($values['title']),
                     'slug' => trim(url_title($values['title'])),
-                    'contact' => trim($values['audience']),
+                    'contact' => implode(',', array_map('trim', $values['audience'])),
                     'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
@@ -1629,6 +1503,10 @@ class AdminController extends HController
 
         try {
             $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $values['audience'] = array_filter($values['audience'], function ($val) {
+                    return in_array($val, array_keys(EDU_GRADES));
+                });
+
                 $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
                         'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
@@ -1692,6 +1570,7 @@ class AdminController extends HController
                                                 ? convertNumbersToPersian($value['price'][$idx], true)
                                                 : 0)
                                             : '';
+                                        $newOpt[$k]['desc'][] = $value['desc'][$idx] ?? '';
                                     }
                                 }
                                 // If there is no name values
@@ -1712,7 +1591,7 @@ class AdminController extends HController
                 $res = $model->update_it('plans', [
                     'title' => trim($values['title']),
                     'slug' => trim(url_title($values['title'])),
-                    'contact' => trim($values['audience']),
+                    'contact' => implode(',', array_map('trim', $values['audience'])),
                     'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
@@ -1763,7 +1642,8 @@ class AdminController extends HController
 
         $this->data['planVals'] = $model->select_it(null, 'plans', '*', 'id=:id', ['id' => $param[0]])[0];
         $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
-        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=pId', ['pId' => $param[0]]), 'image');
+        $this->data['planVals']['contact'] = explode(',', $this->data['planVals']['contact']);
+        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $param[0]]), 'image');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش طرح');
@@ -1801,9 +1681,11 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $this->data['plans'] = $model->select_it(null, 'plans');
+        $this->data['plans'] = $model->select_it(null, 'plans', '*', null, [], null, ['id DESC']);
         foreach ($this->data['plans'] as &$plan) {
-            $plan['filled'] = $model->it_count('factors', 'plan_id=:pId', ['pId' => $plan['id']]);
+            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId', [],
+                ['plan_id'], null, null, null, true);
+            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id']], false, true);
         }
 
         // Base configuration
@@ -1814,6 +1696,8 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
         $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/sliders/nouislider.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/planJs.js');
 
         $this->_render_page('pages/be/Plan/managePlan');
     }
@@ -1846,6 +1730,173 @@ class AdminController extends HController
         }
 
         message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function changePlanStatusAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'plans';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [PLAN_STATUS_ACTIVATE, PLAN_STATUS_DEACTIVATE, PLAN_STATUS_FULL, PLAN_STATUS_CLOSED])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['status' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == PLAN_STATUS_ACTIVATE) {
+                message('success', 200, 'وضعیت طرح به فعال تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_DEACTIVATE) {
+                message('warning', 200, 'وضعیت طرح به غیر فعال تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_FULL) {
+                message('warning', 200, 'وضعیت طرح به پر شده تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_CLOSED) {
+                message('warning', 200, 'وضعیت طرح به بسته شده تغییر یافت.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function manageFactorAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['factors'] = $model->select_it(null, 'factors AS f', [
+            'f.id', 'f.factor_code', 'f.first_name', 'f.last_name', 'f.mobile', 'f.payment_title', 'f.payment_status', 'f.shipping_title',
+            'f.send_status', 'f.final_amount', 'f.want_factor', 'f.payment_date', 'f.order_date'
+        ]);
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارشات');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Factor/manageFactor');
+    }
+
+    public function viewFactorAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('factors', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageFactor'));
+        }
+
+        // Select all send status labels
+        $this->data['allSendStatus'] = $model->select_it(null, 'send_status', '*', null, [], null, 'priority ASC');
+
+        // Select current send_status from factor
+        $sendStatus = $model->select_it(null, 'factors', 'send_status', 'id=:id', ['id' => $param[0]])[0]['send_status'];
+
+        // Submit a form for change send status code
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['errors'] = [];
+        $this->data['form_token'] = $form->csrfToken('sendStatus');
+        $form->setFieldsName(['send-status'])->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function ($values) use ($form, $sendStatus) {
+                if (!in_array($values['send-status'], array_column($this->data['allSendStatus'], 'id'))) {
+                    $form->setError('وضعیت ارسال انتخاب شده نامعتبر است.');
+                }
+
+                if ($sendStatus != $values['send_status']) {
+                    // Send SMS to user to notify its factor status has changed
+
+                }
+            })->afterCheckCallback(function ($values) use ($form, $model, $param) {
+                $res = $model->update_it('factors', [
+                    'send_status' => (int)$values['send-status']
+                ], 'id=:id', ['id' => $param[0]]);
+
+                if (!$res) {
+                    $form->setError('بروزرسانی وضعیت ارسال با خطا مواجه شد.');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'وضعیت ارسال برورسانی شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['statusVals'] = $form->getValues();
+            }
+        }
+
+        // Select current factor
+        $this->data['factor'] = $model->join_it(null, 'factors AS f', 'users AS u', [
+            'f.id', 'f.factor_code', 'f.user_id', 'f.first_name', 'f.last_name', 'f.mobile', 'f.method_code', 'f.payment_title', 'f.payment_status',
+            'f.send_status', 'f.amount', 'f.shipping_title', 'f.shipping_price', 'f.final_amount', 'f.coupon_title', 'f.coupon_amount', 'f.coupon_unit',
+            'f.discount_price', 'f.shipping_address', 'f.shipping_receiver', 'f.shipping_province', 'f.shipping_city', 'f.shipping_postal_code',
+            'f.shipping_phone', 'f.want_factor', 'f.payment_date', 'f.shipping_date', 'f.order_date', 'u.id AS u_id'
+        ], 'f.user_id=u.id', 'f.id=:id', ['id' => $param[0]],
+            null, 'f.id DESC', null, null, false, 'LEFT')[0];
+        // Select current factor status label
+        $this->data['factorStatus'] = $model->select_it(null, 'send_status', ['name', 'badge'],
+            'id=:id', ['id' => $this->data['factor']['send_status']])[0];
+        // Select gateway table if gateway code is one of the bank payment gateway's code
+        foreach ($this->gatewayTables as $table => $codeArr) {
+            if (array_search($this->data['factor']['method_code'], $codeArr) !== false) {
+                $gatewayTable = $table;
+                break;
+            }
+        }
+        if (isset($gatewayTable)) {
+            $successCode = $this->gatewaySuccessCode[$gatewayTable];
+            if ($model->is_exist($gatewayTable, 'factor_code=:fc AND status=:s',
+                ['fc' => $this->data['factor']['factor_code'], 's' => $successCode])) {
+                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
+                    'factor_code=:fc AND status=:s', ['fc' => $this->data['factor']['factor_code'], 's' => $successCode],
+                    null, 'payment_date DESC');
+            } else {
+                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
+                    'factor_code=:fc', ['fc' => $this->data['factor']['factor_code']], null, 'payment_date DESC');
+            }
+            if (count($this->data['factor']['payment_info'])) {
+                $this->data['factor']['payment_info'] = $this->data['factor']['payment_info'][0];
+            } else {
+                unset($this->data['factor']['payment_info']);
+            }
+        }
+        // Select current factor item(s)
+        $this->data['factorItems'] = $model->join_it(null, 'factors_item AS fi', 'products AS p', [
+            'fi.product_color', 'fi.product_color_hex', 'fi.product_count', 'fi.product_unit_price', 'fi.product_price',
+            'p.product_title', 'p.image', 'p.product_code',
+        ], 'fi.product_code=p.product_code', 'fi.factor_code=:fc', ['fc' => $this->data['factor']['factor_code']],
+            null, 'fi.id DESC', null, null, false, 'LEFT');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارش');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+
+        $this->_render_page('pages/be/Factor/viewFactor');
     }
 
     public function addUsefulLinkAction()
@@ -2058,6 +2109,8 @@ class AdminController extends HController
         // If we are in edit mode
         $editId = isset($param[1]) && strtolower($param[0]) == 'edit' ? (int)$param[1] : 0;
         $editId = $editId && $model->is_exist('faq', 'id=:id', ['id' => $editId]) ? $editId : 0;
+
+        $this->data['param'] = $param;
 
         $this->data['errors'] = [];
         $this->data['faqVals'] = [];
@@ -2336,7 +2389,7 @@ class AdminController extends HController
         $this->data['errors_images'] = [];
         $this->data['form_token_images'] = $formImages->csrfToken('settingImages');
         $formImages->setFieldsName([
-            'imgTop', 'imgTopLink', 'imgMiddle', 'imgMiddleLink'
+            'imgTop', 'imgMiddle', 'middleTitle', 'middleDesc'
         ])->setMethod('post');
         try {
             $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
@@ -2349,11 +2402,14 @@ class AdminController extends HController
                     $values['imgMiddle'] = '';
                 }
             })->afterCheckCallback(function ($values) use ($formImages) {
+                $props = array_map(function ($val1, $val2) {
+                    return ['title' => $val1, 'desc' => $val2];
+                }, $values['middleTitle'], $values['middleDesc']);
+                //-----
                 $this->data['setting']['pages']['index']['topImage']['image'] = $values['imgTop'];
-                $this->data['setting']['pages']['index']['topImage']['link'] = $values['imgTopLink'];
-
-                $this->data['setting']['pages']['index']['middleImage']['image'] = $values['imgMiddle'];
-                $this->data['setting']['pages']['index']['middleImage']['link'] = $values['imgMiddleLink'];
+                //-----
+                $this->data['setting']['pages']['index']['middlePart']['image'] = $values['imgMiddle'];
+                $this->data['setting']['pages']['index']['middlePart']['properties'] = $props;
 
                 $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
                 $res = write_json(CORE_PATH . 'config.json', $this->setting);
@@ -2379,8 +2435,8 @@ class AdminController extends HController
         $form = new Form();
         $this->data['errors_footer'] = [];
         $this->data['form_token_footer'] = $form->csrfToken('settingFooter');
-        $form->setFieldsName(['footer_1_title', 'footer_1_text', 'footer_1_link', 'instagram',
-            'information_1', 'information_2', 'information_3', 'descTitle', 'desc', 'namad_1', 'namad_2'
+        $form->setFieldsName([
+            'footer_1_title', 'footer_1_text', 'footer_1_link', 'instagram',
         ])->setMethod('post');
         try {
             $form->afterCheckCallback(function ($values) use ($form) {

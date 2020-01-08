@@ -96,7 +96,7 @@
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>دسته‌بندی والد:</label>
+                                                <label>دسته‌بندی:</label>
                                                 <select class="select-rtl" name="category">
                                                     <?php foreach ($categories as $key => $category): ?>
                                                         <option value="<?= $category['id']; ?>"

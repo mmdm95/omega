@@ -35,6 +35,23 @@ defined('OWN_PAYMENT_STATUS_WAIT') OR define('OWN_PAYMENT_STATUS_WAIT', -8);
 // My custom payment wait
 defined('OWN_WAIT_TIME') OR define('OWN_WAIT_TIME', 60 * 60);
 
+// Custom education grades
+defined('EDU_GRADES') OR define('EDU_GRADES', [
+    6 => 'پایه ششم',
+    7 => 'پایه هفتم',
+    8 => 'پایه هشتم',
+    9 => 'پایه نهم',
+    10 => 'پایه دهم',
+    11 => 'پایه یازدهم',
+    12 => 'پایه دوازدهم',
+    13 => 'پشت کنکور',
+    14 => 'دیپلم',
+    15 => 'فوق دیپلم',
+    16 => 'لیسانس',
+    17 => 'فوق لیسانس',
+    18 => 'دکتری',
+]);
+
 //===============================================
 
 return array(

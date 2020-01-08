@@ -105,6 +105,32 @@
                     <li class="navigation-header"><span>نوشته‌ها</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
+                            <i class="icon-tree6"></i>
+                            <span>
+                                دسته‌بندی
+                            </span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/addCategory">
+                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
+                                    <small>
+                                        افزودن دسته‌بندی
+                                    </small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/manageCategory">
+                                    <i class="icon-table2" style="font-size: 13px;"></i>
+                                    <small>
+                                        مشاهده دسته‌بندی‌ها
+                                    </small>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a>
                             <i class="icon-notebook"></i>
                             <span>
                                 نوشته‌ها
@@ -166,32 +192,6 @@
                     <li class="navigation-header"><span>اصلی</span> <i class="icon-menu"></i></li>
                     <li>
                         <a>
-                            <i class="icon-tree6"></i>
-                            <span>
-                                دسته‌بندی
-                            </span>
-                        </a>
-                        <ul>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/addCategory">
-                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
-                                    <small>
-                                        افزودن دسته‌بندی
-                                    </small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="<?= base_url(); ?>admin/manageCategory">
-                                    <i class="icon-table2" style="font-size: 13px;"></i>
-                                    <small>
-                                        مشاهده دسته‌بندی‌ها
-                                    </small>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a>
                             <i class="icon-map4"></i>
                             <span>
                                 مدیریت طرح
@@ -215,6 +215,14 @@
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                    <li>
+                        <a href="<?= base_url(); ?>admin/manageFactor">
+                            <i class="icon-list2"></i>
+                            <span>
+                                مشاهده فاکتورها
+                            </span>
+                        </a>
                     </li>
                     <!-- /main -->
                     <!-- فرعی -->

@@ -120,6 +120,10 @@
                                                 </div>
                                             </div>
                                             <div class="text-right col-md-12">
+                                                <a href="<?= base_url('admin/manageStaticPage'); ?>"
+                                                   class="btn btn-default mr-5">
+                                                    بازگشت
+                                                </a>
                                                 <button type="submit" class="btn btn-primary submit-button">
                                                     ذخیره
                                                     <i class="icon-arrow-left12 position-right"></i>

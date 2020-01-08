@@ -314,6 +314,12 @@
         });
         //**********
 
+        //********** Change plan status for ManagePlans
+        $.change_plan_status = function (selector, stat) {
+            active_deactive_action(selector, 'changePlanStatus', {stat: stat});
+        };
+        //**********
+
         function active_deactive_action(selector, sendUrl, params, callback) {
             var _this = this, btn = $(selector);
             var id = $(btn).parent().find('input[type=hidden]').val();

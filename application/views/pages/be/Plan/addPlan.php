@@ -191,13 +191,18 @@
                                                        data-format="YYYY/MM/DD - HH:mm" required
                                                        value="<?= set_value($planVals['end_date'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-12">
+                                            <div class="col-lg-12">
                                                 <span class="text-danger">*</span>
                                                 <label>مخاطب طرح:</label>
-                                                <input name="audience" type="text"
-                                                       class="form-control" placeholder="Press Enter"
-                                                       data-role="tagsinput" required
-                                                       value="<?= set_value($planVals['audience'] ?? ''); ?>">
+                                                <select class="select-rtl" multiple="multiple"
+                                                        name="audience[]" data-placeholder="انتخاب کنید">
+                                                    <?php foreach (EDU_GRADES as $id => $grade): ?>
+                                                        <option value="<?= $id; ?>"
+                                                            <?= in_array($id, $planVals['audience'] ?? []) ? 'selected' : ''; ?>>
+                                                            <?= $grade; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
