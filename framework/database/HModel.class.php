@@ -13,26 +13,17 @@ abstract class HModel
     /**
      * @var string
      */
+    protected $table;
+
+    /**
+     * @var string
+     */
     protected $type;
 
     /**
      * @var array
      */
     private $types = array();
-
-    /**
-     * TODO: remove this variable later
-     * @var string
-     * @deprecated
-     */
-    private $rightQuote = '';
-
-    /**
-     * TODO: remove this variable later
-     * @var string
-     * @deprecated
-     */
-    private $leftQuote = '';
 
     /**
      * @var Aura\Sql\ConnectionLocator|null
@@ -48,6 +39,11 @@ abstract class HModel
      * @var Aura\Sql\ExtendedPdoInterface|null
      */
     protected $db = null;
+
+    public function __construct()
+    {
+    	$this->db = $this->getDb();
+    }
 
     /**
      * @param string $name
@@ -90,9 +86,6 @@ abstract class HModel
         }
 
         $this->factory = new QueryFactory($this->type);
-
-        // TODO: remove this function later
-        $this->setQuoteString();
 
         return $this;
     }
@@ -139,32 +132,6 @@ abstract class HModel
             return $this->factory->newDelete();
         }
         return null;
-    }
-
-    /**
-     * TODO: remove this function later
-     *
-     * Set quoting string for each/current Database
-     *
-     * @deprecated
-     */
-    private function setQuoteString()
-    {
-        switch ($this->type) {
-            case 'mysql':
-                $this->leftQuote = '`';
-                $this->rightQuote = '`';
-                break;
-            case 'sqlite':
-            case 'pgsql':
-                $this->leftQuote = '"';
-                $this->rightQuote = '"';
-                break;
-            case 'sqlsrv':
-                $this->leftQuote = '[';
-                $this->rightQuote = ']';
-                break;
-        }
     }
 
     private function setConnectionLocator()

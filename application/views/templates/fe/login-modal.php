@@ -19,7 +19,13 @@
                 </form>
                 <div class="form-excerpts">
                     <ul class="list-unstyled">
-                        <li>هنوز عضو نشدید؟ <a href="">ثبت نام کنید!</a></li>
+                        <li>
+                            هنوز عضو نشدید؟
+                            <a href="javascript:void(0);"
+                               onclick="$('#login_modal').modal('hide');"
+                               data-toggle="modal"
+                               data-target="#signup_modal">ثبت نام کنید!</a>
+                        </li>
                         <li><a href="">بازیابی رمز عبور</a></li>
                     </ul>
                 </div>

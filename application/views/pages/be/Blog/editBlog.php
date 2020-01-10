@@ -35,7 +35,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= base_url(); ?>admin/manageArticle">
+                            <a href="<?= base_url(); ?>admin/manageBlog">
                                 نوشته‌ها
                             </a>
                         </li>
@@ -51,7 +51,7 @@
                 <!-- Centered forms -->
                 <div class="row">
                     <div class="col-md-12">
-                        <form action="<?= base_url(); ?>admin/editArticle/<?= $param[0]; ?>" method="post">
+                        <form action="<?= base_url(); ?>admin/editBlog/<?= $param[0]; ?>" method="post">
                             <?= $data['form_token']; ?>
 
                             <div class="row">
@@ -131,7 +131,7 @@
                                             </div>
 
                                             <div class="text-right col-md-12 mt-20">
-                                                <a href="<?= base_url('admin/manageArticle'); ?>"
+                                                <a href="<?= base_url('admin/manageBlog'); ?>"
                                                    class="btn btn-default mr-5">
                                                     بازگشت
                                                 </a>

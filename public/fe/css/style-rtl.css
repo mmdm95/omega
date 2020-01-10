@@ -7640,6 +7640,28 @@ p {
 }
 
 
+/* Author: MMDM*/
+
+.img-lg {
+    width: 44px !important;
+    height: 44px !important;
+}
+
+.img-sm {
+    width: 36px !important;
+    height: 36px !important;
+}
+
+.img-xs {
+    width: 30px !important;
+    height: 30px !important;
+}
+
+.img-xxs {
+    width: 18px !important;
+    height: 18px !important;
+}
+
 /* Author: Saeed*/
 
 .font-size-sm {

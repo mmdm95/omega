@@ -264,6 +264,7 @@
                 case 'jpg':
                 case 'jpeg':
                 case 'gif':
+                case 'svg':
                     $link = $('<a class="name image" />')
                         .attr('href', data.path).attr('data-url', "<?= base_url(); ?>" + data.path)
                         .append($('<span class="img-name">' + data.name + '</span>'))

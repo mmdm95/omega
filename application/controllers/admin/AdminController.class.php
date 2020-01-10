@@ -6,6 +6,7 @@ use HAuthentication\HAException;
 use HForm\Form;
 use voku\helper\AntiXSS;
 
+
 class AdminController extends HController
 {
     private $auth;
@@ -19,8 +20,8 @@ class AdminController extends HController
         $this->load->library('HAuthentication/Auth');
         try {
             $this->auth = new Auth();
-            $this->auth->setNamespace('adminPanel')->setExpiration(365 * 24 * 60 * 60);
-            $_SESSION['admin_panel_namespace'] = 'hva_ms_7472';
+            $_SESSION['admin_panel_namespace'] = 'admin_hva_ms_7472';
+            $this->auth->setNamespace($_SESSION['admin_panel_namespace'])->setExpiration(365 * 24 * 60 * 60);
         } catch (HAException $e) {
             echo $e;
         }
@@ -464,6 +465,147 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
+    public function addFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        $this->data['errors'] = [];
+        $this->data['feedVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addFeedback');
+        $form->setFieldsName(['image', 'full_name', 'feedback', 'show_in_page'])
+            ->setDefaults('show_in_page', 'off')
+            ->setMethod('post', [], ['show_in_page']);
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['image', 'full_name', 'feedback'], 'فیلدهای ضروری را خالی نگذارید.');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('site_feedback', [
+                    'image' => trim($values['image']),
+                    'full_name' => trim($values['full_name']),
+                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['feedVals'] = $form->getValues();
+            }
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن بازخورد');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->_render_page('pages/be/Feedback/addFeedback');
+    }
+
+    public function editFeedbackAction($param)
+    {
+
+    }
+
+    public function manageFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['feedback'] = $model->select_it(null, 'site_feedback');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده بازخورد');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Feedback/manageFeedback');
+    }
+
+    public function viewFeedbackAction($param)
+    {
+
+    }
+
+    public function deleteFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'site_feedback';
+        if (!isset($id)) {
+            message('error', 200, 'آیتم نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'بازخورد وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'بازخورد با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function publishFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'site_feedback';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['show_in_page' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش بازخورد در صفحه اصلی فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش بازخورد در صفحه اصلی غیرفعال شد.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
     public function manageNewsletterAction()
     {
         if (!$this->auth->isLoggedIn()) {
@@ -565,7 +707,6 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
 
         $this->_render_page('pages/be/Category/addCategory');
-
     }
 
     public function editCategoryAction($param)
@@ -654,7 +795,65 @@ class AdminController extends HController
         $this->_render_page('pages/be/Category/manageCategory');
     }
 
-    public function addArticleAction()
+    public function deleteCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'categories';
+        if (!isset($id)) {
+            message('error', 200, 'دسته‌بندی نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'دسته‌بندی وجود ندارد.');
+        }
+        if ($model->is_exist($table, 'parent_id=:pId', ['pId' => $id])) {
+            message('error', 200, 'این دسته‌بندی شامل زیردسته است.');
+        }
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'دسته‌بندی با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function showInMenuAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'categories';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'دسته‌بندی وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['show_in_menu' => $stat], 'id=:id AND deletable=:del', ['id' => $id, 'del' => 1]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش دسته‌بندی در منو فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش دسته‌بندی در منو غیر فعال شد.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function addBlogAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -669,7 +868,7 @@ class AdminController extends HController
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addArticle');
+        $this->data['form_token'] = $form->csrfToken('addBlog');
         $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
@@ -679,14 +878,14 @@ class AdminController extends HController
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
                 $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
-                if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
                     $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                 }
                 if (!in_array($values['category'], array_column($this->data['categories'], 'id'))) {
                     $form->setError('دسته‌بندی نامعتبر است.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('articles', [
+                $res = $model->insert_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
@@ -724,12 +923,12 @@ class AdminController extends HController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن نوشته جدید');
 
         $this->_render_page([
-            'pages/be/Article/addArticle',
+            'pages/be/Blog/addBlog',
             'templates/be/browser-tiny-func'
         ]);
     }
 
-    public function editArticleAction($param)
+    public function editBlogAction($param)
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -737,8 +936,8 @@ class AdminController extends HController
 
         $model = new Model();
 
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('articles', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageArticle'));
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('blog', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageBlog'));
         }
 
         $this->data['param'] = $param;
@@ -746,11 +945,11 @@ class AdminController extends HController
         $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name']);
 
         $this->data['errors'] = [];
-        $this->data['atcVals'] = $model->select_it(null, 'articles', ['title'], 'id=:id', ['id' => $param[0]])[0];
+        $this->data['atcVals'] = $model->select_it(null, 'blog', ['title'], 'id=:id', ['id' => $param[0]])[0];
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editArticle');
+        $this->data['form_token'] = $form->csrfToken('editBlog');
         $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
@@ -761,7 +960,7 @@ class AdminController extends HController
                 $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
                 if ($values['title'] != $this->data['atcVals']['title']) {
-                    if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                    if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
                         $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                     }
                 }
@@ -769,7 +968,7 @@ class AdminController extends HController
                     $form->setError('دسته‌بندی نامعتبر است.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->update_it('articles', [
+                $res = $model->update_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
@@ -797,7 +996,7 @@ class AdminController extends HController
             }
         }
 
-        $this->data['atcVals'] = $model->select_it(null, 'articles', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['atcVals'] = $model->select_it(null, 'blog', '*', 'id=:id', ['id' => $param[0]])[0];
 
         // Extra js
         $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
@@ -807,19 +1006,19 @@ class AdminController extends HController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش نوشته');
 
         $this->_render_page([
-            'pages/be/Article/editArticle',
+            'pages/be/Blog/editBlog',
             'templates/be/browser-tiny-func'
         ]);
     }
 
-    public function manageArticleAction()
+    public function manageBlogAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
         }
 
         $model = new Model();
-        $this->data['articles'] = $model->select_it(null, 'articles');
+        $this->data['blog'] = $model->select_it(null, 'blog');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نوشته‌ها');
@@ -830,7 +1029,7 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
         $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
 
-        $this->_render_page('pages/be/Article/manageArticle');
+        $this->_render_page('pages/be/Blog/manageBlog');
     }
 
     public function addStaticPageAction()
@@ -1022,11 +1221,11 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $cmtPr = $model->join_it(null, 'comments AS c', 'articles AS a', [
-            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
-        ], 'c.article_id=a.id', null, [], null, null, null, null, true, 'LEFT');
+        $cmtPr = $model->join_it(null, 'comments AS c', 'blog AS a', [
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
+        ], 'c.blog_id=a.id', null, [], null, null, null, null, true, 'LEFT');
         $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
         ], 'c.mobile=u.username', null, [], null, 'c.created_on DESC', null, null, false, 'RIGHT');
 
         // Base configuration
@@ -1152,141 +1351,6 @@ class AdminController extends HController
         $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
         if ($res) {
             message('success', 200, 'عدم تایید نظر با موفقیت انجام شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function managePriorityAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !isset($param[1]) || $param[0] != 'level' || !is_numeric($param[1]) ||
-            !$model->is_exist('categories', 'level=:lvl', ['lvl' => $param[1]])) {
-            $this->redirect(base_url('admin/manageCategory'));
-        }
-
-        $this->data['param'] = $param;
-
-        $this->data['errors'] = [];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editPriority');
-        $form->setFieldsName(['id', 'priority'])->setMethod('post');
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['id', 'priority'], 'آیتم‌ها دستکاری شده‌اند!!');
-
-                $this->data['catItems'] = array_column($model->select_it(null, 'categories', 'id', 'level=:lvl', ['lvl' => $this->data['param'][1]]), 'id');
-                $same = array_intersect($values['id'], $this->data['catItems']);
-                if (count($same) != count($this->data['catItems'])) {
-                    $form->setError('آیتم‌ها دستکاری شده‌اند!!');
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $model->transactionBegin();
-
-                foreach ($values['id'] as $key => $id) {
-                    $res = $model->update_it('categories', [
-                        'priority' => $values['priority'][$key]
-                    ], 'id=:id AND level=:lvl', ['id' => $id, 'lvl' => $this->data['param'][1]]);
-
-                    if (!$res) break;
-                }
-
-                if ($res) {
-                    $model->transactionComplete();
-                } else {
-                    $model->transactionRollback();
-                    $form->setError('خطا در انجام عملیات! مجددا تلاش نمایید.');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-            }
-        }
-
-        $this->data['items'] = $model->select_it(null, 'categories', ['id', 'category_name', 'priority', 'parent_id'],
-            'level=:lvl', ['lvl' => $param[1]], null, ['priority ASC', 'id ASC']);
-
-        for ($i = 0; $i < count($this->data['items']); $i++) {
-            $this->data['items'][$i]['parent'] = !is_null($this->data['items'][$i]['parent_id']) ? ($this->data['items'][$i]['parent_id'] != 0 ? $model->select_it(null, 'categories', 'category_name', 'id=:pid', ['pid' => $this->data['items'][$i]['parent_id']])[0]['category_name'] : 'دسته اصلی') : "<i class='icon-dash text-grey-300' aria-hidden='true'></i>";
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'تغییر اولویت‌های سطح', $param[1]);
-
-        $this->data['js'][] = $this->asset->script('be/js/core/libraries/jquery_ui/interactions.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/core/libraries/jquery_ui/touch.min.js');
-
-        $this->_render_page('pages/be/Category/managePriority');
-    }
-
-    public function deleteCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = @$_POST['postedId'];
-        $table = 'categories';
-        if (!isset($id)) {
-            message('error', 200, 'دسته‌بندی نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'دسته‌بندی وجود ندارد.');
-        }
-        if ($model->is_exist($table, 'parent_id=:pId', ['pId' => $id])) {
-            message('error', 200, 'این دسته‌بندی شامل زیردسته است.');
-        }
-        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'دسته‌بندی با موفقیت حذف شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function showInMenuAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = $_POST['postedId'];
-        $stat = $_POST['stat'];
-        $table = 'categories';
-        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
-            message('error', 200, 'ورودی نامعتبر است.');
-        }
-
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'دسته‌بندی وجود ندارد.');
-        }
-
-        $res = $model->update_it($table, ['show_in_menu' => $stat], 'id=:id AND deletable=:del', ['id' => $id, 'del' => 1]);
-        if ($res) {
-            if ($stat == 1) {
-                message('success', 200, 'نمایش دسته‌بندی در منو فعال شد.');
-            } else {
-                message('warning', 200, 'نمایش دسته‌بندی در منو غیر فعال شد.');
-            }
         }
 
         message('error', 200, 'عملیات با خطا مواجه شد.');
@@ -1727,6 +1791,37 @@ class AdminController extends HController
         $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
         if ($res) {
             message('success', 200, 'طرح با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function publishPlanAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'plans';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['publish' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش طرح فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش طرح غیرفعال شد.');
+            }
         }
 
         message('error', 200, 'عملیات با خطا مواجه شد.');
@@ -2389,16 +2484,15 @@ class AdminController extends HController
         $this->data['errors_images'] = [];
         $this->data['form_token_images'] = $formImages->csrfToken('settingImages');
         $formImages->setFieldsName([
-            'imgTop', 'imgMiddle', 'middleTitle', 'middleDesc'
-        ])->setMethod('post');
+            'imgTop', 'showMiddle', 'imgMiddle', 'middleTitle', 'middleDesc'
+        ])->setDefaults('showMiddle', 'off')
+            ->setMethod('post', [], ['showMiddle']);
         try {
             $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
                 if ($values['imgTop'] != '' && !file_exists($values['imgTop'])) {
-//                    $formImages->setError('تصویر انتخاب شده برای بالای اسلایدر اصلی، نامعتبر است.');
                     $values['imgTop'] = '';
                 }
                 if ($values['imgMiddle'] != '' && !file_exists($values['imgMiddle'])) {
-//                    $formImages->setError('تصویر انتخاب شده برای کنار اسلایدر اصلی، نامعتبر است.');
                     $values['imgMiddle'] = '';
                 }
             })->afterCheckCallback(function ($values) use ($formImages) {
@@ -2408,6 +2502,7 @@ class AdminController extends HController
                 //-----
                 $this->data['setting']['pages']['index']['topImage']['image'] = $values['imgTop'];
                 //-----
+                $this->data['setting']['pages']['index']['middlePart']['show'] = $formImages->isChecked('showMiddle') ? 1 : 0;
                 $this->data['setting']['pages']['index']['middlePart']['image'] = $values['imgMiddle'];
                 $this->data['setting']['pages']['index']['middlePart']['properties'] = $props;
 
@@ -2436,7 +2531,8 @@ class AdminController extends HController
         $this->data['errors_footer'] = [];
         $this->data['form_token_footer'] = $form->csrfToken('settingFooter');
         $form->setFieldsName([
-            'footer_1_title', 'footer_1_text', 'footer_1_link', 'instagram',
+            'footer_1_title', 'footer_1_text', 'footer_1_link',
+            'socialEmail', 'telegram', 'instagram', 'facebook',
         ])->setMethod('post');
         try {
             $form->afterCheckCallback(function ($values) use ($form) {
@@ -2459,6 +2555,7 @@ class AdminController extends HController
                 $this->data['setting']['footer']['sections']['section_3']['title'] = $values['footer_1_title'][2];
                 $this->data['setting']['footer']['sections']['section_3']['links'] = $sec3;
 
+                $this->data['setting']['footer']['socials']['email'] = $values['socialEmail'];
                 $this->data['setting']['footer']['socials']['telegram'] = $values['telegram'];
                 $this->data['setting']['footer']['socials']['instagram'] = $values['instagram'];
                 $this->data['setting']['footer']['socials']['facebook'] = $values['facebook'];

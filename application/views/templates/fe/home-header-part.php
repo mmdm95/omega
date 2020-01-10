@@ -14,7 +14,6 @@
 
     <title><?= $title ?? ''; ?></title>
 
-    <link href="https://fonts.googleapis.com/css?family=Muli:400,400i,600,700" rel="stylesheet">
     <!-- inject:css-->
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/bootstrap/bootstrap-rtl.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/brands.css">

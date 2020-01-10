@@ -30,7 +30,7 @@
                                 <a href="<?= base_url('events'); ?>">طرح‌ها</a>
                             </li>
                             <li>
-                                <a href="<?= base_url('articles'); ?>">اخبار و اطلاعیه‌ها</a>
+                                <a href="<?= base_url('blog'); ?>">اخبار و اطلاعیه‌ها</a>
                             </li>
                         </ul>
                     </div>
@@ -57,24 +57,33 @@
                                 ثبت نام
                             </a>
                         </li>
-
                     </ul>
                 </div>
             </div>
             <!-- end .author-area -->
             <div class="offcanvas-menu d-none">
-                <a href="" class="offcanvas-menu__user"><i class="la la-user"></i></a>
+                <a href="javascript:void(0);" class="offcanvas-menu__user"><i class="la la-user"></i></a>
                 <div class="offcanvas-menu__contents">
-                    <a href="" class="offcanvas-menu__close"><i class="la la-times-circle"></i></a>
+                    <a href="javascript:void(0);" class="offcanvas-menu__close"><i class="la la-times-circle"></i></a>
                     <div class="author-avatar">
-                        <img src="img/author-avatar.png" alt="" class="rounded-circle">
+                        <?php if (isset($identity->image)): ?>
+                            <img src="<?= $identity->image; ?>" alt="<?= $identity->username ?? ''; ?>"
+                                 class="rounded-circle w-75">
+                        <?php endif; ?>
                     </div>
                     <ul class="list-unstyled">
-                        <li><a href="dashboard-listings.html">My Profile</a></li>
-                        <li><a href="dashboard-listings.html">My Listing</a></li>
-                        <li><a href="dashboard-listings.html">Favorite Listing</a></li>
-                        <li><a href="add-listing.html">Add Listing</a></li>
-                        <li><a href="">Logout</a></li>
+                        <li>
+                            <a href="javascript:void(0);" class="access-link"
+                               data-toggle="modal"
+                               data-target="#login_modal">ورود</a>
+                        </li>
+                        <li>
+                            <a href="javascript:void(0);"
+                               data-toggle="modal"
+                               data-target="#signup_modal">
+                                ثبت نام
+                            </a>
+                        </li>
                     </ul>
                 </div><!-- ends: .author-info -->
             </div><!-- ends: .offcanvas-menu -->

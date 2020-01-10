@@ -20,8 +20,8 @@
                 <div class="page-header-content border-bottom border-bottom-success">
                     <div class="page-title">
                         <h5>
-                            <i class="icon-circle position-left"></i> <span
-                                    class="text-semibold">نظرات</span>
+                            <i class="icon-circle position-left"></i>
+                            <span class="text-semibold">بازخوردها</span>
                         </h5>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                                 داشبورد
                             </a>
                         </li>
-                        <li class="active">نظرات</li>
+                        <li class="active">بازخوردها</li>
                     </ul>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                             <div class="col-sm-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
-                                        <h6 class="panel-title">نظرات</h6>
+                                        <h6 class="panel-title">لیست بازخورد</h6>
                                         <div class="heading-elements">
                                             <ul class="icons-list">
                                                 <li><a data-action="collapse"></a></li>
@@ -60,74 +60,43 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>کاربر</th>
-                                                    <th>تصویر نوشته</th>
-                                                    <th>عنوان نوشته</th>
-                                                    <th>تاریخ ارسال نظر</th>
-                                                    <th>وضعیت نظر</th>
+                                                    <th>نام و نام خانوادگی</th>
+                                                    <th>در تاریخ</th>
+                                                    <th>نمایش در صفحه اصلی</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 <!-- Load categories data -->
-                                                <?php foreach ($comments as $key => $comment): ?>
+                                                <?php foreach ($feedback as $key => $feed): ?>
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <?php if (!empty($comment['user_id'])): ?>
-                                                                <a href="<?= base_url('admin/editUser/' . $comment['user_id']); ?>"
-                                                                   class="btn-link">
-                                                                    <?= $comment['name']; ?>
-                                                                </a>
-                                                            <?php else: ?>
-                                                                <?= $comment['name']; ?>
-                                                            <?php endif; ?>
+                                                            <?= $feed['full_name']; ?>
                                                         </td>
                                                         <td>
-                                                            <a data-url="<?= base_url() . $comment['image']; ?>"
-                                                               data-popup="lightbox">
-                                                                <img src=""
-                                                                     data-src="<?= base_url() . $comment['image']; ?>"
-                                                                     alt="<?= $comment['product_title']; ?>"
-                                                                     class="img-rounded img-preview lazy">
-                                                            </a>
+                                                            <?= jDateTime::date('Y/m/d - H:i', $feed['created_at']); ?>
                                                         </td>
-                                                        <td>
-                                                            <a href="<?= base_url('blog/' . url_title($comment['title'])); ?>"
-                                                               target="_blank">
-                                                                <?= $comment['title']; ?>
-                                                            </a>
-                                                        </td>
-                                                        <td>
-                                                            <?= jDateTime::date('Y/m/d - H:i', $comment['created_on']); ?>
-                                                        </td>
-                                                        <td>
-                                                            <?php if ($comment['status'] == 2): ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-success">تایید شده</span>
-                                                            <?php elseif ($comment['status'] == 1): ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-info">مشاهده شده</span>
-                                                            <?php else: ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-danger">مشاهده نشده</span>
-                                                            <?php endif; ?>
+                                                        <td width="100px" class="plan-status-sliders text-center">
+                                                            <input type="hidden" value="<?= $feed['id']; ?>">
+                                                            <input type="checkbox" class="switchery feedback-publish"
+                                                                <?= set_value($feed['show_in_page'] ?? '', 1, 'checked', '', '=='); ?> />
                                                         </td>
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
                                                                 <li class="text-black">
-                                                                    <a href="<?= base_url('admin/viewComment/' . $comment['id']); ?>"
+                                                                    <a href="<?= base_url(); ?>admin/viewFeedback/<?= $feed['id']; ?>"
                                                                        title="مشاهده" data-popup="tooltip">
                                                                         <i class="icon-eye"></i>
                                                                     </a>
                                                                 </li>
                                                                 <li class="text-danger-600">
-                                                                    <a class="deleteCommentBtn"
+                                                                    <a class="deleteFeedbackBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
-                                                                               value="<?= $comment['id']; ?>">
+                                                                               value="<?= $feed['id']; ?>">
                                                                         <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>

@@ -342,6 +342,19 @@
                                             </h4>
                                         </div>
                                         <div class="row pl-20 pr-20 pb-20">
+                                            <div class="col-lg-12">
+                                                <label class="m-0 pt-5 pb-5 pl-10 pr-10 display-block bg-white btn-default border-left
+                                                border-left-info border-left-xlg shadow-depth1 btn-rounded text-right"
+                                                       for="showMiddle">
+                                                    <span class="pull-left h5 no-margin">
+                                                        <i class="icon-switch2 position-left text-info"></i>
+                                                        نمایش در صفحه
+                                                    </span>
+                                                    <input type="checkbox" name="showMiddle" id="showMiddle"
+                                                           class="switchery" <?= set_value($setting['pages']['index']['middlePart']['show'] ?? '', 1, 'checked', '', '=='); ?> />
+                                                </label>
+                                            </div>
+
                                             <div class="col-md-12 mt-10 mb-10">
                                                 <div class="cursor-pointer pick-file" data-toggle="modal"
                                                      data-target="#modal_full"
@@ -382,13 +395,13 @@
                                                         <label>عنوان ویژگی:</label>
                                                         <input name="middleTitle[]" type="text" class="form-control"
                                                                placeholder="عنوان"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['titles'][0] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][0]['title'] ?? ''); ?>">
                                                     </div>
                                                     <div class="form-group">
                                                         <label>توضیح ویژگی:</label>
                                                         <input name="middleDesc[]" type="text" class="form-control"
                                                                placeholder="توضیح"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['description'][0] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][0]['desc'] ?? ''); ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -398,13 +411,13 @@
                                                         <label>عنوان ویژگی:</label>
                                                         <input name="middleTitle[]" type="text" class="form-control"
                                                                placeholder="عنوان"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['titles'][1] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][1]['title'] ?? ''); ?>">
                                                     </div>
                                                     <div class="form-group">
                                                         <label>توضیح ویژگی:</label>
                                                         <input name="middleDesc[]" type="text" class="form-control"
                                                                placeholder="توضیح"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['description'][1] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][1]['desc'] ?? ''); ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -414,13 +427,13 @@
                                                         <label>عنوان ویژگی:</label>
                                                         <input name="middleTitle[]" type="text" class="form-control"
                                                                placeholder="عنوان"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['titles'][2] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][2]['title'] ?? ''); ?>">
                                                     </div>
                                                     <div class="form-group">
                                                         <label>توضیح ویژگی:</label>
                                                         <input name="middleDesc[]" type="text" class="form-control"
                                                                placeholder="توضیح"
-                                                               value="<?= set_value($setting['pages']['index']['middlePart']['description'][2] ?? ''); ?>">
+                                                               value="<?= set_value($setting['pages']['index']['middlePart']['properties'][2]['desc'] ?? ''); ?>">
                                                     </div>
                                                 </div>
                                             </div>
@@ -826,10 +839,18 @@
                                         <div class="p-20 mb-20 border-bottom border-top border-default bg-default">
                                             <h4 class="no-margin">
                                                 <i class="icon-circle-small position-left text-info"></i>
-                                                شبکه‌های اجتماعی
+                                                راه‌های ارتباطی
                                             </h4>
                                         </div>
                                         <div class="row pl-20 pr-20 pb-20">
+                                            <div class="col-lg-6 mt-10">
+                                                <div class="form-group">
+                                                    <label>آدرس ایمیل:</label>
+                                                    <input name="socialEmail" type="text"
+                                                           class="form-control" placeholder=""
+                                                           value="<?= set_value($setting['footer']['socials']['email'] ?? ''); ?>">
+                                                </div>
+                                            </div>
                                             <div class="col-lg-6 mt-10">
                                                 <div class="form-group">
                                                     <label>آدرس تلگرام:</label>

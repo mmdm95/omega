@@ -74,6 +74,7 @@
                                                     <th>تاریخ پایان طرح</th>
                                                     <th>پر شده / ظرفیت کل</th>
                                                     <th>هزینه طرح</th>
+                                                    <th>نمایش</th>
                                                     <th>وضعیت</th>
                                                     <th>عملیات</th>
                                                 </tr>
@@ -121,6 +122,11 @@
                                                         <td>
                                                             <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['base_price'], true))); ?>
                                                             تومان
+                                                        </td>
+                                                        <td width="100px" class="plan-status-sliders text-center">
+                                                            <input type="hidden" value="<?= $plan['id']; ?>">
+                                                            <input type="checkbox" class="switchery plan-publish"
+                                                                <?= set_value($plan['publish'] ?? '', 1, 'checked', '', '=='); ?> />
                                                         </td>
                                                         <td width="200px" class="plan-status-sliders text-center">
                                                             <input type="hidden" value="<?= $plan['id']; ?>">

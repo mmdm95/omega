@@ -18,7 +18,7 @@
                     <label>نقش خود را انتخاب کنید:</label>
                     <div class="custom-control custom-radio">
                         <input value="<?= AUTH_ROLE_STUDENT ?>" type="radio" id="student" name="role"
-                               class="custom-control-input" required>
+                               class="custom-control-input" checked="checked" required>
                         <label class="custom-control-label iranyekan-light"
                                for="student">
                             دانش‌آموز
@@ -26,7 +26,7 @@
                     </div>
                     <div class="custom-control custom-radio">
                         <input value="<?= AUTH_ROLE_COLLEGE_STUDENT ; ?>" type="radio" id="collegian" name="role"
-                               class="custom-control-input">
+                               class="custom-control-input" required>
                         <label class="custom-control-label iranyekan-light"
                                for="collegian">
                             دانشجو
@@ -34,7 +34,7 @@
                     </div>
                     <div class="custom-control custom-radio">
                         <input value="<?= AUTH_ROLE_GRADUATE ; ?>" type="radio" id="graduate" name="role"
-                               class="custom-control-input">
+                               class="custom-control-input" required>
                         <label class="custom-control-label iranyekan-light"
                                for="graduate">
                             فارغ‌التحصیل
@@ -45,8 +45,13 @@
             </form>
             <div class="form-excerpts">
                 <ul class="list-unstyled">
-                    <li>آیا قبلا عضو بوده‌اید؟ <a href="">وارد شوید!</a></li>
-                    <li><a href="">فراموشی رمز عبور</a></li>
+                    <li>
+                        آیا قبلا عضو بوده‌اید؟
+                        <a href="javascript:void(0);"
+                           onclick="$('#signup_modal').modal('hide');"
+                           data-toggle="modal"
+                           data-target="#login_modal">وارد شوید!</a>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -23,8 +23,8 @@ class HomeController extends HController
         $this->load->library('HAuthentication/Auth');
         try {
             $this->auth = new Auth();
-            $this->auth->setNamespace('homePanel')->setExpiration(365 * 24 * 60 * 60);
             $_SESSION['home_panel_namespace'] = 'home_hva_ms_7472';
+            $this->auth->setNamespace($_SESSION['home_panel_namespace'])->setExpiration(365 * 24 * 60 * 60);
         } catch (HAException $e) {
             echo $e;
         }
@@ -53,6 +53,52 @@ class HomeController extends HController
 
     public function indexAction()
     {
+        $model = new Model();
+
+        $this->data['topEvents'] = $model->select_it(null, 'plans', [
+            'title', 'slug', 'capacity', 'base_price', 'image', 'start_at', 'end_at', 'active_at', 'deactive_at', 'place', 'status',
+        ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], 3);
+        //-----
+        $this->data['feedback'] = $model->select_it(null, 'site_feedback', '*', 'show_in_page=:sip', ['sip' => 1]);
+        //-----
+        $this->data['helpfulLinks'] = $model->select_it(null, 'helpful_links');
+        //-----
+
+        // Newsletter form
+        $this->data['newsletterErrors'] = [];
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addNewletter');
+        $form->setFieldsName(['mobile'])->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function () use ($model, $form) {
+                $form->isRequired(['mobile'], 'فیلدهای موبایل اجباری می‌باشد.')
+                    ->validatePersianMobile('mobile');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = true;
+                if(!$model->is_exist('newsletters', 'mobile=:mobile', ['mobile' => $values['mobile']])) {
+                    $res = $model->insert_it('newsletters', [
+                        'mobile' => trim($values['mobile']),
+                    ]);
+                }
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['newsletterSuccess'] = 'موبایل شما با موفقیت ثبت شد.';
+            } else {
+                $this->data['newsletterErrors'] = $form->getError();
+            }
+        }
+
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
 
         $this->_render_page([
@@ -60,7 +106,56 @@ class HomeController extends HController
         ]);
     }
 
-    public function registerAction()
+    public function eventsAction()
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
+
+        $this->_render_page([
+            'pages/fe/all-events',
+        ]);
+    }
+
+    public function eventAction($param)
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح');
+
+        $this->_render_page([
+            'pages/fe/event-detail',
+        ]);
+    }
+
+    public function userInformationAction()
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'فرم اطلاعات');
+
+        $this->_render_page([
+            'pages/fe/user-information',
+        ]);
+    }
+
+    public function dashboardAction()
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'داشبورد');
+
+        $this->_render_page([
+            'pages/fe/user-profile',
+        ]);
+    }
+
+    public function blogAction($param)
+    {
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'بلاگ');
+
+        $this->_render_page([
+            'pages/fe/blog',
+        ]);
+    }
+
+    //------------------------------
+    //------ Register & Login ------
+    //------------------------------
+
+    protected function _register()
     {
         if ($this->auth->isLoggedIn()) {
             $this->error->show_404(null, $this->data);
@@ -68,8 +163,8 @@ class HomeController extends HController
 
         $model = new Model();
 
-        $this->data['errors'] = [];
-        $this->data['usrVals'] = [];
+        $this->data['registerErrors'] = [];
+        $this->data['registerValues'] = [];
 
         $this->load->library('HForm/Form');
         $form = new Form();
@@ -83,7 +178,7 @@ class HomeController extends HController
                 }
                 $form->isLengthInRange('password', 8, 16, 'تعداد رمز عبور باید بین ۸ تا ۱۶ کاراکتر باشد.');
                 $form->validatePersianMobile('mobile');
-                $form->validatePassword('password', 2);
+                $form->validatePassword('password', 2, 'رمز عبور باید شامل حروف و اعداد باشد.');
 
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $this->data['code'] = generateRandomString(6, GRS_NUMBER);
@@ -99,7 +194,7 @@ class HomeController extends HController
                     'ip_address' => get_client_ip_env(),
                     'created_on' => time(),
                     'active' => 0,
-                    'image' => 'user.svg'
+                    'image' => PROFILE_DEFAULT_IMAGE
                 ]);
 
                 if (!$res || !$res2) {
@@ -128,56 +223,12 @@ class HomeController extends HController
             }
             $this->redirect(base_url('verifyPhone'));
         } else if ($res == 2) {
-            $this->data['errors'] = $form->getError();
-            $this->data['usrVals'] = $form->getValues();
+            $this->data['registerErrors'] = $form->getError();
+            $this->data['registerValues'] = $form->getValues();
         }
-
     }
 
-    public function eventsAction()
-    {
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
-
-        $this->_render_page([
-            'pages/fe/all-events',
-        ]);
-    }
-
-    public function eventDetailAction()
-    {
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح');
-
-        $this->_render_page([
-            'pages/fe/event-detail',
-        ]);
-    }
-
-    public function userInformationAction()
-    {
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'فرم اطلاعات');
-
-        $this->_render_page([
-            'pages/fe/user-information',
-        ]);
-    }
-
-    public function dashboardAction()
-    {
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'داشبورد');
-
-        $this->_render_page([
-            'pages/fe/user-profile',
-        ]);
-    }
-
-    public function blogAction()
-    {
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'بلاگ');
-
-        $this->_render_page([
-            'pages/fe/blog',
-        ]);
-    }
+    //-----
 
     private function _render_page($pages, $loadHeaderAndFooter = true)
     {

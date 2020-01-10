@@ -95,6 +95,32 @@
                         </ul>
                     </li>
                     <li>
+                        <a>
+                            <i class="icon-enter6"></i>
+                            <span>
+                                بازخورد
+                            </span>
+                        </a>
+                        <ul>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/addFeedback">
+                                    <i class="icon-add-to-list" style="font-size: 13px;"></i>
+                                    <small>
+                                        افزودن
+                                    </small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="<?= base_url(); ?>admin/manageFeedback">
+                                    <i class="icon-table2" style="font-size: 13px;"></i>
+                                    <small>
+                                        مشاهده
+                                    </small>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
                         <a href="<?= base_url(); ?>admin/manageNewsletter">
                             <i class="icon-envelop5"></i>
                             <span>
@@ -138,7 +164,7 @@
                         </a>
                         <ul>
                             <li>
-                                <a href="<?= base_url(); ?>admin/addArticle">
+                                <a href="<?= base_url(); ?>admin/addBlog">
                                     <i class="icon-add-to-list" style="font-size: 13px;"></i>
                                     <small>
                                         افزودن نوشته
@@ -146,7 +172,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= base_url(); ?>admin/manageArticle">
+                                <a href="<?= base_url(); ?>admin/manageBlog">
                                     <i class="icon-pencil7" style="font-size: 13px;"></i>
                                     <small>
                                         مشاهده نوشته‌ها
