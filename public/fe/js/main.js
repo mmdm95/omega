@@ -4,7 +4,7 @@
     //single listing
     var single_listing = $(".atbd_single_listing");
     var slWidth = single_listing.width();
-    if(slWidth <= 300){
+    if (slWidth <= 300) {
         single_listing.addClass("rs_fix");
     }
 
@@ -42,32 +42,32 @@
 
     // replace all SVG images with inline SVG
     $("img.svg").each(function () {
-       var $img = $(this);
-       var imgID = $img.attr("id");
-       var imgClass = $img.attr("class");
-       var imgURL = $img.attr("src");
+        var $img = $(this);
+        var imgID = $img.attr("id");
+        var imgClass = $img.attr("class");
+        var imgURL = $img.attr("src");
 
-       $.get(imgURL, function (data) {
-           //get the svg tag, ignore the rest
-           var $svg = jQuery(data).find("svg");
+        $.get(imgURL, function (data) {
+            //get the svg tag, ignore the rest
+            var $svg = jQuery(data).find("svg");
 
-           //Add replaced image's ID to the new SVG
-           if(typeof imgID !== "undefined"){
-               $svg = $svg.attr("id", imgID);
-           }
+            //Add replaced image's ID to the new SVG
+            if (typeof imgID !== "undefined") {
+                $svg = $svg.attr("id", imgID);
+            }
 
-           //Add replaced image's classes to the new SVG
-           if(typeof imgClass !== "undefined"){
-               $svg = $svg.attr('class', imgClass + " replaced-svg");
-           }
+            //Add replaced image's classes to the new SVG
+            if (typeof imgClass !== "undefined") {
+                $svg = $svg.attr('class', imgClass + " replaced-svg");
+            }
 
-           // remove any invalid XML tags as per http://validator.w3.org
-           $svg = $svg.removeAttr('xmlns:a');
+            // remove any invalid XML tags as per http://validator.w3.org
+            $svg = $svg.removeAttr('xmlns:a');
 
-           //replace image width new SVG
-           $img.replaceWith($svg);
+            //replace image width new SVG
+            $img.replaceWith($svg);
 
-       }, 'xml');
+        }, 'xml');
     });
 
     // testimonial-carousel
@@ -85,23 +85,23 @@
         dots: false,
         margin: 100,
         responsive: {
-            0:{
+            0: {
                 items: 2
             },
-            575:{
+            575: {
                 items: 3
             },
-            767:{
+            767: {
                 items: 3
             },
-            991:{
+            991: {
                 items: 5
             }
         }
     });
 
     //setting css bg image as inline in html
-    $(".bg_image_holder").each(function(){
+    $(".bg_image_holder").each(function () {
         var $this = $(this);
         var imgLink = $this.children().attr("src");
         $this.css({
@@ -138,7 +138,7 @@
     /* FAQ Accordion */
     var allPanels = $('p.ac-body').hide();
     var selectedPanel = $(".accordion-single.selected p.ac-body").show();
-    $('.accordion-single > .faq-title > a').on("click", function(e) {
+    $('.accordion-single > .faq-title > a').on("click", function (e) {
         allPanels.slideUp();
         $(this).parent().next().slideDown();
         $(this).parent().parent().addClass('selected').siblings().removeClass('selected');
@@ -148,27 +148,27 @@
     /* review reply form */
     $(".review_content .reply").on("click", function (e) {
         e.preventDefault();
-        if($(this).parent().next().hasClass("active")){
+        if ($(this).parent().next().hasClass("active")) {
             $(this).parent().next().removeClass("active")
-        }else {
+        } else {
             $(this).parent().next().addClass("active");
         }
     });
 
     /* custom upload file name */
     $("#atbd_review_attachment").on("change", function () {
-       var file = $("#atbd_review_attachment")[0].files[0].name;
-       $("#file_name").html(file);
+        var file = $("#atbd_review_attachment")[0].files[0].name;
+        $("#file_name").html(file);
     });
 
     $(".atbdp_child_category").hide();
     $(".atbdp_parent_category > li > span").on("click", function () {
-       $(this).siblings(".atbdp_child_category").slideToggle();
-       if($(this).hasClass("active")){
-           $(this).removeClass("active")
-       }else{
-           $(this).addClass("active");
-       }
+        $(this).siblings(".atbdp_child_category").slideToggle();
+        if ($(this).hasClass("active")) {
+            $(this).removeClass("active")
+        } else {
+            $(this).addClass("active");
+        }
     });
 
     //custom scrollbar
@@ -185,11 +185,11 @@
         var $content = $this.prev(".feature-checklist");
         var linkText = $this.text().toUpperCase();
 
-        if(linkText === "SHOW MORE"){
-            linkText = "Show Less";
+        if (linkText === "نمایش بیشتر") {
+            linkText = "نمایش کمتر";
             $content.toggleClass("hideContent").addClass("showContent");
-        }else{
-            linkText = "Show More";
+        } else {
+            linkText = "نمایش بیشتر";
             $content.toggleClass("showContent").addClass("hideContent");
         }
         $this.text(linkText);
@@ -215,20 +215,20 @@
     var priceOne = $("#price-input");
     var priceTwo = $("#price-input-range").hide();
     $("#price_one").on("click", function (e) {
-        if($(this).is(":checked")){
+        if ($(this).is(":checked")) {
             priceOne.show();
             $("#price_two").prop("checked", false);
             priceTwo.hide();
-        }else {
+        } else {
             e.preventDefault();
         }
     });
     $("#price_two").on("click", function (e) {
-        if($(this).is(":checked")){
+        if ($(this).is(":checked")) {
             priceTwo.show();
             $("#price_one").prop("checked", false);
             priceOne.hide();
-        }else {
+        } else {
             e.preventDefault();
         }
     });
@@ -246,11 +246,11 @@
     //map coordinate
     var menual_cor = $("#hide_if_no_manual_cor").hide();
     $("#manual_coordinate").on("click", function () {
-       if($(this).is(":checked")){
-           menual_cor.show();
-       }else{
-           menual_cor.hide();
-       }
+        if ($(this).is(":checked")) {
+            menual_cor.show();
+        } else {
+            menual_cor.hide();
+        }
     });
 
     //counter
@@ -284,24 +284,24 @@
         type: 'iframe',
         iframe: {
             markup: '<div class="mfp-iframe-scaler">' +
-            '<div class="mfp-close"></div>' +
-            '<iframe class="mfp-iframe" frameborder="0" allowfullscreen></iframe>' +
-            '</div>',
+                '<div class="mfp-close"></div>' +
+                '<iframe class="mfp-iframe" frameborder="0" allowfullscreen></iframe>' +
+                '</div>',
             patterns: {
                 youtube: {
                     index: 'youtube.com/',
-                    id: function(url) {
+                    id: function (url) {
                         var m = url.match(/[\\?\\&]v=([^\\?\\&]+)/);
-                        if ( !m || !m[1] ) return null;
+                        if (!m || !m[1]) return null;
                         return m[1];
                     },
                     src: '//www.youtube.com/embed/%id%?rel=0&autoplay=1'
                 },
                 vimeo: {
                     index: 'vimeo.com/',
-                    id: function(url) {
+                    id: function (url) {
                         var m = url.match(/(https?:\/\/)?(www.)?(player.)?vimeo.com\/([a-z]*\/)*([0-9]{6,11})[?]?.*/);
-                        if ( !m || !m[5] ) return null;
+                        if (!m || !m[5]) return null;
                         return m[5];
                     },
                     src: '//player.vimeo.com/video/%id%?autoplay=1'
@@ -312,5 +312,13 @@
         mainClass: 'mfp-fade'
     });
 
-
+    // Reload captcha
+    $('.form-captcha').on('click', function () {
+        var action, sameAction;
+        action = $(this).closest('.form-account-captcha').data('captcha-url');
+        sameAction = $('[data-captcha-url="' + action + '"]');
+        sameAction.each(function () {
+            $(this).find('img').attr('src', baseUrl + 'captcha/' + action + '?' + Date.now());
+        });
+    });
 })(jQuery);

@@ -96,7 +96,7 @@
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('event/' . $plan['slug']); ?>"
+                                                            <a href="<?= base_url('event/detail/' . $plan['slug']); ?>"
                                                                target="_blank">
                                                                 <?= $plan['title']; ?>
                                                             </a>

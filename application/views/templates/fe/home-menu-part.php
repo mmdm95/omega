@@ -27,7 +27,7 @@
                                 <a href="<?= base_url('index'); ?>">صفحه اصلی</a>
                             </li>
                             <li>
-                                <a href="<?= base_url('events'); ?>">طرح‌ها</a>
+                                <a href="<?= base_url('event'); ?>">طرح‌ها</a>
                             </li>
                             <li>
                                 <a href="<?= base_url('blog'); ?>">اخبار و اطلاعیه‌ها</a>

@@ -60,6 +60,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
+                                                    <th>تصویر</th>
                                                     <th>نام و نام خانوادگی</th>
                                                     <th>در تاریخ</th>
                                                     <th>نمایش در صفحه اصلی</th>
@@ -72,6 +73,15 @@
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
+                                                        </td>
+                                                        <td width="100px">
+                                                            <a data-url="<?= base_url() . $feed['image']; ?>"
+                                                               data-popup="lightbox">
+                                                                <img src=""
+                                                                     data-src="<?= base_url() . $feed['image']; ?>"
+                                                                     alt="<?= $feed['full_name']; ?>"
+                                                                     class="img-rounded img-preview lazy">
+                                                            </a>
                                                         </td>
                                                         <td>
                                                             <?= $feed['full_name']; ?>

@@ -87,23 +87,60 @@
                                                 </div>
                                             <?php endif; ?>
 
-                                            <div class="form-group col-lg-6">
+                                            <div class="col-lg-12 mb-15">
+                                                <div class="cursor-pointer pick-file border border-lg border-default"
+                                                     data-toggle="modal"
+                                                     data-target="#modal_full"
+                                                     style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                    <input class="image-file" type="hidden"
+                                                           name="image"
+                                                           value="<?= set_value($feedVals['image'] ?? ''); ?>">
+                                                    <div class="media stack-media-on-mobile">
+                                                        <div class="media-left">
+                                                            <div class="thumb">
+                                                                <a class="display-inline-block"
+                                                                   style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                    <img
+                                                                        src="<?= set_value($feedVals['image'] ?? '', '', base_url($feedVals['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                        class="img-rounded" alt=""
+                                                                        style="width: 100px; height: 100px; object-fit: contain;"
+                                                                        data-base-url="<?= base_url(); ?>">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="media-body">
+                                                            <h6 class="media-heading">
+                                                                <a class="text-grey-300">
+                                                                    <span class="text-danger">*</span>
+                                                                    انتخاب تصویر کاربر:
+                                                                </a>
+                                                                <a class="io-image-name display-block">
+                                                                    <?= basename(set_value($feedVals['image'] ?? '')); ?>
+                                                                </a>
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-9">
                                                 <span class="text-danger">*</span>
                                                 <label>نام و نام خانوادگی:</label>
                                                 <input name="full_name" type="text" class="form-control"
                                                        placeholder="اجباری"
                                                        value="<?= set_value($feedVals['full_name'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-6">
-                                            <textarea rows="5" cols="12" class="form-control"
-                                                      name="feedback" required
-                                                      style="min-height: 100px; resize: vertical;"
-                                                      placeholder="بازخورد"><?= $feedVals['feedback'] ?? ''; ?></textarea>
-                                            </div>
                                             <div class="form-group col-lg-12 text-right">
                                                 <label for="SIPStatus">نمایش در صفحه اصلی:</label>
                                                 <input type="checkbox" name="publish" id="SIPStatus"
                                                        class="switchery" <?= set_value($feedVals['show_in_page'] ?? '', 'off', '', 'checked', '=='); ?> />
+                                            </div>
+                                            <div class="form-group col-lg-12">
+                                                <span class="text-danger">*</span>
+                                                <label>توضیحات:</label>
+                                                <textarea rows="5" cols="12" class="form-control"
+                                                          name="feedback" required
+                                                          style="min-height: 100px; resize: vertical;"
+                                                          placeholder="بازخورد"><?= $feedVals['feedback'] ?? ''; ?></textarea>
                                             </div>
 
                                             <div class="text-right col-md-12 mt-20">
@@ -123,6 +160,10 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Standard width modal -->
+                <?php $this->view('templates/be/file-picker', $data) ?>
+                <!-- /standard width modal -->
 
                 <!-- Footer -->
                 <?php $this->view("templates/be/copyright", $data); ?>

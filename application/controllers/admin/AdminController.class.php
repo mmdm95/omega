@@ -483,13 +483,15 @@ class AdminController extends HController
             ->setDefaults('show_in_page', 'off')
             ->setMethod('post', [], ['show_in_page']);
         try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+            $form->beforeCheckCallback(function () use ($model, $form) {
                 $form->isRequired(['image', 'full_name', 'feedback'], 'فیلدهای ضروری را خالی نگذارید.');
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->insert_it('site_feedback', [
                     'image' => trim($values['image']),
                     'full_name' => trim($values['full_name']),
-                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0
+                    'feedback' => trim($values['feedback']),
+                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0,
+                    'created_at' => time(),
                 ]);
 
                 if (!$res) {
@@ -513,15 +515,94 @@ class AdminController extends HController
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن بازخورد');
 
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
 
-        $this->_render_page('pages/be/Feedback/addFeedback');
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        $this->_render_page([
+            'pages/be/Feedback/addFeedback',
+            'templates/be/efm',
+        ]);
     }
 
     public function editFeedbackAction($param)
     {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
 
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('site_feedback', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageFeedback'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('editFeedback');
+        $form->setFieldsName(['image', 'full_name', 'feedback', 'show_in_page'])
+            ->setDefaults('show_in_page', 'off')
+            ->setMethod('post', [], ['show_in_page']);
+        try {
+            $form->beforeCheckCallback(function () use ($model, $form) {
+                $form->isRequired(['image', 'full_name', 'feedback'], 'فیلدهای ضروری را خالی نگذارید.');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('site_feedback', [
+                    'image' => trim($values['image']),
+                    'full_name' => trim($values['full_name']),
+                    'feedback' => trim($values['feedback']),
+                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0,
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['feedVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['feedVals'] = $model->select_it(null, 'site_feedback', '*', 'id=:id', ['id' => $param[0]])[0];
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش بازخورد');
+
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        $this->_render_page([
+            'pages/be/Feedback/editFeedback',
+            'templates/be/efm',
+        ]);
     }
 
     public function manageFeedbackAction()
