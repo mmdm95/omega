@@ -63,6 +63,9 @@
                                         <a href="#imagesPanel" data-toggle="tab">تنظیمات صفحه اصلی</a>
                                     </li>
                                     <li>
+                                        <a href="#othersPanel" data-toggle="tab">تنظیمات سایر صفحات</a>
+                                    </li>
+                                    <li>
                                         <a href="#footerPanel" data-toggle="tab">تنظیمات فوتر</a>
                                     </li>
                                 </ul>
@@ -434,6 +437,96 @@
                                                         <input name="middleDesc[]" type="text" class="form-control"
                                                                placeholder="توضیح"
                                                                value="<?= set_value($setting['pages']['index']['middlePart']['properties'][2]['desc'] ?? ''); ?>">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-center">
+                                            <hr style="margin-bottom: 0;">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-block pt-20 pb-20 no-border-radius-top">
+                                                <span class="h5">
+                                                <i class="icon-cog position-left"></i>
+                                                    ذخیره تنظیمات
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- ********************* -->
+                                <!-- ***** TAB PANEL ***** -->
+                                <!-- ********************* -->
+                                <div class="tab-pane" id="othersPanel">
+                                    <div class="row no-padding pl-20 pr-20">
+                                        <div class="col-md-12">
+                                            <!--Error Check-->
+                                            <?php if (isset($errors_others) && count($errors_others)): ?>
+                                                <div class="alert alert-danger alert-styled-left alert-bordered
+                                                 no-border-top no-border-right no-border-bottom">
+                                                    <ul class="list-unstyled">
+                                                        <?php foreach ($errors_others as $err): ?>
+                                                            <li>
+                                                                <i class="icon-dash" aria-hidden="true"></i>
+                                                                <?= $err; ?>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            <?php elseif (isset($success_others)): ?>
+                                                <div class="alert alert-success alert-styled-left alert-bordered
+                                                 no-border-top no-border-right no-border-bottom">
+                                                    <p>
+                                                        <?= $success_others; ?>
+                                                    </p>
+                                                </div>
+                                            <?php endif; ?>
+                                            <!--Error Check End-->
+                                        </div>
+                                    </div>
+
+                                    <form action="<?= base_url(); ?>admin/setting#othersPanel" method="post">
+                                        <?= $data['form_token_others']; ?>
+
+                                        <div class="p-20 mb-20 border-bottom border-top border-default bg-default">
+                                            <h4 class="no-margin">
+                                                <i class="icon-circle-small position-left text-info"></i>
+                                                تصویر بالای سایر صفحات
+                                            </h4>
+                                        </div>
+                                        <div class="row pl-20 pr-20 pb-20">
+                                            <div class="col-md-12 mt-10 mb-10">
+                                                <div class="cursor-pointer pick-file" data-toggle="modal"
+                                                     data-target="#modal_full"
+                                                     style="border: dashed 2px #ddd; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                    <input class="image-file" type="hidden"
+                                                           name="otherImgTop"
+                                                           value="<?= $setting['pages']['all']['topImage']['image'] ?? ''; ?>">
+                                                    <div class="media stack-media-on-mobile">
+                                                        <div class="media-left">
+                                                            <div class="thumb">
+                                                                <a class="display-inline-block"
+                                                                   style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                    <img
+                                                                            src="<?= set_value($setting['pages']['all']['topImage']['image'] ?? '', '', base_url($setting['pages']['all']['topImage']['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                            class="img-rounded" alt=""
+                                                                            style="width: 100px; height: 100px; object-fit: contain;"
+                                                                            data-base-url="<?= base_url(); ?>">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="media-body">
+                                                            <h6 class="media-heading">
+                                                                <a class="text-grey-300">
+                                                                    انتخاب تصویر:
+                                                                </a>
+                                                                <a class="io-image-name display-block">
+                                                                    <?= basename($setting['pages']['all']['topImage']['image'] ?? ''); ?>
+                                                                </a>
+                                                            </h6>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -901,7 +994,7 @@
                     <!-- Show active tab from url's hash -->
                     <script>
                         var hash = window.location.hash.substr(1);
-                        var tabs = ['mainPanel', 'imagesPanel', 'footerPanel'];
+                        var tabs = ['mainPanel', 'imagesPanel', 'othersPanel', 'footerPanel'];
 
                         if ($.inArray(hash, tabs) !== -1) {
                             $('a[href="#' + hash + '"]').tab('show');

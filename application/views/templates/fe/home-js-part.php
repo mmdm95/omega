@@ -1,4 +1,3 @@
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA0C5etf1GVmL_ldVAichWwFFVcDfa1y_c"></script>
 <!-- inject:js-->
 <script src="<?= asset_url(); ?>fe/js/jquery/jquery-1.12.3.js"></script>
 <script src="<?= asset_url(); ?>fe/js/bootstrap/popper.js"></script>
@@ -15,7 +14,6 @@
 <script src="<?= asset_url(); ?>fe/js/slick.min.js"></script>
 <script src="<?= asset_url(); ?>fe/js/locator.js"></script>
 <script src="<?= asset_url(); ?>fe/js/main.js"></script>
-<script src="<?= asset_url(); ?>fe/js/map.js"></script>
 <!-- endinject-->
 
 <!-- plugins:js -->

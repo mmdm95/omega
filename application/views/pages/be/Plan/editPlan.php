@@ -209,6 +209,26 @@
 
                                     <div class="panel panel-white">
                                         <div class="panel-heading">
+                                            <h6 class="panel-title">درباره طرح</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mt-12">
+                                                <textarea
+                                                        class="form-control cntEditor"
+                                                        placeholder="توضیحات"
+                                                        name="description"
+                                                        rows="10"><?= set_value($planVals['description'] ?? ''); ?></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
                                             <h6 class="panel-title">محل برگزاری</h6>
                                             <div class="heading-elements">
                                                 <ul class="icons-list">
@@ -259,9 +279,8 @@
                                         <div class="row">
                                             <div class="col-md-12 mt-12">
                                                 <textarea
-                                                        id="cntEditor"
-                                                        class="form-control"
-                                                        placeholder="سوال"
+                                                        class="form-control cntEditor"
+                                                        placeholder=""
                                                         name="rules"
                                                         rows="10"><?= set_value($planVals['rules'] ?? ''); ?></textarea>
                                             </div>

@@ -1661,8 +1661,8 @@
 }
 
 .checkbox-outline-primary .custom-control-input:checked ~ .custom-control-label::before {
-    border: 1px solid #f5548e;
-    background: #f5548e;
+    border: 1px solid #f5548e !important;
+    background: #f5548e !important;
 }
 
 .checkbox-outline-primary .custom-control-input:checked ~ .custom-control-label::after {
@@ -3973,6 +3973,8 @@ p {
 
 .atbd_listing_gallery .gallery-images .single-image img {
     display: inline-block;
+    width: 100%;
+    height: auto;
 }
 
 .atbd_listing_gallery .gallery-thumbs {
@@ -5632,7 +5634,7 @@ p {
     border-radius: 3px;
     top: 0;
     right: 0;
-    border-color: rgba(39, 43, 65, 0.15);
+    border-color: rgba(39, 43, 65, 0.15) !important;
 }
 
 .custom-checkbox .custom-control-label::after {
@@ -5653,7 +5655,7 @@ p {
 }
 
 .checkbox-outline .custom-control-label:before {
-    background: none;
+    background: none !important;
 }
 
 .checkbox-outline .custom-control-input:checked ~ .custom-control-label::after {
@@ -6724,7 +6726,7 @@ p {
     height: 100%;
     right: 0;
     bottom: 0;
-    background: url("img/svg/about-shape.svg");
+    background: url("../img/svg/about-shape.svg");
     background-repeat: no-repeat;
     background-position: bottom;
 }
@@ -7665,15 +7667,15 @@ p {
 /* Author: Saeed*/
 
 .font-size-lg {
-    font-size: 1.5rem;
+    font-size: 1.5rem !important;
 }
 
 .font-size-md {
-    font-size: 1.15rem;
+    font-size: 1.15rem !important;
 }
 
 .font-size-sm {
-    font-size: 0.85rem;
+    font-size: 0.85rem !important;
 }
 
 .blog-card-size {

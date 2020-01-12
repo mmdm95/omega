@@ -115,8 +115,8 @@
         slidesToShow: 1,
         slidesToScroll: 1,
         arrows: true,
-        prevArrow: '<span class="slick-arrow prev-arrow"><i class="la la-angle-left"></i></span>',
-        nextArrow: '<span class="slick-arrow next-arrow"><i class="la la-angle-right"></i></span>',
+        prevArrow: '<span class="slick-arrow prev-arrow"><i class="la la-angle-right"></i></span>',
+        nextArrow: '<span class="slick-arrow next-arrow"><i class="la la-angle-left"></i></span>',
         fade: true,
         asNavFor: ".gallery-thumbs"
     });
@@ -320,5 +320,15 @@
         sameAction.each(function () {
             $(this).find('img').attr('src', baseUrl + 'captcha/' + action + '?' + Date.now());
         });
+    });
+
+    $('.smooth-scroll').on('click', function (e) {
+        e.preventDefault();
+        var target = $(this).attr('href');
+        if(target && $(target).length) {
+            $('html, body').stop().animate({
+                scrollTop: $(target).offset().top - 30
+            }, 300);
+        }
     });
 })(jQuery);

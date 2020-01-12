@@ -64,7 +64,7 @@ abstract class AbstractController extends HController
     //------ Register & Login ------
     //------------------------------
 
-    protected function _register()
+    protected function _register($param)
     {
         $this->data['registerErrors'] = [];
         $this->data['registerValues'] = [];
@@ -82,7 +82,7 @@ abstract class AbstractController extends HController
             ->setDefaults('role', AUTH_ROLE_GUEST)
             ->setMethod('post', [], ['role']);
         try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+            $form->beforeCheckCallback(function ($values) use ($model, $form, $param) {
                 $form->isRequired(['mobile', 'password', 're_password', 'role', 'registerCaptcha'], 'فیلدهای ضروری را خالی نگذارید.');
                 if ($model->is_exist('users', 'username=:name AND active=:a',
                     ['name' => $values['mobile'], 'a' => 1])) {
@@ -97,7 +97,8 @@ abstract class AbstractController extends HController
                 $config = getConfig('config');
                 if (!isset($config['captcha_session_name']) ||
                     !isset($_SESSION[$config['captcha_session_name']]) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']]) != $values['registerCaptcha']) {
+                    !isset($param['captcha']) ||
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name'][$param['captcha']]]) != $values['registerCaptcha']) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
@@ -151,7 +152,7 @@ abstract class AbstractController extends HController
         }
     }
 
-    protected function _login()
+    protected function _login($param)
     {
         $this->data['loginErrors'] = [];
         $this->data['loginValues'] = [];
@@ -169,11 +170,12 @@ abstract class AbstractController extends HController
         $form->setFieldsName(['username', 'password', 'remember', 'loginCaptcha'])
             ->setMethod('post', [], ['remember']);
         try {
-            $form->afterCheckCallback(function ($values) use ($model, $form) {
+            $form->afterCheckCallback(function ($values) use ($model, $form, $param) {
                 $config = getConfig('config');
                 if (!isset($config['captcha_session_name']) ||
                     !isset($_SESSION[$config['captcha_session_name']]) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']]) != $values['loginCaptcha']) {
+                    !isset($param['captcha']) ||
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name'][$param['captcha']]]) != $values['loginCaptcha']) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
                 // If there is no captcha error

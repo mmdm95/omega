@@ -7,7 +7,7 @@ use HForm\Form;
 use voku\helper\AntiXSS;
 
 
-class AdminController extends HController
+class HomeController extends HController
 {
     private $auth;
     private $data = [];
@@ -1451,9 +1451,10 @@ class AdminController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
             'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
 
         try {
@@ -1463,7 +1464,7 @@ class AdminController extends HController
                 });
 
                 $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Check plan duplicate
@@ -1549,6 +1550,7 @@ class AdminController extends HController
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
                     'image' => trim($values['image']),
+                    'description' => trim($values['description']),
                     'rules' => trim($values['rules']),
                     'start_at' => convertNumbersToPersian($values['start_date'], true),
                     'end_at' => convertNumbersToPersian($values['end_date'], true),
@@ -1641,9 +1643,10 @@ class AdminController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
             'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
 
         try {
@@ -1653,7 +1656,7 @@ class AdminController extends HController
                 });
 
                 $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Check plan duplicate
@@ -1741,6 +1744,7 @@ class AdminController extends HController
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
                     'image' => trim($values['image']),
+                    'description' => trim($values['description']),
                     'rules' => trim($values['rules']),
                     'start_at' => convertNumbersToPersian($values['start_date'], true),
                     'end_at' => convertNumbersToPersian($values['end_date'], true),
@@ -2604,6 +2608,43 @@ class AdminController extends HController
                 $this->data['success_images'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors_images'] = $formImages->getError();
+            }
+        }
+
+        // Others panel setting form submit
+        $formImages = new Form();
+        $this->data['errors_others'] = [];
+        $this->data['form_token_others'] = $formImages->csrfToken('settingOthers');
+        $formImages->setFieldsName([
+            'otherImgTop',
+        ])->setMethod('post');
+        try {
+            $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
+                if ($values['otherImgTop'] != '' && !file_exists($values['otherImgTop'])) {
+                    $values['otherImgTop'] = '';
+                }
+            })->afterCheckCallback(function ($values) use ($formImages) {
+                //-----
+                $this->data['setting']['pages']['all']['topImage']['image'] = $values['otherImgTop'];
+                //-----
+
+                $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
+                $res = write_json(CORE_PATH . 'config.json', $this->setting);
+
+                if (!$res) {
+                    $formImages->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $formImages->checkForm()->isSuccess();
+        if ($formImages->isSubmit()) {
+            if ($res) {
+                $this->data['success_others'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors_others'] = $formImages->getError();
             }
         }
 
