@@ -47,9 +47,19 @@ abstract class AbstractController extends HController
         }
     }
 
-    //------------------------------
-    //---------- Captcha -----------
-    //------------------------------
+    public function logout()
+    {
+        if($this->auth->isLoggedIn()) {
+            $this->auth->logout();
+            $this->redirect(base_url('index'));
+        } else {
+            $this->error->show_404();
+        }
+    }
+
+    //-------------------------------
+    //----------- Captcha -----------
+    //-------------------------------
 
     public function captchaAction($param)
     {
@@ -60,9 +70,9 @@ abstract class AbstractController extends HController
         }
     }
 
-    //------------------------------
-    //------ Register & Login ------
-    //------------------------------
+    //-------------------------------
+    //------ Register & Login -------
+    //-------------------------------
 
     protected function _register($param)
     {
@@ -96,9 +106,9 @@ abstract class AbstractController extends HController
                 }
                 $config = getConfig('config');
                 if (!isset($config['captcha_session_name']) ||
-                    !isset($_SESSION[$config['captcha_session_name']]) ||
+                    !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                     !isset($param['captcha']) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name'][$param['captcha']]]) != $values['registerCaptcha']) {
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['registerCaptcha']) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
@@ -141,10 +151,12 @@ abstract class AbstractController extends HController
                 unset($this->data['mobile']);
                 unset($this->data['code']);
 
+                $message = 'در حال پردازش عملیات ورود';
+                $delay = 1;
                 if (isset($_GET['back_url'])) {
-                    $this->redirect(base_url('verifyPhone?back_url=' . $_GET['back_url']));
+                    $this->redirect(base_url('verifyPhone?back_url=' . $_GET['back_url']), $message, $delay);
                 }
-                $this->redirect(base_url('verifyPhone'));
+                $this->redirect(base_url('verifyPhone'), $message, $delay);
             } else {
                 $this->data['registerErrors'] = $form->getError();
                 $this->data['registerValues'] = $form->getValues();
@@ -173,9 +185,9 @@ abstract class AbstractController extends HController
             $form->afterCheckCallback(function ($values) use ($model, $form, $param) {
                 $config = getConfig('config');
                 if (!isset($config['captcha_session_name']) ||
-                    !isset($_SESSION[$config['captcha_session_name']]) ||
+                    !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                     !isset($param['captcha']) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name'][$param['captcha']]]) != $values['loginCaptcha']) {
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['loginCaptcha']) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
                 // If there is no captcha error
@@ -193,10 +205,12 @@ abstract class AbstractController extends HController
         $res = $form->checkForm()->isSuccess();
         if ($form->isSubmit()) {
             if ($res) {
+                $message = 'در حال پردازش عملیات ورود';
+                $delay = 1;
                 if (isset($_GET['back_url'])) {
-                    $this->redirect($_GET['back_url']);
+                    $this->redirect($_GET['back_url'], $message, $delay);
                 }
-                $this->redirect(base_url('user/profile'));
+                $this->redirect(base_url('user/profile'), $message, $delay);
             } else {
                 $this->data['loginErrors'] = $form->getError();
                 $this->data['loginValues'] = $form->getValues();

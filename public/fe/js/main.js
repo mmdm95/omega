@@ -314,18 +314,21 @@
 
     // Reload captcha
     $('.form-captcha').on('click', function () {
-        var action, sameAction;
+        var action, sameAction, sameImgSrc;
         action = $(this).closest('.form-account-captcha').data('captcha-url');
         sameAction = $('[data-captcha-url="' + action + '"]');
+        sameAction.first().find('img').attr('src', baseUrl + 'captcha/' + action + '?' + Date.now());
+        sameImgSrc = sameAction.first().find('img').attr('src');
         sameAction.each(function () {
-            $(this).find('img').attr('src', baseUrl + 'captcha/' + action + '?' + Date.now());
+            $(this).find('img').attr('src', sameImgSrc);
         });
-    });
+    }).trigger('click');
+
 
     $('.smooth-scroll').on('click', function (e) {
         e.preventDefault();
         var target = $(this).attr('href');
-        if(target && $(target).length) {
+        if (target && $(target).length) {
             $('html, body').stop().animate({
                 scrollTop: $(target).offset().top - 30
             }, 300);

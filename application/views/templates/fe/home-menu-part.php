@@ -48,20 +48,34 @@
                                 <div class="author-area">
                                     <div class="author__access_area">
                                         <ul class="d-flex list-unstyled align-items-center">
-                                            <li>
-                                                <a href="javascript:void(0);" class="access-link"
-                                                   data-toggle="modal"
-                                                   data-target="#login_modal">ورود</a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0);"
-                                                   data-toggle="modal"
-                                                   data-target="#signup_modal"
-                                                   class="btn btn-xs btn-gradient btn-gradient-two">
-                                                    <i class="la la-user mr-1"></i>
-                                                    ثبت نام
-                                                </a>
-                                            </li>
+                                            <?php if ($auth->isLoggedIn()): ?>
+                                                <li>
+                                                    <a href="<?= base_url('user/dashboard'); ?>"
+                                                       class="access-link">داشبورد</a>
+                                                </li>
+                                                <li>
+                                                    <a href="<?= base_url('logout'); ?>"
+                                                       class="btn btn-xs btn-gradient btn-gradient-one">
+                                                        <i class="la la-power-off mr-1"></i>
+                                                        خروج
+                                                    </a>
+                                                </li>
+                                            <?php else: ?>
+                                                <li>
+                                                    <a href="javascript:void(0);" class="access-link"
+                                                       data-toggle="modal"
+                                                       data-target="#login_modal">ورود</a>
+                                                </li>
+                                                <li>
+                                                    <a href="javascript:void(0);"
+                                                       data-toggle="modal"
+                                                       data-target="#signup_modal"
+                                                       class="btn btn-xs btn-gradient btn-gradient-two">
+                                                        <i class="la la-user mr-1"></i>
+                                                        ثبت نام
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
                                         </ul>
                                     </div>
                                 </div>
@@ -74,24 +88,36 @@
                                                     class="la la-times-circle"></i></a>
                                         <div class="author-avatar">
                                             <?php if (isset($identity->image)): ?>
-                                                <img src="<?= $identity->image; ?>"
+                                                <img src="<?= asset_url($identity->image); ?>"
                                                      alt="<?= $identity->username ?? ''; ?>"
                                                      class="rounded-circle w-75">
                                             <?php endif; ?>
                                         </div>
                                         <ul class="list-unstyled">
-                                            <li>
-                                                <a href="javascript:void(0);" class="access-link"
-                                                   data-toggle="modal"
-                                                   data-target="#login_modal">ورود</a>
-                                            </li>
-                                            <li>
-                                                <a href="javascript:void(0);"
-                                                   data-toggle="modal"
-                                                   data-target="#signup_modal">
-                                                    ثبت نام
-                                                </a>
-                                            </li>
+                                            <?php if ($auth->isLoggedIn()): ?>
+                                                <li>
+                                                    <a href="<?= base_url('user/dashboard'); ?>"
+                                                       class="access-link">داشبورد</a>
+                                                </li>
+                                                <li>
+                                                    <a href="<?= base_url('logout'); ?>">
+                                                        خروج
+                                                    </a>
+                                                </li>
+                                            <?php else: ?>
+                                                <li>
+                                                    <a href="javascript:void(0);" class="access-link"
+                                                       data-toggle="modal"
+                                                       data-target="#login_modal">ورود</a>
+                                                </li>
+                                                <li>
+                                                    <a href="javascript:void(0);"
+                                                       data-toggle="modal"
+                                                       data-target="#signup_modal">
+                                                        ثبت نام
+                                                    </a>
+                                                </li>
+                                            <?php endif; ?>
                                         </ul>
                                     </div><!-- ends: .author-info -->
                                 </div><!-- ends: .offcanvas-menu -->

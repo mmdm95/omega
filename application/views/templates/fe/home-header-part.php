@@ -14,7 +14,7 @@
 
     <title><?= $title ?? ''; ?></title>
 
-    <!-- inject:css-->
+    <!-- inject:css -->
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/bootstrap/bootstrap-rtl.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/brands.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/fontawesome.min.css">
@@ -35,6 +35,12 @@
         <?php endforeach; ?>
     <?php endif; ?>
     <!-- End plugin css for this page -->
+
+    <!-- inject:js -->
+    <script src="<?= asset_url(); ?>fe/js/jquery/jquery-1.12.3.js"></script>
+    <script src="<?= asset_url(); ?>fe/js/bootstrap/popper.js"></script>
+    <script src="<?= asset_url(); ?>fe/js/bootstrap/bootstrap.min.js"></script>
+    <!-- endinject -->
 </head>
 <body class="rtl">
 <script>

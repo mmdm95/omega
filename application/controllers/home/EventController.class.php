@@ -41,6 +41,9 @@ class EventController extends AbstractController
             $this->redirect(base_url('event'));
         }
 
+        // Submit checker
+        $this->_eventSubmit();
+
         $this->data['param'] = $param;
         $this->data['event'] = $model->select_it(null, 'plans', '*', 'slug=:slug', ['slug' => $param[0]])[0];
         $this->data['event']['options'] = json_decode($this->data['event']['options'], true);
@@ -94,8 +97,18 @@ class EventController extends AbstractController
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح', $this->data['event']['title']);
 
+        // Extra js
+        $this->data['js'][] = $this->asset->script('fe/js/eventJs.js');
+
         $this->_render_page([
             'pages/fe/event-detail',
         ]);
+    }
+
+    protected function _eventSubmit()
+    {
+//        if($this->auth->isLoggedIn()) {
+
+//        }
     }
 }

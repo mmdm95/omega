@@ -4,9 +4,9 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 
-require_once CONTROLLER_PATH . "home/HomeController.class.php";
+require_once CONTROLLER_PATH . "home/AbstractController.class.php";
 
-class ErrorsController extends HomeController
+class ErrorsController extends AbstractController
 {
     // Index is notFound method
     public function indexAction()
@@ -19,9 +19,9 @@ class ErrorsController extends HomeController
 
         try {
             $auth = new Auth();
-            if (($auth->setStorageType(AUTH::session)->setNamespace('adminPanel')->isLoggedIn() ||
-                    $auth->setStorageType(AUTH::cookie)->setNamespace('adminPanel')->isLoggedIn())
-                && isset($_SESSION['admin_panel_namespace'])) {
+            if (isset($_SESSION['admin_panel_namespace']) &&
+                ($auth->setStorageType(AUTH::session)->setNamespace($_SESSION['admin_panel_namespace'])->isLoggedIn() ||
+                    $auth->setStorageType(AUTH::cookie)->setNamespace($_SESSION['admin_panel_namespace'])->isLoggedIn())) {
                 $data['identity'] = $auth->getIdentity();
                 $this->load->view($config['admin_notfound'], $data);
             } else {

@@ -160,10 +160,11 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
         $this->_storeStorageType();
 
         $extraWhere = is_string($extraWhere) ? $extraWhere : '';
+        $extraWhere = empty($extraWhere) ? '' : ' AND (' . $extraWhere . ')' ;
         $extraParams = is_array($extraParams) ? $extraParams : [];
 
         $row = $this->getDataFromDB($this->authData->tables->user, '*',
-            "{$this->authData->columns->user->username->column}=:username AND (" . $extraWhere . ")",
+            "{$this->authData->columns->user->username->column}=:username" . $extraWhere,
             array_merge(['username' => $username], $extraParams));
 
         if (!count($row)) {

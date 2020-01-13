@@ -1,3 +1,16 @@
+<?php if (isset($registerErrors) && count($registerErrors)): ?>
+    <script>
+        (function ($) {
+            'use strict';
+
+            $(function () {
+                $('#signup_modal').modal('show');
+                $('#login_modal').modal('hide');
+            });
+        })(jQuery);
+    </script>
+<?php endif; ?>
+
 <div class="modal fade" id="signup_modal" tabindex="-1" role="dialog" aria-labelledby="signup_modal_label"
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -28,7 +41,7 @@
                     </div>
                 <?php endif ?>
 
-                <form action="<?= base_url(ACTION); ?>?back_url=<?= URITracker::get_last_uri(); ?>"
+                <form action="<?= base_url(CONTROLLER . '/' . ACTION); ?><?= $param ? '/' . implode('/', $param) : ''; ?>?back_url=<?= URITracker::get_last_uri(); ?>"
                       id="signup-form" method="post">
                     <?= $form_token_register; ?>
 
@@ -65,7 +78,7 @@
                     <br>
                     <div class="form-group text-center">
                         <div class="form-group form-account-captcha" data-captcha-url="<?= ACTION; ?>">
-                            <img src="<?= base_url('captcha/' . ACTION); ?>" alt="">
+                            <img src="" alt="captcha">
                             <button type="button" class="btn btn-link ml-2 mb-0 form-captcha">
                                 <i class="la la-refresh font-size-lg"></i>
                             </button>
