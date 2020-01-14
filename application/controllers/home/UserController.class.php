@@ -19,7 +19,8 @@ class UserController extends AbstractController
     {
         $this->_checker();
 
-        $model = new Model();
+        $user = new UserModel();
+        $this->data['payedEvents'] = $user->getPayedEvents(['user_id' => $this->data['identity']->id]);
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'فرم اطلاعات');
 
