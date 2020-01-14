@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: "IRANSansWeb", Arial, sans-serif;
+            font-family: IRANSansWeb, sans-serif;
             padding: 1%;
         }
 
@@ -24,10 +24,12 @@
             height: auto;
             padding: 20px;
             border-radius: 7px;
-            font-size: 14px;
+            font-size: 18px;
             -webkit-box-shadow: 0 7px 18px 0rgba(0, 0, 0, 0.12);
             -moz-box-shadow: 0 7px 18px 0 #rgba(0, 0, 0, 0.12);
             box-shadow: 0 7px 18px 0 rgba(0, 0, 0, 0.12);
+            direction: rtl;
+            text-align: center;
         }
     </style>
 </head>

@@ -90,7 +90,7 @@
                                             <?php if (isset($identity->image)): ?>
                                                 <img src="<?= asset_url($identity->image); ?>"
                                                      alt="<?= $identity->username ?? ''; ?>"
-                                                     class="rounded-circle w-75">
+                                                     class="rounded-circle w-50">
                                             <?php endif; ?>
                                         </div>
                                         <ul class="list-unstyled">

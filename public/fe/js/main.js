@@ -328,10 +328,6 @@
     $('.smooth-scroll').on('click', function (e) {
         e.preventDefault();
         var target = $(this).attr('href');
-        if (target && $(target).length) {
-            $('html, body').stop().animate({
-                scrollTop: $(target).offset().top - 30
-            }, 300);
-        }
+        $.OmegaSmoothScroll(target);
     });
 })(jQuery);

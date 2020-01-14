@@ -21,15 +21,31 @@ class HomeController extends AbstractController
         $this->data['helpfulLinks'] = $model->select_it(null, 'helpful_links');
         //-----
 
-        // Newsletter form
+        // Newsletter submission
+        $this->_newsletter();
+
+        // Register & Login actions
+        $this->_register(['captcha' => ACTION]);
+        $this->_login(['captcha' => ACTION]);
+
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
+
+        $this->_render_page([
+            'pages/fe/index',
+        ]);
+    }
+
+    protected function _newsletter()
+    {
+        $model = new Model();
         $this->data['newsletterErrors'] = [];
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addNewletter');
+        $this->data['form_token_newsletter'] = $form->csrfToken('addNewletter');
         $form->setFieldsName(['mobile'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function () use ($model, $form) {
-                $form->isRequired(['mobile'], 'فیلدهای موبایل اجباری می‌باشد.')
+                $form->isRequired(['mobile'], 'فیلد موبایل اجباری می‌باشد.')
                     ->validatePersianMobile('mobile');
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = true;
@@ -55,15 +71,5 @@ class HomeController extends AbstractController
                 $this->data['newsletterErrors'] = $form->getError();
             }
         }
-
-        // Register & Login actions
-        $this->_register(['captcha' => ACTION]);
-        $this->_login(['captcha' => ACTION]);
-
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'صفحه اصلی');
-
-        $this->_render_page([
-            'pages/fe/index',
-        ]);
     }
 }

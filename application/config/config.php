@@ -55,6 +55,23 @@ defined('EDU_GRADES') OR define('EDU_GRADES', [
     18 => 'دکتری',
 ]);
 
+// Custom education fields
+defined('EDU_FIELDS') OR define('EDU_FIELDS', [
+    1 => ' ریاضی و فیزیک',
+    2 => 'علوم تجربی',
+    3 => 'علوم انسانی',
+    4 => 'هنرستان',
+]);
+
+// Gender
+defined('GENDER_MALE') OR define('GENDER_MALE', 1);
+defined('GENDER_FEMALE') OR define('GENDER_FEMALE', 2);
+
+// Marriage
+defined('MARRIAGE_MARRIED') OR define('MARRIAGE_MARRIED', 1);
+defined('MARRIAGE_SINGLE') OR define('MARRIAGE_SINGLE', 2);
+defined('MARRIAGE_DEAD') OR define('MARRIAGE_DEAD', 3);
+
 //===============================================
 
 return array(

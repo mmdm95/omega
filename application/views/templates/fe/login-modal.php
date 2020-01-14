@@ -40,7 +40,7 @@
                     </div>
                 <?php endif; ?>
 
-                <form action="<?= base_url(CONTROLLER . '/' . ACTION); ?><?= $param ? '/' . implode('/', $param) : ''; ?>?back_url=<?= URITracker::get_last_uri(); ?>"
+                <form action="<?= base_url(CONTROLLER . '/' . ACTION); ?><?= isset($param) && !empty($param) ? '/' . implode('/', $param) : ''; ?>?back_url=<?= URITracker::get_last_uri(); ?>"
                       id="login-form" method="post">
                     <?= $form_token_login; ?>
 

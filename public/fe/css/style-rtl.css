@@ -7666,6 +7666,10 @@ p {
 
 /* Author: Saeed*/
 
+.font-size-huge {
+    font-size: 6rem !important;
+}
+
 .font-size-lg {
     font-size: 1.5rem !important;
 }

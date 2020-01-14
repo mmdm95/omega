@@ -15,9 +15,6 @@ abstract class AbstractController extends HController
     {
         parent::__construct();
 
-        $this->load->library('HForm/Form');
-        $form = new Form();
-
         $this->load->library('HAuthentication/Auth');
         try {
             $this->auth = new Auth();
