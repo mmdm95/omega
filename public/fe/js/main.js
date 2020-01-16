@@ -456,25 +456,25 @@
             var content, msg;
             if (response.success) {
                 msg = Array.isArray(response.success.msg) ? response.success.msg[0] : (response.success.msg ? response.success.msg : '');
-                content = Array.isArray(response.success.msg) && typeof response.success.msg[1] !== typeof undefined ? response.success.msg[1] : undefined;
+                content = Array.isArray(response.success.msg) && typeof response.success.msg[1] !== typeof undefined ? response.success.msg.slice(1) : undefined;
                 if (msg != '') {
                     _this.showMessage(msg, 'موفقیت', 'success', _this.messageIcon.success);
                 }
             } else if (response.info) {
                 msg = Array.isArray(response.info.msg) ? response.info.msg[0] : (response.info.msg ? response.info.msg : '');
-                content = Array.isArray(response.info.msg) && typeof response.info.msg[1] !== typeof undefined ? response.info.msg[1] : undefined;
+                content = Array.isArray(response.info.msg) && typeof response.info.msg[1] !== typeof undefined ? response.info.msg.slice(1) : undefined;
                 if (msg != '') {
                     _this.showMessage(msg, 'اطلاع', 'info', _this.messageIcon.info);
                 }
             } else if (response.warning) {
                 msg = Array.isArray(response.warning.msg) ? response.warning.msg[0] : (response.warning.msg ? response.warning.msg : '');
-                content = Array.isArray(response.warning.msg) && typeof response.warning.msg[1] !== typeof undefined ? response.warning.msg[1] : undefined;
+                content = Array.isArray(response.warning.msg) && typeof response.warning.msg[1] !== typeof undefined ? response.warning.msg.slice(1) : undefined;
                 if (msg != '') {
                     _this.showMessage(msg, 'اخطار', 'warning', _this.messageIcon.warning);
                 }
             } else if (response.error) {
                 msg = Array.isArray(response.error.msg) ? response.error.msg[0] : (response.error.msg ? response.error.msg : '');
-                content = Array.isArray(response.error.msg) && typeof response.error.msg[1] !== typeof undefined ? response.error.msg[1] : undefined;
+                content = Array.isArray(response.error.msg) && typeof response.error.msg[1] !== typeof undefined ? response.error.msg.slice(1) : undefined;
                 if (msg != '') {
                     _this.showMessage(msg, 'خطا', 'error', _this.messageIcon.danger);
                 }

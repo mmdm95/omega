@@ -70,24 +70,30 @@ class UserController extends AbstractController
         if(!$this->auth->isLoggedIn() || !is_ajax()) {
             message('error', 200, 'دسترسی غیر مجاز');
         }
+        if(empty($_FILES['file'])) {
+            message('error', 200, 'پارامترهای وارد شده نامعتبر است.');
+        }
 
-        $userDir = asset_url('users/profileImages');
+        $userDir = PROFILE_IMAGE_DIR;
         //
         if (!file_exists($userDir)) {
             mkdir($userDir, 0777, true);
         }
         //
+        $imageExt = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+        //
+        $this->load->library('Upload/vendor/autoload');
         $storage = new \Upload\Storage\FileSystem($userDir, true);
         $file = new \Upload\File('file', $storage);
 
         // Set file name to user's phone number
-        $file->setName('');
+        $file->setName($this->data['identity']->username);
 
         // Validate file upload
         // MimeType List => http://www.iana.org/assignments/media-types/media-types.xhtml
         $file->addValidations(array(
             // Ensure file is of type "image/png"
-            new \Upload\Validation\Mimetype(['image/png', 'image/jpg', 'image/jpeg']),
+            new \Upload\Validation\Mimetype(['image/png', 'image/jpg', 'image/jpeg', 'image/gif']),
 
             // Ensure file is no larger than 4M (use "B", "K", M", or "G")
             new \Upload\Validation\Size('4M')
@@ -99,10 +105,17 @@ class UserController extends AbstractController
             $res = $file->upload();
         } catch (\Exception $e) {
             // Fail!
-            $errors = $file->getErrors();
             $res = false;
         }
         //
+        if($res) {
+            $image = PROFILE_IMAGE_DIR . $this->data['identity']->username . '.' . $imageExt;
+            $this->auth->storeIdentity([
+                'image' => $image,
+            ]);
+            message('success', 200, ['تصویر با موفقیت بروزرسانی شد.', $image]);
+        }
+        message('error', 200, 'خطا در بروزرسانی تصویر');
     }
 
     //-----

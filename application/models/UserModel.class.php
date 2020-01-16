@@ -11,7 +11,7 @@ class UserModel extends HModel
     {
         parent::__construct();
 
-        $this->table = 'user';
+        $this->table = 'users';
         $this->db = $this->getDb();
     }
 

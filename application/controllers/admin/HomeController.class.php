@@ -1953,14 +1953,11 @@ class HomeController extends HController
             $this->redirect(base_url('admin/login'));
         }
 
-        $model = new Model();
-        $this->data['factors'] = $model->select_it(null, 'factors AS f', [
-            'f.id', 'f.factor_code', 'f.first_name', 'f.last_name', 'f.mobile', 'f.payment_title', 'f.payment_status', 'f.shipping_title',
-            'f.send_status', 'f.final_amount', 'f.want_factor', 'f.payment_date', 'f.order_date'
-        ]);
+        $factorModel = new FactorModel();
+        $this->data['factors'] = $factorModel->getFactors();
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارشات');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده فاکتورهای ثبت شده');
 
         $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');

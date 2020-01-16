@@ -121,7 +121,7 @@ abstract class AbstractController extends HController
                     'password' => password_hash(trim($values['password']), PASSWORD_DEFAULT),
                     'ip_address' => get_client_ip_env(),
                     'created_on' => time(),
-                    'active' => 0,
+                    'active' => 1,
                     'image' => PROFILE_DEFAULT_IMAGE
                 ]);
 
@@ -189,7 +189,8 @@ abstract class AbstractController extends HController
                 }
                 // If there is no captcha error
                 if (!count($form->getError())) {
-                    $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'));
+                    $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'),
+                        false, 'active=:active', ['active' => 1]);
                     if (is_array($login)) {
                         $form->setError($login['err']);
                     }

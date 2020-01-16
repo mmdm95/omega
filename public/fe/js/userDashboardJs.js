@@ -10,24 +10,22 @@
             img_placeholder_class = '.user-profile-image',
             img_placeholder,
             //-----
-            upload_url = baseUrl + 'ajaxUploadUserImage';
+            upload_url = baseUrl + 'user/ajaxUploadUserImage';
 
         function inpFileUploadChange() {
-            var $this, data;
+            var $this, fd;
             inp_file.on('change.' + namespace, function () {
                 if (imageChecker()) {
                     $this = $(this);
                     //-----
-                    data = new FormData();
-                    data.append('file', $this.get(0).files[0]);
+                    fd = new FormData();
+                    fd.append('file', $this.get(0).files[0]);
                     //-----
                     omega.question('تغییر تصویر پروفایل؟', function () {
                         omega.ajaxRequest({
                             method: 'POST',
                             url: upload_url,
-                            data: data,
-                            enctype: 'multipart/form-data',
-                            cache: false,
+                            data: fd,
                             contentType: false,
                             processData: false,
                         }, function (response) {
@@ -36,7 +34,9 @@
                             var res = JSON.parse(response);
                             omega.processAjaxData(res, function (content) {
                                 if (res.success) {
-                                    img_placeholder.attr('src', content);
+                                    if(content && content.length) {
+                                        img_placeholder.attr('src', baseUrl + content[0] + '?' + Date.now());
+                                    }
                                 }
                             });
                         });

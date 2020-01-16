@@ -107,8 +107,8 @@ class EventController extends AbstractController
 
     protected function _eventSubmit()
     {
-//        if($this->auth->isLoggedIn()) {
+        if($this->auth->isLoggedIn()) {
 
-//        }
+        }
     }
 }
