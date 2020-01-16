@@ -1832,7 +1832,7 @@ class HomeController extends HController
         $model = new Model();
         $this->data['plans'] = $model->select_it(null, 'plans', '*', null, [], null, ['id DESC']);
         foreach ($this->data['plans'] as &$plan) {
-            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId', [],
+            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount NOT NULL', [],
                 ['plan_id'], null, null, null, true);
             $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id']], false, true);
         }

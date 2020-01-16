@@ -21,7 +21,7 @@ defined('ASSURED_KEY') OR define('ASSURED_KEY','EZ44mFi3TlAey1b2w4Y7lVDuqO+SRxGX
 //===============================================
 
 // Default user profile image
-defined('PROFILE_DEFAULT_IMAGE') OR define('PROFILE_DEFAULT_IMAGE', 'fe/img/user-default.jpg');
+defined('PROFILE_DEFAULT_IMAGE') OR define('PROFILE_DEFAULT_IMAGE', 'public/fe/img/user-default.jpg');
 
 // My custom plan status
 defined('PLAN_STATUS_ACTIVATE') OR define('PLAN_STATUS_ACTIVATE', 1);
@@ -36,7 +36,7 @@ defined('OWN_PAYMENT_STATUS_NOT_PAYED') OR define('OWN_PAYMENT_STATUS_NOT_PAYED'
 defined('OWN_PAYMENT_STATUS_WAIT') OR define('OWN_PAYMENT_STATUS_WAIT', -8);
 
 // My custom payment wait
-defined('OWN_WAIT_TIME') OR define('OWN_WAIT_TIME', 60 * 60);
+defined('OWN_WAIT_TIME') OR define('OWN_WAIT_TIME', 10 * 60);
 
 // Custom education grades
 defined('EDU_GRADES') OR define('EDU_GRADES', [

@@ -88,9 +88,9 @@
                                                     class="la la-times-circle"></i></a>
                                         <div class="author-avatar">
                                             <?php if (isset($identity->image)): ?>
-                                                <img src="<?= asset_url($identity->image); ?>"
+                                                <img src="<?= base_url($identity->image); ?>"
                                                      alt="<?= $identity->username ?? ''; ?>"
-                                                     class="rounded-circle w-50">
+                                                     class="rounded-circle w-50 user-profile-image">
                                             <?php endif; ?>
                                         </div>
                                         <ul class="list-unstyled">

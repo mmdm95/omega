@@ -160,7 +160,7 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
         $this->_storeStorageType();
 
         $extraWhere = is_string($extraWhere) ? $extraWhere : '';
-        $extraWhere = empty($extraWhere) ? '' : ' AND (' . $extraWhere . ')' ;
+        $extraWhere = empty($extraWhere) ? '' : ' AND (' . $extraWhere . ')';
         $extraParams = is_array($extraParams) ? $extraParams : [];
 
         $row = $this->getDataFromDB($this->authData->tables->user, '*',
@@ -889,7 +889,7 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
     public function getCurrentUserRole()
     {
         $roleId = $this->getCurrentUserRoleID();
-        $role = $this->getDataFromDB($this->authData->tables->role, $this->authData->columns->role->name->column,
+        $role = $this->getDataFromDB($this->authData->tables->role, ['*'],
             "{$this->authData->columns->role->id->column}=:roleId", ['roleId' => $roleId]);
         if (!count($role)) {
             throw new HAException('نقش مورد نظر وجود ندارد!');
@@ -961,6 +961,8 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
             $role = $this->_fetchRole($role);
         }
 
+        if (!count($role)) return false;
+
         if (in_array($role[0][$this->authData->columns->role->name->column], $this->authData->data->admin_roles)) {
             return true;
         }
@@ -1000,7 +1002,10 @@ class Auth extends BasicDB implements HIAuthenticator, HIAuthorizator, HIRole, H
             ) {
                 return [];
             }
-            return [0 => [$this->authData->columns->role->id->column => $role]];
+            return $this->getDataFromDB($this->authData->tables->role, '*',
+                "{$this->authData->columns->role->id->column}=:role", [
+                    'role' => $role
+                ]);
         } else {
             if (!$this->existsDataInDB($this->authData->tables->role,
                 "{$this->authData->columns->role->name->column}=:role", [

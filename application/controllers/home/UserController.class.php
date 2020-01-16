@@ -53,7 +53,7 @@ class UserController extends AbstractController
 
         // If don't have any event for current user, redirect him/her to dashboard to make better decision
         $model = new Model();
-        if(!$model->is_exist('plans', 'slug=:slug', ['slug' => $param[1]]) || !count($this->data['event'])) {
+        if (!$model->is_exist('plans', 'slug=:slug', ['slug' => $param[1]]) || !count($this->data['event'])) {
             $_SESSION['user-event'] = 'جزئیاتی برای طرح درخواست شده وجود ندارد';
             $this->redirect('user/dashboard');
         }
@@ -63,6 +63,11 @@ class UserController extends AbstractController
 //        $this->_render_page([
 //            'pages/fe/',
 //        ]);
+    }
+
+    public function uploadUserImageAction()
+    {
+
     }
 
     //-----
@@ -76,17 +81,97 @@ class UserController extends AbstractController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token_information'] = $form->csrfToken('saveInformation');
-        $form->setFieldsName([''])->setMethod('post');
+        $formFields = ['full-name', 'father-name', 'n-code', 'id-code', 'id-location', 'grade', 'gender', 'home-phone',
+            'e-phone', 'province', 'city', 'postal-code', 'address'];
+        if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
+            $formFields = array_merge(['school', 'point', 'degree'], $formFields);
+        }
+        if ($this->data['identity']->role_id != AUTH_ROLE_STUDENT) {
+            $formFields = array_merge(['soldiery', 'soldiery-place', 'soldiery-end', 'marriage', 'children'], $formFields);
+        }
+        $form->setFieldsName($formFields)->setMethod('post');
         try {
-            $form->beforeCheckCallback(function () use ($model, $form) {
-                $form->isRequired([''], 'فیلدهای اجباری را خالی نگذارید.');
+            $form->beforeCheckCallback(function () use ($model, $form, $formFields) {
+                $form->isRequired($formFields, 'فیلدهای اجباری را خالی نگذارید.');
+                $form->validateUsername('full-name', 'نام و نام خانوادگی باید فقط حروف باشد.')
+                    ->validateUsername('father-name', 'نام پدر باید فقط حروف باشد.')
+                    ->validateNationalCode('n-code')
+                    ->validate('numeric', 'id-code', 'شماره شناسنامه باید عدد باشد.')
+                    ->validateUsername('id-location', 'محل صدور شناسنامه باید فقط حروف باشد.')
+                    ->isIn('grade', array_keys(EDU_GRADES), 'وضعیت تحصیلی انتخاب شده نامعتبر است.')
+                    ->isIn('gender', [GENDER_MALE, GENDER_FEMALE], 'جنسیت انتخاب شده نامعتبر است.')
+                    ->validate('numeric', 'home-phone', 'شماره تلفن منزل باید عدد باشد.')
+                    ->validate('numeric', 'e-phone', 'شماره تلفن رابط باید عدد باشد.')
+                    ->validateUsername('province', 'استان محل سکونت باید فقط حروف باشد.')
+                    ->validateUsername('city', 'شهر محل سکونت باید فقط حروف باشد.');
+                //-----
+                if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
+                    $form->validateUsername('school', 'مدرسه محل تحصیل باید فقط حروف باشد.')
+                        ->isIn('degree', array_merge([0], array_keys(EDU_FIELDS)), 'رشته تحصیلی انتخاب شده نامعتبر است.');
+                }
+                //-----
+                if ($this->data['identity']->role_id != AUTH_ROLE_STUDENT) {
+                    $form->isIn('soldiery', [0, 1, 2, 3, 4], 'وضعیت سربازی انتخاب شده نامعتبر است.')
+                        ->isLengthEquals('soldiery-place', 4, 'سال پایان خدمت باید شامل ۴ عدد باشد.')
+                        ->validate('numeric', 'soldiery-place', 'سال پایان خدمت باید شامل ۴ عدد باشد.')
+                        ->isIn('marriage', [MARRIAGE_MARRIED, MARRIAGE_SINGLE, MARRIAGE_DEAD], 'وضعیت تأهل انتخاب شده نامعتبر است.')
+                        ->validate('numeric', 'children', 'تعداد فرزند باید عدد باشد.');
+                }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('', [
-                    '' => '',
-                ]);
+                $updateFields = [
+                    'full_name' => trim($values['full-name']),
+                    'father_name' => trim($values['father-name']),
+                    'phone' => convertNumbersToPersian(trim($values['home-phone']), true),
+                    'connector_phone' => convertNumbersToPersian(trim($values['e-phone']), true),
+                    'province' => trim($values['province']),
+                    'city' => trim($values['city']),
+                    'address' => trim($values['address']),
+                    'postal_code' => convertNumbersToPersian(trim($values['postal-code']), true),
+                    'n_code' => convertNumbersToPersian(trim($values['n-code']), true),
+                    'id_code' => convertNumbersToPersian(trim($values['id-code']), true),
+                    'birth_certificate_place' => trim($values['id-location']),
+                    'gender' => convertNumbersToPersian(trim($values['gender']), true),
+                    'grade' => convertNumbersToPersian(trim($values['grade']), true),
+                ];
+                //-----
+                if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
+                    $updateFields['school'] = trim($values['school']);
+                    $updateFields['field'] = convertNumbersToPersian(trim($values['degree']), true);
+                    $updateFields['gpa'] = convertNumbersToPersian(trim($values['point']), true);
+                }
+                //-----
+                if ($this->data['identity']->role_id != AUTH_ROLE_STUDENT) {
+                    $updateFields['military_status'] = convertNumbersToPersian(trim($values['soldiery']), true);
+                    $updateFields['military_place'] = trim($values['soldiery-place']);
+                    $updateFields['military_end_year'] = convertNumbersToPersian(trim($values['soldiery-end']), true);
+                    $updateFields['marital_status'] = convertNumbersToPersian(trim($values['marriage']), true);
+                    $updateFields['children_count'] = convertNumbersToPersian(trim($values['children']), true);
+                }
 
+                $res = $model->update_it('users', $updateFields, 'id=:id', ['id' => $this->data['identity']->id]);
                 if (!$res) {
                     $form->setError('خطا در انجام عملیات!');
+                } else {
+                    $this->auth->storeIdentity(array_merge($this->data['identity'], $updateFields));
+                    $infoFlag = 0;
+                    if(!empty($this->data['identity']->full_name) && !empty($this->data['identity']->connector_phone) &&
+                        !empty($this->data['identity']->n_code) && !empty($this->data['identity']->gender) &&
+                        !empty($this->data['identity']->grade)) {
+                        if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
+                            if(!empty($this->data['identity']->school)) {
+                                $infoFlag = 1;
+                            }
+                        } else {
+                            $infoFlag = 1;
+                        }
+                    }
+
+                    $res2 = $model->update_it('users', [
+                        'info_flag' => $infoFlag
+                    ], 'id=:id', ['id' => $this->data['identity']->id]);
+                    if(!$res2) {
+                        $form->setError('خطا در انجام عملیات!');
+                    }
                 }
             });
         } catch (Exception $e) {
@@ -112,14 +197,34 @@ class UserController extends AbstractController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token_password'] = $form->csrfToken('changePassword');
-        $form->setFieldsName([''])->setMethod('post');
+        $formFields = ['last-password', 'new-password', 'new-re-password'];
+        if (!$this->auth->isInAdminRole($this->data['identity']->role_id)) {
+            $formFields = array_merge(['role'], $formFields);
+        }
+        $form->setFieldsName($formFields)->setMethod('post');
         try {
-            $form->beforeCheckCallback(function () use ($model, $form) {
-                $form->isRequired([''], 'فیلدهای اجباری را خالی نگذارید.');
+            $form->beforeCheckCallback(function ($values) use ($model, $form, $formFields) {
+                $form->isRequired($formFields, 'فیلدهای اجباری را خالی نگذارید.');
+                if (isset($_POST['role'])) {
+                    if ($this->auth->isInAdminRole($this->data['identity']->role_id)) {
+                        $form->setError('نقش شما در این قسمت قابل تغییر نمی‌باشد، لطفا تلاش نفرمایید!');
+                    }
+                }
+                if(!count($form->getError())) {
+                    if (password_verify($values['last-password'], $this->data['identity']->password)) {
+                        $form->isLengthInRange('new-password', 8, 16, 'پسورد باید حداقل ۸ و حداکثر ۱۶ رقم باشد.');
+                        $form->validatePassword('new-password', 2, 'پسورد باید شامل حروف و اعداد انگلیسی باشد.');
+                        if ($values['new-password'] != $values['new-re-password']) {
+                            $form->setError('رمز عبور با تکرار آن مغایرت دارد.');
+                        }
+                    } else {
+                        $form->setError('رمز عبور قبلی اشتباه است! لطفا دوباره تلاش نمایید.');
+                    }
+                }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('', [
-                    '' => '',
-                ]);
+                $res = $model->update_it('users', [
+                    'password' => password_hash($values['new-password'], PASSWORD_DEFAULT),
+                ], 'id=:id', ['id' => $this->data['identity']->id]);
 
                 if (!$res) {
                     $form->setError('خطا در انجام عملیات!');

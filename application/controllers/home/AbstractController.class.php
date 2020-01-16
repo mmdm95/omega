@@ -118,7 +118,7 @@ abstract class AbstractController extends HController
                 $res = $model->insert_it('users', [
                     'activation_code' => $this->data['code'],
                     'username' => convertNumbersToPersian(trim($values['mobile']), true),
-                    'password' => password_hash(trim($values['password']), PASSWORD_BCRYPT),
+                    'password' => password_hash(trim($values['password']), PASSWORD_DEFAULT),
                     'ip_address' => get_client_ip_env(),
                     'created_on' => time(),
                     'active' => 0,
