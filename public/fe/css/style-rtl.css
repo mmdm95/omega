@@ -7906,6 +7906,10 @@ p {
     font-size: 6rem !important;
 }
 
+.font-size-semi-huge {
+    font-size: 3.2rem !important;
+}
+
 .font-size-lg {
     font-size: 1.5rem !important;
 }

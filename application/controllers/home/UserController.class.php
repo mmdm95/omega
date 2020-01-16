@@ -60,14 +60,49 @@ class UserController extends AbstractController
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح', $this->data['event']['title']);
 
-//        $this->_render_page([
-//            'pages/fe/',
-//        ]);
+        $this->_render_page([
+            'pages/fe/user-event-detail',
+        ]);
     }
 
-    public function uploadUserImageAction()
+    public function ajaxUploadUserImageAction()
     {
+        if(!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 200, 'دسترسی غیر مجاز');
+        }
 
+        $userDir = asset_url('users/profileImages');
+        //
+        if (!file_exists($userDir)) {
+            mkdir($userDir, 0777, true);
+        }
+        //
+        $storage = new \Upload\Storage\FileSystem($userDir, true);
+        $file = new \Upload\File('file', $storage);
+
+        // Set file name to user's phone number
+        $file->setName('');
+
+        // Validate file upload
+        // MimeType List => http://www.iana.org/assignments/media-types/media-types.xhtml
+        $file->addValidations(array(
+            // Ensure file is of type "image/png"
+            new \Upload\Validation\Mimetype(['image/png', 'image/jpg', 'image/jpeg']),
+
+            // Ensure file is no larger than 4M (use "B", "K", M", or "G")
+            new \Upload\Validation\Size('4M')
+        ));
+
+        // Try to upload file
+        try {
+            // Success!
+            $res = $file->upload();
+        } catch (\Exception $e) {
+            // Fail!
+            $errors = $file->getErrors();
+            $res = false;
+        }
+        //
     }
 
     //-----

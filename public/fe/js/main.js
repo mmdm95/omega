@@ -520,12 +520,13 @@
                 scrollTop: top
             }, 300);
         };
-        _this.showMessage = function (message, title, type, icon, theme, overlay, draggable) {
+        _this.showMessage = function (message, title, type, icon, theme, overlay, position, draggable) {
             message = message ? message : '';
             title = title ? title : '';
             type = type ? type : 'dark';
             icon = icon ? icon : '';
             theme = theme ? theme : 'light';
+            position = position ? position : 'topRight';
             draggable = draggable ? draggable : true;
 
             // For iziToast
@@ -542,7 +543,7 @@
                     displayMode: 'replace',
                     overlay: overlay,
                     drag: draggable,
-                    position: 'topRight'
+                    position: position
                 };
 
                 switch (type) {
@@ -616,6 +617,9 @@
                 is_connect = true;
                 _this.hasInternetConnection = is_connect;
             }
+        };
+        _this.log = function (context, ...parameters) {
+            console.log(context, parameters)
         };
 
         //------------------------------

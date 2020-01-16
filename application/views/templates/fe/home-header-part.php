@@ -25,6 +25,7 @@
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/owl.carousel.min.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/select2.min.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/slick.css">
+    <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/iziToast.css">
     <link rel="stylesheet" href="<?= asset_url(); ?>fe/css/style-rtl.css">
     <!-- endinject -->
 
