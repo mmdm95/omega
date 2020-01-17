@@ -394,7 +394,7 @@ var tinyMCEPopup = {
         document.attachEvent('onmouseup', tinyMCEPopup._restoreSelection);
 
         // Add base target element for it since it would fail with modal dialogs
-        t.dom.add(t.dom.select('home-header-part.php.php')[0], 'base', { target: '_self' });
+        t.dom.add(t.dom.select('head')[0], 'base', { target: '_self' });
       } else {
         document.addEventListener('mouseup', tinyMCEPopup._restoreSelection, false);
       }
@@ -445,9 +445,9 @@ var tinyMCEPopup = {
     document.onkeyup = tinyMCEPopup._closeWinKeyHandler;
 
     if ('textContent' in document) {
-      t.uiWindow.getEl('home-header-part.php.php').firstChild.textContent = document.title;
+      t.uiWindow.getEl('head').firstChild.textContent = document.title;
     } else {
-      t.uiWindow.getEl('home-header-part.php.php').firstChild.innerText = document.title;
+      t.uiWindow.getEl('head').firstChild.innerText = document.title;
     }
   },
 

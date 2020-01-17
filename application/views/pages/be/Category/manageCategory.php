@@ -76,7 +76,7 @@
                                                             <?= $category['category_name']; ?>
                                                         </td>
                                                         <td>
-                                                            <?php if ($category['status'] == 1): ?>
+                                                            <?php if ($category['publish'] == 1): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-success">فعال</span>
                                                             <?php else: ?>

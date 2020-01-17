@@ -2,8 +2,8 @@
 
 <div class="navbar navbar-inverse header-highlight">
     <div class="navbar-header">
-        <a class="navbar-brand no-padding ml-10" href="<?= base_url(); ?>index">
-            <img src="<?= $favIcon; ?>" alt="" class="img-lg">
+        <a class="navbar-brand no-padding" href="<?= base_url(); ?>index">
+            <img src="<?= $favIcon; ?>" alt="" class="p-10 img-full-y">
         </a>
 
         <ul class="nav navbar-nav visible-xs-block">

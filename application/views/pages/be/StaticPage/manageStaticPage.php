@@ -72,7 +72,7 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('Pages/' . $page['url_name']); ?>">
+                                                            <a href="<?= base_url('pages/' . $page['url_name']); ?>" target="_blank">
                                                                 <?= $page['title']; ?>
                                                             </a>
                                                         </td>

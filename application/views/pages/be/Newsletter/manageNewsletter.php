@@ -60,7 +60,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>ایمیل</th>
+                                                    <th>موبایل</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
@@ -72,7 +72,7 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <?= $newsletter['email']; ?>
+                                                            <?= $newsletter['mobile']; ?>
                                                         </td>
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
@@ -80,7 +80,7 @@
                                                                     <a class="deleteNewsletterBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
-                                                                               value="<?= $blk['id']; ?>">
+                                                                               value="<?= $newsletter['id']; ?>">
                                                                         <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>

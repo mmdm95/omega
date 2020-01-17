@@ -6,7 +6,8 @@ use HAuthentication\HAException;
 use HForm\Form;
 use voku\helper\AntiXSS;
 
-class AdminController extends HController
+
+class HomeController extends HController
 {
     private $auth;
     private $data = [];
@@ -19,8 +20,8 @@ class AdminController extends HController
         $this->load->library('HAuthentication/Auth');
         try {
             $this->auth = new Auth();
-            $this->auth->setNamespace('adminPanel')->setExpiration(365 * 24 * 60 * 60);
-            $_SESSION['admin_panel_namespace'] = 'hva_ms_7472';
+            $_SESSION['admin_panel_namespace'] = 'admin_hva_ms_7472';
+            $this->auth->setNamespace($_SESSION['admin_panel_namespace'])->setExpiration(365 * 24 * 60 * 60);
         } catch (HAException $e) {
             echo $e;
         }
@@ -74,7 +75,8 @@ class AdminController extends HController
             ->setMethod('post', [], ['remember']);
         try {
             $form->afterCheckCallback(function ($values) use ($model, $form) {
-                $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'), true);
+                $login = $this->auth->login($values['username'], $values['password'], $form->isChecked('remember'), true,
+                    'active=:active', ['active' => 1]);
                 if (is_array($login)) {
                     $form->setError($login['err']);
                 }
@@ -169,7 +171,12 @@ class AdminController extends HController
         $this->data['errors'] = [];
         $this->data['userVals'] = [];
 
-        $this->data['userVals'] = $model->select_it(null, 'users', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
+            '*', 'u.id=r.user_id',
+            'u.id=:id', [
+                'id' => $param[0],
+            ], null, 'u.id DESC', null, null, false, 'LEFT')[0];
+
         $this->data['roles'] = $model->select_it(null, 'roles', '*', 'id>:id AND id!=:id2', ['id' => $this->data['identity']->role_id, 'id2' => AUTH_ROLE_GUEST]);
 
         $this->load->library('HForm/Form');
@@ -234,9 +241,8 @@ class AdminController extends HController
             }
         }
 
-        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS ur', [
-            'u.id', 'u.username', 'full_name', 'ur.role_id'
-        ], 'u.id=ur.user_id', 'u.id=:id', ['id' => $param[0]]);
+        $this->data['userVals'] = $model->join_it(null, 'users AS u', 'users_roles AS ur',
+            '*', 'u.id=ur.user_id', 'u.id=:id', ['id' => $param[0]]);
         if (!count($this->data['userVals'])) {
             $this->data['errors'][] = 'خطا در یافتن کاربر';
         } else {
@@ -459,6 +465,228 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
+    public function addFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        $this->data['errors'] = [];
+        $this->data['feedVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addFeedback');
+        $form->setFieldsName(['image', 'full_name', 'feedback', 'show_in_page'])
+            ->setDefaults('show_in_page', 'off')
+            ->setMethod('post', [], ['show_in_page']);
+        try {
+            $form->beforeCheckCallback(function () use ($model, $form) {
+                $form->isRequired(['image', 'full_name', 'feedback'], 'فیلدهای ضروری را خالی نگذارید.');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('site_feedback', [
+                    'image' => trim($values['image']),
+                    'full_name' => trim($values['full_name']),
+                    'feedback' => trim($values['feedback']),
+                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0,
+                    'created_at' => time(),
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['feedVals'] = $form->getValues();
+            }
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن بازخورد');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        $this->_render_page([
+            'pages/be/Feedback/addFeedback',
+            'templates/be/efm',
+        ]);
+    }
+
+    public function editFeedbackAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('site_feedback', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageFeedback'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('editFeedback');
+        $form->setFieldsName(['image', 'full_name', 'feedback', 'show_in_page'])
+            ->setDefaults('show_in_page', 'off')
+            ->setMethod('post', [], ['show_in_page']);
+        try {
+            $form->beforeCheckCallback(function () use ($model, $form) {
+                $form->isRequired(['image', 'full_name', 'feedback'], 'فیلدهای ضروری را خالی نگذارید.');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('site_feedback', [
+                    'image' => trim($values['image']),
+                    'full_name' => trim($values['full_name']),
+                    'feedback' => trim($values['feedback']),
+                    'show_in_page' => $form->isChecked('show_in_page') ? 1 : 0,
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['feedVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['feedVals'] = $model->select_it(null, 'site_feedback', '*', 'id=:id', ['id' => $param[0]])[0];
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش بازخورد');
+
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        $this->_render_page([
+            'pages/be/Feedback/editFeedback',
+            'templates/be/efm',
+        ]);
+    }
+
+    public function manageFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['feedback'] = $model->select_it(null, 'site_feedback');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده بازخورد');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Feedback/manageFeedback');
+    }
+
+    public function viewFeedbackAction($param)
+    {
+
+    }
+
+    public function deleteFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'site_feedback';
+        if (!isset($id)) {
+            message('error', 200, 'آیتم نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'بازخورد وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'بازخورد با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function publishFeedbackAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'site_feedback';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['show_in_page' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش بازخورد در صفحه اصلی فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش بازخورد در صفحه اصلی غیرفعال شد.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
     public function manageNewsletterAction()
     {
         if (!$this->auth->isLoggedIn()) {
@@ -505,7 +733,208 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
-    public function addArticleAction()
+    public function addCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        $this->data['errors'] = [];
+        $this->data['catVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addCategory');
+        $form->setFieldsName(['name', 'keywords', 'publish'])
+            ->setDefaults('publish', 'off')
+            ->setMethod('post', [], ['publish']);
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                    $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('categories', [
+                    'category_name' => trim($values['name']),
+                    'keywords' => trim($values['keywords']),
+                    'publish' => $form->isChecked('publish') ? 1 : 0
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['catVals'] = $form->getValues();
+            }
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن دسته‌بندی');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->_render_page('pages/be/Category/addCategory');
+    }
+
+    public function editCategoryAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('categories', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageCategory'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+        $this->data['catVals'] = $model->select_it(null, 'categories', ['category_name'], 'id=:id', ['id' => $param[0]])[0];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('editCategory');
+        $form->setFieldsName(['name', 'keywords', 'publish'])
+            ->setDefaults('status', 'off')
+            ->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
+                if ($this->data['catVals']['category_name'] != $values['name']) {
+                    if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
+                        $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
+                    }
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('categories', [
+                    'category_name' => trim($values['name']),
+                    'keywords' => trim($values['keywords']),
+                    'publish' => $form->isChecked('publish') ? 1 : 0
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['catVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['catVals'] = $model->select_it(null, 'categories', '*', 'id=:id', ['id' => $param[0]])[0];
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['category_name']);
+
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+
+        $this->_render_page('pages/be/Category/editCategory');
+    }
+
+    public function manageCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, ['id ASC']);
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده دسته‌بندی‌ها');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/Category/manageCategory');
+    }
+
+    public function deleteCategoryAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'categories';
+        if (!isset($id)) {
+            message('error', 200, 'دسته‌بندی نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'دسته‌بندی وجود ندارد.');
+        }
+        if ($model->is_exist($table, 'parent_id=:pId', ['pId' => $id])) {
+            message('error', 200, 'این دسته‌بندی شامل زیردسته است.');
+        }
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'دسته‌بندی با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function showInMenuAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'categories';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'دسته‌بندی وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['show_in_menu' => $stat], 'id=:id AND deletable=:del', ['id' => $id, 'del' => 1]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش دسته‌بندی در منو فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش دسته‌بندی در منو غیر فعال شد.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function addBlogAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -520,7 +949,7 @@ class AdminController extends HController
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addArticle');
+        $this->data['form_token'] = $form->csrfToken('addBlog');
         $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
@@ -530,14 +959,14 @@ class AdminController extends HController
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
                 $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
-                if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
                     $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                 }
                 if (!in_array($values['category'], array_column($this->data['categories'], 'id'))) {
                     $form->setError('دسته‌بندی نامعتبر است.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('articles', [
+                $res = $model->insert_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
@@ -575,12 +1004,12 @@ class AdminController extends HController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن نوشته جدید');
 
         $this->_render_page([
-            'pages/be/Article/addArticle',
+            'pages/be/Blog/addBlog',
             'templates/be/browser-tiny-func'
         ]);
     }
 
-    public function editArticleAction($param)
+    public function editBlogAction($param)
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
@@ -588,8 +1017,8 @@ class AdminController extends HController
 
         $model = new Model();
 
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('articles', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageArticle'));
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('blog', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/manageBlog'));
         }
 
         $this->data['param'] = $param;
@@ -597,11 +1026,11 @@ class AdminController extends HController
         $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name']);
 
         $this->data['errors'] = [];
-        $this->data['atcVals'] = $model->select_it(null, 'articles', ['title'], 'id=:id', ['id' => $param[0]])[0];
+        $this->data['atcVals'] = $model->select_it(null, 'blog', ['title'], 'id=:id', ['id' => $param[0]])[0];
 
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editArticle');
+        $this->data['form_token'] = $form->csrfToken('editBlog');
         $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
@@ -612,7 +1041,7 @@ class AdminController extends HController
                 $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
                 if ($values['title'] != $this->data['atcVals']['title']) {
-                    if ($model->is_exist('articles', 'title=:title', ['title' => $values['title']])) {
+                    if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
                         $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                     }
                 }
@@ -620,7 +1049,7 @@ class AdminController extends HController
                     $form->setError('دسته‌بندی نامعتبر است.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->update_it('articles', [
+                $res = $model->update_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'body' => $values['body'],
@@ -648,28 +1077,29 @@ class AdminController extends HController
             }
         }
 
-        $this->data['atcVals'] = $model->select_it(null, 'articles', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['atcVals'] = $model->select_it(null, 'blog', '*', 'id=:id', ['id' => $param[0]])[0];
 
         // Extra js
         $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش نوشته');
 
         $this->_render_page([
-            'pages/be/Article/editArticle',
+            'pages/be/Blog/editBlog',
             'templates/be/browser-tiny-func'
         ]);
     }
 
-    public function manageArticleAction()
+    public function manageBlogAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
         }
 
         $model = new Model();
-        $this->data['articles'] = $model->select_it(null, 'articles');
+        $this->data['blog'] = $model->select_it(null, 'blog');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نوشته‌ها');
@@ -680,7 +1110,7 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
         $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
 
-        $this->_render_page('pages/be/Article/manageArticle');
+        $this->_render_page('pages/be/Blog/manageBlog');
     }
 
     public function addStaticPageAction()
@@ -872,11 +1302,11 @@ class AdminController extends HController
         }
 
         $model = new Model();
-        $cmtPr = $model->join_it(null, 'comments AS c', 'articles AS a', [
-            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
-        ], 'c.article_id=a.id', null, [], null, null, null, null, true, 'LEFT');
+        $cmtPr = $model->join_it(null, 'comments AS c', 'blog AS a', [
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
+        ], 'c.blog_id=a.id', null, [], null, null, null, null, true, 'LEFT');
         $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.name', 'c.article_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
         ], 'c.mobile=u.username', null, [], null, 'c.created_on DESC', null, null, false, 'RIGHT');
 
         // Base configuration
@@ -1007,20 +1437,531 @@ class AdminController extends HController
         message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
-    public function manageFactorAction()
+    public function addPlanAction()
     {
         if (!$this->auth->isLoggedIn()) {
             $this->redirect(base_url('admin/login'));
         }
 
         $model = new Model();
-        $this->data['factors'] = $model->select_it(null, 'factors AS f', [
-            'f.id', 'f.factor_code', 'f.first_name', 'f.last_name', 'f.mobile', 'f.payment_title', 'f.payment_status', 'f.shipping_title',
-            'f.send_status', 'f.final_amount', 'f.want_factor', 'f.payment_date', 'f.order_date'
-        ]);
+
+        $this->data['errors'] = [];
+        $this->data['planVals'] = [];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addPlan');
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
+            ->setMethod('post');
+
+        try {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $values['audience'] = array_filter($values['audience'], function ($val) {
+                    return in_array($val, array_keys(EDU_GRADES));
+                });
+
+                $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
+                    , 'فیلدهای ضروری را خالی نگذارید.');
+
+                // Check plan duplicate
+                if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
+                    $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
+                }
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
+                }
+                // Validate capacity
+                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
+                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
+                // Validate prices
+                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['total_price'] < (int)$values['min_price']) {
+                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                }
+                // Validate date timestamps
+                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
+                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
+                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
+                } else {
+                    if ($values['start_date'] > $values['end_date']) {
+                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                    if ($values['active_date'] > $values['deactive_date']) {
+                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                }
+                // Validate image gallery
+                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
+                if (!count($values['image_gallery'])) {
+                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
+                }
+                // Validate options structure
+                $values['option_group'] = $_POST['option_group'] ?? [];
+                $newOpt = [];
+                $k = 0;
+                if (is_array($values['option_group'])) {
+                    foreach ($values['option_group'] as $key => $value) {
+                        if (is_array($value)) {
+                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
+                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                                $newOpt[$k]['title'] = $value['title'];
+                                $newOpt[$k]['radio'] = $value['radio'];
+                                foreach ($value['name'] as $idx => $name) {
+                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
+                                        !empty($value['name'][$idx])) {
+                                        $newOpt[$k]['name'][] = $value['name'][$idx];
+                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
+                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                                ? convertNumbersToPersian($value['price'][$idx], true)
+                                                : 0)
+                                            : '';
+                                        $newOpt[$k]['desc'][] = $value['desc'][$idx] ?? '';
+                                    }
+                                }
+                                // If there is no name values
+                                if (!isset($newOpt[$k]['name'])) {
+                                    unset($newOpt[$k]);
+                                    --$k;
+                                }
+                                // Default behavior
+                                ++$k;
+                            }
+                        }
+                    }
+                }
+                $values['option_group'] = $newOpt; // Assign new option groups
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $model->transactionBegin();
+
+                $res = $model->insert_it('plans', [
+                    'title' => trim($values['title']),
+                    'slug' => trim(url_title($values['title'])),
+                    'contact' => implode(',', array_map('trim', $values['audience'])),
+                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'total_price' => convertNumbersToPersian(trim($values['total_price']), true),
+                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
+                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
+                    'image' => trim($values['image']),
+                    'description' => trim($values['description']),
+                    'rules' => trim($values['rules']),
+                    'start_at' => convertNumbersToPersian($values['start_date'], true),
+                    'end_at' => convertNumbersToPersian($values['end_date'], true),
+                    'active_at' => convertNumbersToPersian($values['active_date'], true),
+                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
+                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
+                    'support_phone' => trim($values['support_phone']),
+                    'place' => trim($values['place']),
+                    'options' => json_encode($values['option_group']),
+                    'status' => PLAN_STATUS_DEACTIVATE,
+                ], [], true);
+
+                // Insert images to gallery table
+                $res2 = false;
+                foreach ($values['image_gallery'] as $img) {
+                    $res2 = $model->insert_it('plan_images', [
+                        'plan_id' => $res,
+                        'image' => $img,
+                    ]);
+                    if (!$res2) break;
+                }
+
+                if ($res && $res2) {
+                    $model->transactionComplete();
+                } else {
+                    $model->transactionRollback();
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['planVals'] = $form->getValues();
+            }
+        }
 
         // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارشات');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن طرح جدید');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
+        $this->_render_page([
+            'pages/be/Plan/addPlan',
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
+        ]);
+    }
+
+    public function editPlanAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/managePlan'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->data['errors'] = [];
+        $this->data['planVals'] = $model->select_it(null, 'plans', ['title'], 'id=:id', ['id' => $param[0]])[0];
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token'] = $form->csrfToken('addPlan');
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
+            ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
+            ->setMethod('post');
+
+        try {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                $values['audience'] = array_filter($values['audience'], function ($val) {
+                    return in_array($val, array_keys(EDU_GRADES));
+                });
+
+                $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
+                    , 'فیلدهای ضروری را خالی نگذارید.');
+
+                // Check plan duplicate
+                if ($this->data['planVals']['title'] != $values['title']) {
+                    if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
+                        $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
+                    }
+                }
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
+                }
+                // Validate capacity
+                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
+                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
+                // Validate prices
+                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['total_price'] < (int)$values['min_price']) {
+                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                }
+                // Validate date timestamps
+                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
+                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
+                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
+                } else {
+                    if ($values['start_date'] > $values['end_date']) {
+                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                    if ($values['active_date'] > $values['deactive_date']) {
+                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
+                    }
+                }
+                // Validate image gallery
+                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
+                if (!count($values['image_gallery'])) {
+                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
+                }
+                // Validate options structure
+                $values['option_group'] = $_POST['option_group'] ?? [];
+                $newOpt = [];
+                $k = 0;
+                if (is_array($values['option_group'])) {
+                    foreach ($values['option_group'] as $key => $value) {
+                        if (is_array($value)) {
+                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
+                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                                $newOpt[$k]['title'] = $value['title'];
+                                $newOpt[$k]['radio'] = $value['radio'];
+                                foreach ($value['name'] as $idx => $name) {
+                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
+                                        !empty($value['name'][$idx])) {
+                                        $newOpt[$k]['name'][] = $value['name'][$idx];
+                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
+                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                                ? convertNumbersToPersian($value['price'][$idx], true)
+                                                : 0)
+                                            : '';
+                                        $newOpt[$k]['desc'][] = $value['desc'][$idx] ?? '';
+                                    }
+                                }
+                                // If there is no name values
+                                if (!isset($newOpt[$k]['name'])) {
+                                    unset($newOpt[$k]);
+                                    --$k;
+                                }
+                                // Default behavior
+                                ++$k;
+                            }
+                        }
+                    }
+                }
+                $values['option_group'] = $newOpt; // Assign new option groups
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $model->transactionBegin();
+
+                $res = $model->update_it('plans', [
+                    'title' => trim($values['title']),
+                    'slug' => trim(url_title($values['title'])),
+                    'contact' => implode(',', array_map('trim', $values['audience'])),
+                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'total_price' => convertNumbersToPersian(trim($values['total_price']), true),
+                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
+                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
+                    'image' => trim($values['image']),
+                    'description' => trim($values['description']),
+                    'rules' => trim($values['rules']),
+                    'start_at' => convertNumbersToPersian($values['start_date'], true),
+                    'end_at' => convertNumbersToPersian($values['end_date'], true),
+                    'active_at' => convertNumbersToPersian($values['active_date'], true),
+                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
+                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
+                    'support_phone' => trim($values['support_phone']),
+                    'place' => trim($values['place']),
+                    'options' => json_encode($values['option_group']),
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                // Delete previous gallery images
+                $res3 = $model->delete_it('plan_images', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
+                // Insert images to gallery table
+                $res2 = false;
+                foreach ($values['image_gallery'] as $img) {
+                    $res2 = $model->insert_it('plan_images', [
+                        'plan_id' => $this->data['param'][0],
+                        'image' => $img,
+                    ]);
+                    if (!$res2) break;
+                }
+
+                if ($res && $res2 && $res3) {
+                    $model->transactionComplete();
+                } else {
+                    $model->transactionRollback();
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors'] = $form->getError();
+                $this->data['planVals'] = $form->getValues();
+            }
+        }
+
+        $this->data['planVals'] = $model->select_it(null, 'plans', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
+        $this->data['planVals']['contact'] = explode(',', $this->data['planVals']['contact']);
+        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $param[0]]), 'image');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش طرح');
+
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
+        $this->_render_page([
+            'pages/be/Plan/editPlan',
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
+        ]);
+    }
+
+    public function managePlanAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $this->data['plans'] = $model->select_it(null, 'plans', '*', null, [], null, ['id DESC']);
+        foreach ($this->data['plans'] as &$plan) {
+            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL', [],
+                ['plan_id'], null, null, null, true);
+            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id']], false, true);
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده طرح‌ها');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/sliders/nouislider.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/planJs.js');
+
+        $this->_render_page('pages/be/Plan/managePlan');
+    }
+
+    public function detailPlanAction($param)
+    {
+
+    }
+
+    public function deletePlanAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'plans';
+        if (!isset($id)) {
+            message('error', 200, 'طرح نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'طرح با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function publishPlanAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'plans';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['publish' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == 1) {
+                message('success', 200, 'نمایش طرح فعال شد.');
+            } else {
+                message('warning', 200, 'نمایش طرح غیرفعال شد.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function changePlanStatusAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $stat = $_POST['stat'];
+        $table = 'plans';
+        if (!isset($id) || !isset($stat) || !in_array($stat, [PLAN_STATUS_ACTIVATE, PLAN_STATUS_DEACTIVATE, PLAN_STATUS_FULL, PLAN_STATUS_CLOSED])) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'طرح وجود ندارد.');
+        }
+
+        $res = $model->update_it($table, ['status' => $stat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            if ($stat == PLAN_STATUS_ACTIVATE) {
+                message('success', 200, 'وضعیت طرح به فعال تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_DEACTIVATE) {
+                message('warning', 200, 'وضعیت طرح به غیر فعال تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_FULL) {
+                message('warning', 200, 'وضعیت طرح به پر شده تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_CLOSED) {
+                message('warning', 200, 'وضعیت طرح به بسته شده تغییر یافت.');
+            }
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function manageFactorAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $factorModel = new FactorModel();
+        $this->data['factors'] = $factorModel->getFactors();
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده فاکتورهای ثبت شده');
 
         $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
@@ -1137,710 +2078,6 @@ class AdminController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
 
         $this->_render_page('pages/be/Factor/viewFactor');
-    }
-
-    public function addCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        $this->data['errors'] = [];
-        $this->data['catVals'] = [];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addCategory');
-        $form->setFieldsName(['name', 'keywords', 'publish'])
-            ->setDefaults('publish', 'off')
-            ->setMethod('post', [], ['publish']);
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['en_name']])) {
-                    $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->insert_it('categories', [
-                    'category_name' => trim($values['name']),
-                    'keywords' => trim($values['keywords']),
-                    'publish' => $form->isChecked('publish') ? 1 : 0
-                ]);
-
-                if (!$res) {
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['catVals'] = $form->getValues();
-            }
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن دسته‌بندی');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
-        $this->_render_page('pages/be/Category/addCategory');
-
-    }
-
-    public function editCategoryAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('categories', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/manageCategory'));
-        }
-
-        $this->data['param'] = $param;
-
-        $this->data['errors'] = [];
-        $this->data['catVals'] = $model->select_it(null, 'categories', ['category_name'], 'id=:id', ['id' => $param[0]])[0];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editCategory');
-        $form->setFieldsName(['name', 'keywords', 'publish'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post');
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
-                if ($this->data['catVals']['category_name'] != $values['name']) {
-                    if ($model->is_exist('categories', 'category_name=:name', ['name' => $values['name']])) {
-                        $form->setError('این دسته‌بندی وجود دارد. لطفا دوباره تلاش کنید.');
-                    }
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $res = $model->update_it('categories', [
-                    'category_name' => trim($values['name']),
-                    'keywords' => trim($values['keywords']),
-                    'publish' => $form->isChecked('publish') ? 1 : 0
-                ], 'id=:id', ['id' => $this->data['param'][0]]);
-
-                if (!$res) {
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['catVals'] = $form->getValues();
-            }
-        }
-
-        $this->data['catVals'] = $model->select_it(null, 'categories', '*', 'id=:id', ['id' => $param[0]])[0];
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش دسته‌بندی', $this->data['catVals']['en_slug']);
-
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
-        $this->_render_page('pages/be/Category/editCategory');
-    }
-
-    public function manageCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-        $this->data['categories'] = $model->select_it(null, 'categories', '*', null, [], null, ['id ASC']);
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده دسته‌بندی‌ها');
-
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
-
-        $this->_render_page('pages/be/Category/manageCategory');
-    }
-
-    public function managePriorityAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !isset($param[1]) || $param[0] != 'level' || !is_numeric($param[1]) ||
-            !$model->is_exist('categories', 'level=:lvl', ['lvl' => $param[1]])) {
-            $this->redirect(base_url('admin/manageCategory'));
-        }
-
-        $this->data['param'] = $param;
-
-        $this->data['errors'] = [];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('editPriority');
-        $form->setFieldsName(['id', 'priority'])->setMethod('post');
-        try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['id', 'priority'], 'آیتم‌ها دستکاری شده‌اند!!');
-
-                $this->data['catItems'] = array_column($model->select_it(null, 'categories', 'id', 'level=:lvl', ['lvl' => $this->data['param'][1]]), 'id');
-                $same = array_intersect($values['id'], $this->data['catItems']);
-                if (count($same) != count($this->data['catItems'])) {
-                    $form->setError('آیتم‌ها دستکاری شده‌اند!!');
-                }
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $model->transactionBegin();
-
-                foreach ($values['id'] as $key => $id) {
-                    $res = $model->update_it('categories', [
-                        'priority' => $values['priority'][$key]
-                    ], 'id=:id AND level=:lvl', ['id' => $id, 'lvl' => $this->data['param'][1]]);
-
-                    if (!$res) break;
-                }
-
-                if ($res) {
-                    $model->transactionComplete();
-                } else {
-                    $model->transactionRollback();
-                    $form->setError('خطا در انجام عملیات! مجددا تلاش نمایید.');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-            }
-        }
-
-        $this->data['items'] = $model->select_it(null, 'categories', ['id', 'category_name', 'priority', 'parent_id'],
-            'level=:lvl', ['lvl' => $param[1]], null, ['priority ASC', 'id ASC']);
-
-        for ($i = 0; $i < count($this->data['items']); $i++) {
-            $this->data['items'][$i]['parent'] = !is_null($this->data['items'][$i]['parent_id']) ? ($this->data['items'][$i]['parent_id'] != 0 ? $model->select_it(null, 'categories', 'category_name', 'id=:pid', ['pid' => $this->data['items'][$i]['parent_id']])[0]['category_name'] : 'دسته اصلی') : "<i class='icon-dash text-grey-300' aria-hidden='true'></i>";
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'تغییر اولویت‌های سطح', $param[1]);
-
-        $this->data['js'][] = $this->asset->script('be/js/core/libraries/jquery_ui/interactions.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/core/libraries/jquery_ui/touch.min.js');
-
-        $this->_render_page('pages/be/Category/managePriority');
-    }
-
-    public function deleteCategoryAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = @$_POST['postedId'];
-        $table = 'categories';
-        if (!isset($id)) {
-            message('error', 200, 'دسته‌بندی نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'دسته‌بندی وجود ندارد.');
-        }
-        if ($model->is_exist($table, 'parent_id=:pId', ['pId' => $id])) {
-            message('error', 200, 'این دسته‌بندی شامل زیردسته است.');
-        }
-        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'دسته‌بندی با موفقیت حذف شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function showInMenuAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = $_POST['postedId'];
-        $stat = $_POST['stat'];
-        $table = 'categories';
-        if (!isset($id) || !isset($stat) || !in_array($stat, [0, 1])) {
-            message('error', 200, 'ورودی نامعتبر است.');
-        }
-
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'دسته‌بندی وجود ندارد.');
-        }
-
-        $res = $model->update_it($table, ['show_in_menu' => $stat], 'id=:id AND deletable=:del', ['id' => $id, 'del' => 1]);
-        if ($res) {
-            if ($stat == 1) {
-                message('success', 200, 'نمایش دسته‌بندی در منو فعال شد.');
-            } else {
-                message('warning', 200, 'نمایش دسته‌بندی در منو غیر فعال شد.');
-            }
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
-    }
-
-    public function addPlanAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        $this->data['errors'] = [];
-        $this->data['planVals'] = [];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
-            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
-            ->setMethod('post');
-
-        try {
-            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
-                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
-                    , 'فیلدهای ضروری را خالی نگذارید.');
-
-                // Check plan duplicate
-                if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
-                    $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
-                }
-                // Validate main image
-                if (!file_exists($values['image'])) {
-                    $form->setError('تصویر شاخص نامعتبر است.');
-                }
-                // Validate capacity
-                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
-                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
-                // Validate prices
-                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
-                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
-                    (int)$values['base_price'] < (int)$values['min_price']) {
-                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
-                }
-                // Validate date timestamps
-                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
-                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
-                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
-                } else {
-                    if ($values['start_date'] > $values['end_date']) {
-                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
-                    }
-                    if ($values['active_date'] > $values['deactive_date']) {
-                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
-                    }
-                }
-                // Validate image gallery
-                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
-                    return file_exists($val) && is_file($val);
-                });
-                if (!count($values['image_gallery'])) {
-                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
-                }
-                // Validate options structure
-                $values['option_group'] = $_POST['option_group'] ?? [];
-                $newOpt = [];
-                $k = 0;
-                if (is_array($values['option_group'])) {
-                    foreach ($values['option_group'] as $key => $value) {
-                        if (is_array($value)) {
-                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
-                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
-                                $newOpt[$k]['title'] = $value['title'];
-                                $newOpt[$k]['radio'] = $value['radio'];
-                                foreach ($value['name'] as $idx => $name) {
-                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
-                                        !empty($value['name'][$idx])) {
-                                        $newOpt[$k]['name'][] = $value['name'][$idx];
-                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
-                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
-                                                ? convertNumbersToPersian($value['price'][$idx], true)
-                                                : 0)
-                                            : '';
-                                    }
-                                }
-                                // If there is no name values
-                                if (!isset($newOpt[$k]['name'])) {
-                                    unset($newOpt[$k]);
-                                    --$k;
-                                }
-                                // Default behavior
-                                ++$k;
-                            }
-                        }
-                    }
-                }
-                $values['option_group'] = $newOpt; // Assign new option groups
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $model->transactionBegin();
-
-                $res = $model->insert_it('plans', [
-                    'title' => trim($values['title']),
-                    'slug' => trim(url_title($values['title'])),
-                    'contact' => trim($values['audience']),
-                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
-                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
-                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
-                    'image' => trim($values['image']),
-                    'rules' => trim($values['rules']),
-                    'start_at' => convertNumbersToPersian($values['start_date'], true),
-                    'end_at' => convertNumbersToPersian($values['end_date'], true),
-                    'active_at' => convertNumbersToPersian($values['active_date'], true),
-                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
-                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
-                    'support_phone' => trim($values['support_phone']),
-                    'place' => trim($values['place']),
-                    'options' => json_encode($values['option_group']),
-                    'status' => PLAN_STATUS_DEACTIVATE,
-                ], [], true);
-
-                // Insert images to gallery table
-                $res2 = false;
-                foreach ($values['image_gallery'] as $img) {
-                    $res2 = $model->insert_it('plan_images', [
-                        'plan_id' => $res,
-                        'image' => $img,
-                    ]);
-                    if (!$res2) break;
-                }
-
-                if ($res && $res2) {
-                    $model->transactionComplete();
-                } else {
-                    $model->transactionRollback();
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['planVals'] = $form->getValues();
-            }
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن طرح جدید');
-
-        $this->load->helper('easy file manager');
-        //Security options
-        $this->data['upload']['allow_upload'] = allow_upload(false);
-        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
-        $this->data['upload']['allow_direct_link'] = allow_direct_link();
-        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
-
-        // Extra css
-        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
-        $this->data['css'][] = $this->asset->css('be/css/efm.css');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
-        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
-
-        $this->_render_page([
-            'pages/be/Plan/addPlan',
-            'templates/be/browser-tiny-func',
-            'templates/be/efm'
-        ]);
-    }
-
-    public function editPlanAction($param)
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-
-        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
-            $this->redirect(base_url('admin/managePlan'));
-        }
-
-        $this->data['param'] = $param;
-
-        $this->data['errors'] = [];
-        $this->data['planVals'] = $model->select_it(null, 'plans', ['title'], 'id=:id', ['id' => $param[0]])[0];
-
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
-            ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
-            ->setMethod('post');
-
-        try {
-            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
-                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'rules']
-                    , 'فیلدهای ضروری را خالی نگذارید.');
-
-                // Check plan duplicate
-                if ($this->data['planVals']['title'] != $values['title']) {
-                    if ($model->is_exist('plans', 'title=:title', ['title' => trim($values['title'])])) {
-                        $form->setError('این طرح وجود دارد. لطفا دوباره تلاش کنید.');
-                    }
-                }
-                // Validate main image
-                if (!file_exists($values['image'])) {
-                    $form->setError('تصویر شاخص نامعتبر است.');
-                }
-                // Validate capacity
-                $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
-                    ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
-                // Validate prices
-                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
-                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
-                    (int)$values['base_price'] < (int)$values['min_price']) {
-                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
-                }
-                // Validate date timestamps
-                if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
-                    !isValidTimeStamp($values['active_date']) || !isValidTimeStamp($values['deactive_date'])) {
-                    $form->setError('زمان(های) وارد شده برای طرح نامعتبر است.');
-                } else {
-                    if ($values['start_date'] > $values['end_date']) {
-                        $form->setError('زمان شروع طرح باید از تاریخ پایان آن کمتر باشد.');
-                    }
-                    if ($values['active_date'] > $values['deactive_date']) {
-                        $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
-                    }
-                }
-                // Validate image gallery
-                $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
-                    return file_exists($val) && is_file($val);
-                });
-                if (!count($values['image_gallery'])) {
-                    $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
-                }
-                // Validate options structure
-                $values['option_group'] = $_POST['option_group'] ?? [];
-                $newOpt = [];
-                $k = 0;
-                if (is_array($values['option_group'])) {
-                    foreach ($values['option_group'] as $key => $value) {
-                        if (is_array($value)) {
-                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
-                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
-                                $newOpt[$k]['title'] = $value['title'];
-                                $newOpt[$k]['radio'] = $value['radio'];
-                                foreach ($value['name'] as $idx => $name) {
-                                    if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
-                                        !empty($value['name'][$idx])) {
-                                        $newOpt[$k]['name'][] = $value['name'][$idx];
-                                        $newOpt[$k]['price'][] = !empty($value['price'][$idx])
-                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
-                                                ? convertNumbersToPersian($value['price'][$idx], true)
-                                                : 0)
-                                            : '';
-                                    }
-                                }
-                                // If there is no name values
-                                if (!isset($newOpt[$k]['name'])) {
-                                    unset($newOpt[$k]);
-                                    --$k;
-                                }
-                                // Default behavior
-                                ++$k;
-                            }
-                        }
-                    }
-                }
-                $values['option_group'] = $newOpt; // Assign new option groups
-            })->afterCheckCallback(function ($values) use ($model, $form) {
-                $model->transactionBegin();
-
-                $res = $model->update_it('plans', [
-                    'title' => trim($values['title']),
-                    'slug' => trim(url_title($values['title'])),
-                    'contact' => trim($values['audience']),
-                    'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
-                    'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
-                    'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
-                    'image' => trim($values['image']),
-                    'rules' => trim($values['rules']),
-                    'start_at' => convertNumbersToPersian($values['start_date'], true),
-                    'end_at' => convertNumbersToPersian($values['end_date'], true),
-                    'active_at' => convertNumbersToPersian($values['active_date'], true),
-                    'deactive_at' => convertNumbersToPersian($values['deactive_date'], true),
-                    'support_place' => empty(trim($values['support_place'])) ? null : trim($values['support_place']),
-                    'support_phone' => trim($values['support_phone']),
-                    'place' => trim($values['place']),
-                    'options' => json_encode($values['option_group']),
-                ], 'id=:id', ['id' => $this->data['param'][0]]);
-
-                // Delete previous gallery images
-                $res3 = $model->delete_it('plan_images', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
-                // Insert images to gallery table
-                $res2 = false;
-                foreach ($values['image_gallery'] as $img) {
-                    $res2 = $model->insert_it('plan_images', [
-                        'plan_id' => $this->data['param'][0],
-                        'image' => $img,
-                    ]);
-                    if (!$res2) break;
-                }
-
-                if ($res && $res2 && $res3) {
-                    $model->transactionComplete();
-                } else {
-                    $model->transactionRollback();
-                    $form->setError('خطا در انجام عملیات!');
-                }
-            });
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'عملیات با موفقیت انجام شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['planVals'] = $form->getValues();
-            }
-        }
-
-        $this->data['planVals'] = $model->select_it(null, 'plans', '*', 'id=:id', ['id' => $param[0]])[0];
-        $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
-        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=pId', ['pId' => $param[0]]), 'image');
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش طرح');
-
-        $this->load->helper('easy file manager');
-        //Security options
-        $this->data['upload']['allow_upload'] = allow_upload(false);
-        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
-        $this->data['upload']['allow_direct_link'] = allow_direct_link();
-        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
-
-        // Extra css
-        $this->data['css'][] = $this->asset->css('be/css/persian-datepicker-custom.css');
-        $this->data['css'][] = $this->asset->css('be/css/efm.css');
-
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-date.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/pickers/persian-datepicker.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/propertyJs.js');
-        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
-
-        $this->_render_page([
-            'pages/be/Plan/editPlan',
-            'templates/be/browser-tiny-func',
-            'templates/be/efm'
-        ]);
-    }
-
-    public function managePlanAction()
-    {
-        if (!$this->auth->isLoggedIn()) {
-            $this->redirect(base_url('admin/login'));
-        }
-
-        $model = new Model();
-        $this->data['plans'] = $model->select_it(null, 'plans');
-        foreach ($this->data['plans'] as &$plan) {
-            $plan['filled'] = $model->it_count('factors', 'plan_id=:pId', ['pId' => $plan['id']]);
-        }
-
-        // Base configuration
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده طرح‌ها');
-
-        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
-
-        $this->_render_page('pages/be/Plan/managePlan');
-    }
-
-    public function detailPlanAction($param)
-    {
-
-    }
-
-    public function deletePlanAction()
-    {
-        if (!$this->auth->isLoggedIn() || !is_ajax()) {
-            message('error', 403, 'دسترسی غیر مجاز');
-        }
-
-        $model = new Model();
-
-        $id = @$_POST['postedId'];
-        $table = 'plans';
-        if (!isset($id)) {
-            message('error', 200, 'طرح نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'طرح وجود ندارد.');
-        }
-
-        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
-        if ($res) {
-            message('success', 200, 'طرح با موفقیت حذف شد.');
-        }
-
-        message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
     public function addUsefulLinkAction()
@@ -2053,6 +2290,8 @@ class AdminController extends HController
         // If we are in edit mode
         $editId = isset($param[1]) && strtolower($param[0]) == 'edit' ? (int)$param[1] : 0;
         $editId = $editId && $model->is_exist('faq', 'id=:id', ['id' => $editId]) ? $editId : 0;
+
+        $this->data['param'] = $param;
 
         $this->data['errors'] = [];
         $this->data['faqVals'] = [];
@@ -2331,24 +2570,27 @@ class AdminController extends HController
         $this->data['errors_images'] = [];
         $this->data['form_token_images'] = $formImages->csrfToken('settingImages');
         $formImages->setFieldsName([
-            'imgTop', 'imgTopLink', 'imgMiddle', 'imgMiddleLink'
-        ])->setMethod('post');
+            'imgTop', 'showMiddle', 'imgMiddle', 'middleTitle', 'middleDesc'
+        ])->setDefaults('showMiddle', 'off')
+            ->setMethod('post', [], ['showMiddle']);
         try {
             $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
                 if ($values['imgTop'] != '' && !file_exists($values['imgTop'])) {
-//                    $formImages->setError('تصویر انتخاب شده برای بالای اسلایدر اصلی، نامعتبر است.');
                     $values['imgTop'] = '';
                 }
                 if ($values['imgMiddle'] != '' && !file_exists($values['imgMiddle'])) {
-//                    $formImages->setError('تصویر انتخاب شده برای کنار اسلایدر اصلی، نامعتبر است.');
                     $values['imgMiddle'] = '';
                 }
             })->afterCheckCallback(function ($values) use ($formImages) {
+                $props = array_map(function ($val1, $val2) {
+                    return ['title' => $val1, 'desc' => $val2];
+                }, $values['middleTitle'], $values['middleDesc']);
+                //-----
                 $this->data['setting']['pages']['index']['topImage']['image'] = $values['imgTop'];
-                $this->data['setting']['pages']['index']['topImage']['link'] = $values['imgTopLink'];
-
-                $this->data['setting']['pages']['index']['middleImage']['image'] = $values['imgMiddle'];
-                $this->data['setting']['pages']['index']['middleImage']['link'] = $values['imgMiddleLink'];
+                //-----
+                $this->data['setting']['pages']['index']['middlePart']['show'] = $formImages->isChecked('showMiddle') ? 1 : 0;
+                $this->data['setting']['pages']['index']['middlePart']['image'] = $values['imgMiddle'];
+                $this->data['setting']['pages']['index']['middlePart']['properties'] = $props;
 
                 $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
                 $res = write_json(CORE_PATH . 'config.json', $this->setting);
@@ -2370,12 +2612,50 @@ class AdminController extends HController
             }
         }
 
+        // Others panel setting form submit
+        $formImages = new Form();
+        $this->data['errors_others'] = [];
+        $this->data['form_token_others'] = $formImages->csrfToken('settingOthers');
+        $formImages->setFieldsName([
+            'otherImgTop',
+        ])->setMethod('post');
+        try {
+            $formImages->beforeCheckCallback(function (&$values) use ($formImages) {
+                if ($values['otherImgTop'] != '' && !file_exists($values['otherImgTop'])) {
+                    $values['otherImgTop'] = '';
+                }
+            })->afterCheckCallback(function ($values) use ($formImages) {
+                //-----
+                $this->data['setting']['pages']['all']['topImage']['image'] = $values['otherImgTop'];
+                //-----
+
+                $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
+                $res = write_json(CORE_PATH . 'config.json', $this->setting);
+
+                if (!$res) {
+                    $formImages->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $formImages->checkForm()->isSuccess();
+        if ($formImages->isSubmit()) {
+            if ($res) {
+                $this->data['success_others'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors_others'] = $formImages->getError();
+            }
+        }
+
         // Footer panel setting form submit
         $form = new Form();
         $this->data['errors_footer'] = [];
         $this->data['form_token_footer'] = $form->csrfToken('settingFooter');
-        $form->setFieldsName(['footer_1_title', 'footer_1_text', 'footer_1_link', 'instagram',
-            'information_1', 'information_2', 'information_3', 'descTitle', 'desc', 'namad_1', 'namad_2'
+        $form->setFieldsName([
+            'footer_1_title', 'footer_1_text', 'footer_1_link',
+            'socialEmail', 'telegram', 'instagram', 'facebook',
         ])->setMethod('post');
         try {
             $form->afterCheckCallback(function ($values) use ($form) {
@@ -2398,6 +2678,7 @@ class AdminController extends HController
                 $this->data['setting']['footer']['sections']['section_3']['title'] = $values['footer_1_title'][2];
                 $this->data['setting']['footer']['sections']['section_3']['links'] = $sec3;
 
+                $this->data['setting']['footer']['socials']['email'] = $values['socialEmail'];
                 $this->data['setting']['footer']['socials']['telegram'] = $values['telegram'];
                 $this->data['setting']['footer']['socials']['instagram'] = $values['instagram'];
                 $this->data['setting']['footer']['socials']['facebook'] = $values['facebook'];

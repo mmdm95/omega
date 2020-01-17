@@ -137,14 +137,21 @@
                                                        placeholder="مثال: ۳۰" required
                                                        value="<?= set_value($planVals['capacity'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-6">
+                                            <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت طرح (تومان):</label>
-                                                <input name="base_price" type="text" class="form-control"
+                                                <label>قیمت کل طرح (تومان):</label>
+                                                <input name="total_price" type="text" class="form-control"
                                                        placeholder="مثال: ۱۰۰۰۰۰۰" required
+                                                       value="<?= set_value($planVals['total_price'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-4">
+                                                <span class="text-danger">*</span>
+                                                <label>قیمت پایه طرح (تومان):</label>
+                                                <input name="base_price" type="text" class="form-control"
+                                                       placeholder="مثال: ۱۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['base_price'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-6">
+                                            <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
                                                 <label>قیمت پرداخت (تومان):</label>
                                                 <input name="min_price" type="text" class="form-control"
@@ -191,13 +198,38 @@
                                                        data-format="YYYY/MM/DD - HH:mm" required
                                                        value="<?= set_value($planVals['end_date'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-12">
+                                            <div class="col-lg-12">
                                                 <span class="text-danger">*</span>
                                                 <label>مخاطب طرح:</label>
-                                                <input name="audience" type="text"
-                                                       class="form-control" placeholder="Press Enter"
-                                                       data-role="tagsinput" required
-                                                       value="<?= set_value($planVals['audience'] ?? ''); ?>">
+                                                <select class="select-rtl" multiple="multiple"
+                                                        name="audience[]" data-placeholder="انتخاب کنید">
+                                                    <?php foreach (EDU_GRADES as $id => $grade): ?>
+                                                        <option value="<?= $id; ?>"
+                                                            <?= in_array($id, $planVals['audience'] ?? []) ? 'selected' : ''; ?>>
+                                                            <?= $grade; ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">درباره طرح</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 mt-12">
+                                                <textarea
+                                                        class="form-control cntEditor"
+                                                        placeholder="توضیحات"
+                                                        name="description"
+                                                        rows="10"><?= set_value($planVals['description'] ?? ''); ?></textarea>
                                             </div>
                                         </div>
                                     </div>
@@ -254,9 +286,8 @@
                                         <div class="row">
                                             <div class="col-md-12 mt-12">
                                                 <textarea
-                                                        id="cntEditor"
-                                                        class="form-control"
-                                                        placeholder="سوال"
+                                                        class="form-control cntEditor"
+                                                        placeholder=""
                                                         name="rules"
                                                         rows="10"><?= set_value($planVals['rules'] ?? ''); ?></textarea>
                                             </div>

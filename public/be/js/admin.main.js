@@ -40,6 +40,23 @@
         });
         //**********
 
+        //********** ManageFeedback Action
+        $('.deleteFeedbackBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deleteFeedback', function () {
+                $(del_btn).closest('tr').fadeOut(800, function () {
+                    if ($.fn.DataTable) {
+                        dataTable.DataTable().row($(this)).remove().draw();
+                    } else {
+                        $(this).remove();
+                    }
+                });
+            });
+        });
+        //**********
+
         //********** ManageNewsletter Action
         $('.deleteNewsletterBtn').on('click', function (e) {
             e.preventDefault();
@@ -304,6 +321,16 @@
         });
         //**********
 
+        //********** Publish change for Feedback
+        $('.feedback-publish').on('change', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            var stat = btn.is(':checked') ? 1 : 0;
+
+            active_deactive_action(this, 'publishFeedback', {stat: stat});
+        });
+        //**********
+
         //********** Show in menu for Categories
         $('.showInMenuParts').on('change', function (e) {
             e.preventDefault();
@@ -312,6 +339,22 @@
 
             active_deactive_action(this, 'showInMenu', {stat: stat});
         });
+        //**********
+
+        //********** Publish change for Plans
+        $('.plan-publish').on('change', function (e) {
+            e.preventDefault();
+            var btn = $(this);
+            var stat = btn.is(':checked') ? 1 : 0;
+
+            active_deactive_action(this, 'publishPlan', {stat: stat});
+        });
+        //**********
+
+        //********** Change plan status for ManagePlans
+        $.change_plan_status = function (selector, stat) {
+            active_deactive_action(selector, 'changePlanStatus', {stat: stat});
+        };
         //**********
 
         function active_deactive_action(selector, sendUrl, params, callback) {

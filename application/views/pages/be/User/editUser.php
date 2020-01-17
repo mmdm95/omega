@@ -81,8 +81,15 @@
                                             <?php endif; ?>
                                             <div class="alert alert-info alert-styled-left alert-bordered">
                                                 <p>
-                                                    ۱- در صورت عدم تغییر رمز عبور، این مقدار تغییر نخواهد کرد.
+                                                    <i class="icon-dash"></i>
+                                                    در صورت عدم تغییر رمز عبور، این مقدار تغییر نخواهد کرد.
                                                 </p>
+                                            </div>
+                                            <div class="form-group col-lg-4">
+                                                <label>کد ملی:</label>
+                                                <input type="text" disabled
+                                                       class="form-control" placeholder="اجباری"
+                                                       value="<?= isset($data['userVals']['n_code']) ? convertNumbersToPersian($data['userVals']['n_code']) : ''; ?>">
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <label>نام و نام خانوادگی:</label>

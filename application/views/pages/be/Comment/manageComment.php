@@ -95,7 +95,7 @@
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('article/' . url_title($comment['title'])); ?>"
+                                                            <a href="<?= base_url('blog/' . url_title($comment['title'])); ?>"
                                                                target="_blank">
                                                                 <?= $comment['title']; ?>
                                                             </a>

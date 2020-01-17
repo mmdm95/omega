@@ -9,6 +9,14 @@
     <div class="page-content">
         <input type="hidden" id="BASE_URL" value="<?= base_url(); ?>">
 
+        <script>
+            var status_activate, status_deactivate, status_full, status_closed;
+            status_activate = <?= PLAN_STATUS_ACTIVATE; ?>;
+            status_deactivate = <?= PLAN_STATUS_DEACTIVATE; ?>;
+            status_full = <?= PLAN_STATUS_FULL; ?>;
+            status_closed = <?= PLAN_STATUS_CLOSED; ?>;
+        </script>
+
         <!-- Main sidebar -->
         <?php $this->view("templates/be/mainsidebar", $data); ?>
         <!-- /main sidebar -->
@@ -66,6 +74,7 @@
                                                     <th>تاریخ پایان طرح</th>
                                                     <th>پر شده / ظرفیت کل</th>
                                                     <th>هزینه طرح</th>
+                                                    <th>نمایش</th>
                                                     <th>وضعیت</th>
                                                     <th>عملیات</th>
                                                 </tr>
@@ -87,7 +96,8 @@
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('plan/' . $plan['title']); ?>">
+                                                            <a href="<?= base_url('event/detail/' . $plan['slug']); ?>"
+                                                               target="_blank">
                                                                 <?= $plan['title']; ?>
                                                             </a>
                                                         </td>
@@ -106,26 +116,23 @@
                                                         </td>
 
                                                         <td class="info">
-                                                            <?= $plan['filled']; ?> / <?= $plan['capacity']; ?>
+                                                            <?= convertNumbersToPersian($plan['filled']); ?>
+                                                            / <?= convertNumbersToPersian($plan['capacity']); ?>
                                                         </td>
                                                         <td>
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['base_price'], true))); ?>
+                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['total_price'], true))); ?>
+                                                            تومان
                                                         </td>
-                                                        <td>
-                                                            <?php switch ($plan['status']):
-                                                                case PLAN_STATUS_ACTIVATE: ?>
-
-                                                                    <?php break; ?>
-                                                                <?php case PLAN_STATUS_DEACTIVATE: ?>
-
-                                                                    <?php break; ?>
-                                                                <?php case PLAN_STATUS_FULL: ?>
-
-                                                                    <?php break; ?>
-                                                                <?php case PLAN_STATUS_CLOSED: ?>
-
-                                                                    <?php break; ?>
-                                                                <?php endswitch; ?>
+                                                        <td width="100px" class="plan-status-sliders text-center">
+                                                            <input type="hidden" value="<?= $plan['id']; ?>">
+                                                            <input type="checkbox" class="switchery plan-publish"
+                                                                <?= set_value($plan['publish'] ?? '', 1, 'checked', '', '=='); ?> />
+                                                        </td>
+                                                        <td width="200px" class="plan-status-sliders text-center">
+                                                            <input type="hidden" value="<?= $plan['id']; ?>">
+                                                            <div class="status-slider"
+                                                                 data-plan-status="<?= $plan['status']; ?>"></div>
+                                                            <div class="status-slider-label text-center mt-15 badge bg-indigo-400 display-block"></div>
                                                         </td>
 
                                                         <td style="width: 115px;" class="text-center">

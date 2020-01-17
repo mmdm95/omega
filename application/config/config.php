@@ -20,6 +20,12 @@ defined('ASSURED_KEY') OR define('ASSURED_KEY','EZ44mFi3TlAey1b2w4Y7lVDuqO+SRxGX
 
 //===============================================
 
+// Default user profile image
+defined('PROFILE_DEFAULT_IMAGE') OR define('PROFILE_DEFAULT_IMAGE', 'public/fe/img/user-default.jpg');
+
+// Default users profile image directory
+defined('PROFILE_IMAGE_DIR') OR define('PROFILE_IMAGE_DIR', 'public/users/profileImages/');
+
 // My custom plan status
 defined('PLAN_STATUS_ACTIVATE') OR define('PLAN_STATUS_ACTIVATE', 1);
 defined('PLAN_STATUS_DEACTIVATE') OR define('PLAN_STATUS_DEACTIVATE', 2);
@@ -33,7 +39,41 @@ defined('OWN_PAYMENT_STATUS_NOT_PAYED') OR define('OWN_PAYMENT_STATUS_NOT_PAYED'
 defined('OWN_PAYMENT_STATUS_WAIT') OR define('OWN_PAYMENT_STATUS_WAIT', -8);
 
 // My custom payment wait
-defined('OWN_WAIT_TIME') OR define('OWN_WAIT_TIME', 60 * 60);
+defined('OWN_WAIT_TIME') OR define('OWN_WAIT_TIME', 10 * 60);
+
+// Custom education grades
+defined('EDU_GRADES') OR define('EDU_GRADES', [
+    6 => 'پایه ششم',
+    7 => 'پایه هفتم',
+    8 => 'پایه هشتم',
+    9 => 'پایه نهم',
+    10 => 'پایه دهم',
+    11 => 'پایه یازدهم',
+    12 => 'پایه دوازدهم',
+    13 => 'پشت کنکور',
+    14 => 'دیپلم',
+    15 => 'فوق دیپلم',
+    16 => 'لیسانس',
+    17 => 'فوق لیسانس',
+    18 => 'دکتری',
+]);
+
+// Custom education fields
+defined('EDU_FIELDS') OR define('EDU_FIELDS', [
+    1 => ' ریاضی و فیزیک',
+    2 => 'علوم تجربی',
+    3 => 'علوم انسانی',
+    4 => 'هنرستان',
+]);
+
+// Gender
+defined('GENDER_MALE') OR define('GENDER_MALE', 1);
+defined('GENDER_FEMALE') OR define('GENDER_FEMALE', 2);
+
+// Marriage
+defined('MARRIAGE_MARRIED') OR define('MARRIAGE_MARRIED', 1);
+defined('MARRIAGE_SINGLE') OR define('MARRIAGE_SINGLE', 2);
+defined('MARRIAGE_DEAD') OR define('MARRIAGE_DEAD', 3);
 
 //===============================================
 
@@ -44,10 +84,10 @@ return array(
     //    'hello/*' => 'index'
     //);
     'routes' => array(
-        'admin' => 'admin/admin',
-        'admin/(:any)' => 'admin/admin/$1',
-        'admin/(:any)/(:any)' => 'admin/admin/$1/$2',
-        'admin/(:any)/(:any)/(:any)' => 'admin/admin/$1/$2/$3',
+//        'admin' => 'admin/admin',
+//        'admin/(:any)' => 'admin/admin/$1',
+//        'admin/(:any)/(:any)' => 'admin/admin/$1/$2',
+//        'admin/(:any)/(:any)/(:any)' => 'admin/admin/$1/$2/$3',
     ),
 
     //===============================================

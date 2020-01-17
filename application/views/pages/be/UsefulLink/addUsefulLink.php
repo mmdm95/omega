@@ -136,7 +136,7 @@
                                             <div class="form-group col-lg-6">
                                                 <span class="text-danger">*</span>
                                                 <label>لینک:</label>
-                                                <input name="link" type="text" class="form-control"
+                                                <input name="link" type="text" class="form-control ltr"
                                                        placeholder="<?= base_url();  ?>"
                                                        value="<?= set_value($uslVals['link'] ?? ''); ?>">
                                             </div>

@@ -380,6 +380,7 @@
                 case 'jpg':
                 case 'jpeg':
                 case 'gif':
+                case 'svg':
                     $link = $('<a class="name image" />')
                         .attr('href', data.path).attr('data-url', "<?= base_url(); ?>" + data.path)
                         .attr('data-popup', 'lightbox')

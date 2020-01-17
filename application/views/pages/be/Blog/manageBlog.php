@@ -66,20 +66,20 @@
                                                 </thead>
                                                 <tbody>
                                                 <!-- Load categories data -->
-                                                <?php foreach ($articles as $key => $article): ?>
+                                                <?php foreach ($blog as $key => $blg): ?>
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('article/' . $article['title']); ?>">
-                                                                <?= $article['title']; ?>
+                                                            <a href="<?= base_url('blog/' . $blg['slug']); ?>" target="_blank">
+                                                                <?= $blg['title']; ?>
                                                             </a>
                                                         </td>
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
                                                                 <li class="text-primary-600">
-                                                                    <a href="<?= base_url(); ?>admin/editArticle/<?= $article['id']; ?>"
+                                                                    <a href="<?= base_url(); ?>admin/editBlog/<?= $blg['id']; ?>"
                                                                        title="ویرایش" data-popup="tooltip">
                                                                         <i class="icon-pencil7"></i>
                                                                     </a>
@@ -88,7 +88,7 @@
                                                                     <a class="deleteStaticPageBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
-                                                                               value="<?= $article['id']; ?>">
+                                                                               value="<?= $blg['id']; ?>">
                                                                         <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>

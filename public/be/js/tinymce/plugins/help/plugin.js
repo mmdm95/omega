@@ -1052,7 +1052,7 @@ define(
     };
 
     var capitalize = function(str) {
-      return StringParts.home(str).bind(function (head) {
+      return StringParts.head(str).bind(function (head) {
         return StringParts.tail(str).map(function (tail) {
           return head.toUpperCase() + tail;
         });

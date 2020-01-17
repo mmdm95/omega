@@ -94,7 +94,7 @@ if (!function_exists('array_merge_recursive_distinct')) {
  * @see https://code.tutsplus.com/tutorials/build-your-own-captcha-and-contact-form-in-php--net-5362
  */
 if (!function_exists('createCaptcha')) {
-    function createCaptcha($code = null)
+    function createCaptcha($action = 'default', $code = null)
     {
         if(empty($code)) {
             $code = generateRandomString(6, GRS_NUMBER | GRS_LOWER_CHAR);
@@ -137,7 +137,7 @@ if (!function_exists('createCaptcha')) {
         } else {
             $captchaSesName = $captchaSesName['captcha_session_name'];
         }
-        $_SESSION[$captchaSesName] = encryption_decryption(ED_ENCRYPT, $captcha_string);
+        $_SESSION[$captchaSesName][$action] = encryption_decryption(ED_ENCRYPT, $captcha_string);
 
         for($i = 0; $i < $string_length; $i++) {
             $letter_space = 140/$string_length;

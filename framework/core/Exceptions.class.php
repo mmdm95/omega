@@ -25,9 +25,9 @@ class Exceptions
 
         try {
             $auth = new Auth();
-            if ($checkAdmin && ($auth->setStorageType(AUTH::session)->setNamespace('adminPanel')->isLoggedIn() ||
-                    $auth->setStorageType(AUTH::cookie)->setNamespace('adminPanel')->isLoggedIn())
-                && isset($_SESSION['admin_panel_namespace'])) {
+            if ($checkAdmin && isset($_SESSION['admin_panel_namespace']) &&
+                ($auth->setStorageType(AUTH::session)->setNamespace($_SESSION['admin_panel_namespace'])->isLoggedIn() ||
+                    $auth->setStorageType(AUTH::cookie)->setNamespace($_SESSION['admin_panel_namespace'])->isLoggedIn())) {
                 $data['identity'] = $auth->getIdentity();
                 $this->controller->load->view($path, $data, $returnContent === true);
             } else {

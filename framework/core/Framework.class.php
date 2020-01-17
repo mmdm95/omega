@@ -223,7 +223,7 @@ class Framework
 
     private function get_url()
     {
-        $extension_pattern = '/\\.[^.\\s]{3,4}$/';
+        $extension_pattern = '/\\.[^.\\s]{3,4,5}$/';
 
         $language = '';
         $platform = '';
@@ -338,7 +338,7 @@ class Framework
 
     private function setDefaultRoute()
     {
-        $extension_pattern = '/\\.[^.\\s]{3,4}$/';
+        $extension_pattern = '/\\.[^.\\s]{3,4,5}$/';
 
         // Extra parameters
 
@@ -431,7 +431,7 @@ class Framework
 
     private function existsAction($platform, $controller, $action)
     {
-        $extension_pattern = '/\\.[^.\\s]{3,4}$/';
+        $extension_pattern = '/\\.[^.\\s]{3,4,5}$/';
 
         if (trim($action) != '') {
             if ((trim($platform) != '' && !$this->existsPlatform($platform)) || !$this->existsController($platform, $controller)) {

@@ -6,6 +6,10 @@
     padding-left: 20px !important;
 }
 
+.plan-status-sliders .noUi-background {
+    background-color: #98a8ff;
+}
+
 .border {
     border: 1px solid transparent;
 }
@@ -49,6 +53,16 @@
 
 .img-fit {
     object-fit: cover;
+}
+
+.img-full-x {
+    width: 100% !important;
+    height: auto;
+}
+
+.img-full-y {
+    width: auto;
+    height: 100% !important;
 }
 
 .lazy {

@@ -35,7 +35,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= base_url(); ?>admin/manageArticle">
+                            <a href="<?= base_url(); ?>admin/manageBlog">
                                 نوشته‌ها
                             </a>
                         </li>
@@ -51,7 +51,7 @@
                 <!-- Centered forms -->
                 <div class="row">
                     <div class="col-md-12">
-                        <form action="<?= base_url(); ?>admin/addArticle" method="post">
+                        <form action="<?= base_url(); ?>admin/addBlog" method="post">
                             <?= $data['form_token']; ?>
 
                             <div class="row">
@@ -96,7 +96,7 @@
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>دسته‌بندی والد:</label>
+                                                <label>دسته‌بندی:</label>
                                                 <select class="select-rtl" name="category">
                                                     <?php foreach ($categories as $key => $category): ?>
                                                         <option value="<?= $category['id']; ?>"
@@ -131,7 +131,7 @@
                                             </div>
 
                                             <div class="text-right col-md-12 mt-20">
-                                                <a href="<?= base_url('admin/manageArticle'); ?>"
+                                                <a href="<?= base_url('admin/manageBlog'); ?>"
                                                    class="btn btn-default mr-5">
                                                     بازگشت
                                                 </a>
