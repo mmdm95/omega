@@ -48,7 +48,11 @@ abstract class AbstractController extends HController
     {
         if($this->auth->isLoggedIn()) {
             $this->auth->logout();
-            $this->redirect(base_url('index'));
+            if($_GET['back_url']) {
+                $this->redirect($_GET['back_url']);
+            } else {
+                $this->redirect(base_url('index'));
+            }
         } else {
             $this->error->show_404();
         }

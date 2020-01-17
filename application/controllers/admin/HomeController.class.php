@@ -1451,7 +1451,7 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
             'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
@@ -1463,7 +1463,7 @@ class HomeController extends HController
                     return in_array($val, array_keys(EDU_GRADES));
                 });
 
-                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+                $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
                         'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
@@ -1479,10 +1479,11 @@ class HomeController extends HController
                 $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
-                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
                 $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
-                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
-                    (int)$values['base_price'] < (int)$values['min_price']) {
+                if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['total_price'] < (int)$values['min_price']) {
                     $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
                 }
                 // Validate date timestamps
@@ -1547,6 +1548,7 @@ class HomeController extends HController
                     'slug' => trim(url_title($values['title'])),
                     'contact' => implode(',', array_map('trim', $values['audience'])),
                     'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'total_price' => convertNumbersToPersian(trim($values['total_price']), true),
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
                     'image' => trim($values['image']),
@@ -1643,7 +1645,7 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
             'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
@@ -1655,7 +1657,7 @@ class HomeController extends HController
                     return in_array($val, array_keys(EDU_GRADES));
                 });
 
-                $form->isRequired(['image', 'title', 'capacity', 'base_price', 'min_price', 'start_date', 'end_date',
+                $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
                         'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
@@ -1673,10 +1675,11 @@ class HomeController extends HController
                 $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
-                $form->validate('numeric', 'base_price', 'قیمت طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
                 $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
-                if (is_numeric($values['base_price']) && is_numeric($values['min_price']) &&
-                    (int)$values['base_price'] < (int)$values['min_price']) {
+                if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
+                    (int)$values['total_price'] < (int)$values['min_price']) {
                     $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
                 }
                 // Validate date timestamps
@@ -1741,6 +1744,7 @@ class HomeController extends HController
                     'slug' => trim(url_title($values['title'])),
                     'contact' => implode(',', array_map('trim', $values['audience'])),
                     'capacity' => convertNumbersToPersian(trim($values['capacity']), true),
+                    'total_price' => convertNumbersToPersian(trim($values['total_price']), true),
                     'base_price' => convertNumbersToPersian(trim($values['base_price']), true),
                     'min_price' => convertNumbersToPersian(trim($values['min_price']), true),
                     'image' => trim($values['image']),

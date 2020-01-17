@@ -17,28 +17,29 @@ class FactorModel extends HModel
 
     public function getFactors($where = '', $params = [])
     {
-        $select = $this->select();
-        $select->cols([
-            ''
-        ])->from($this->table);
-
-        try {
-            $select->join(
-                'INNER',
-                '',
-                ''
-            );
-        } catch (\Aura\SqlQuery\Exception $e) {
-            die('unexpected error: ' . $e->getMessage());
-        }
-
-        if(!empty($where) && is_string($where)) {
-            $select->where('f.user_id=:uId');
-            if(is_array($params) && count($params)) {
-                $select->bindValues($params);
-            }
-        }
-
-        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
+//        $select = $this->select();
+//        $select->cols([
+//            ''
+//        ])->from($this->table);
+//
+//        try {
+//            $select->join(
+//                'INNER',
+//                '',
+//                ''
+//            );
+//        } catch (\Aura\SqlQuery\Exception $e) {
+//            die('unexpected error: ' . $e->getMessage());
+//        }
+//
+//        if(!empty($where) && is_string($where)) {
+//            $select->where('f.user_id=:uId');
+//            if(is_array($params) && count($params)) {
+//                $select->bindValues($params);
+//            }
+//        }
+//
+//        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
+        return [];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use HForm\Form;
+
 include_once 'AbstractController.class.php';
 
 class EventController extends AbstractController
@@ -16,7 +18,7 @@ class EventController extends AbstractController
         $this->data['pagination']['lastPage'] = ceil($this->data['pagination']['total'] / $this->data['pagination']['limit']);
         //-----
         $this->data['events'] = $model->select_it(null, 'plans', [
-            'title', 'slug', 'contact', 'capacity', 'base_price', 'image', 'start_at', 'end_at', 'active_at', 'deactive_at', 'place', 'status',
+            'title', 'slug', 'contact', 'capacity', 'total_price', 'image', 'start_at', 'end_at', 'active_at', 'deactive_at', 'place', 'status',
         ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], $this->data['pagination']['limit'], $this->data['pagination']['offset']);
 
         // Count active events
@@ -86,7 +88,7 @@ class EventController extends AbstractController
             $relatedTitle = ' OR ' . $relatedTitle;
         }
         //=====
-        $this->data['relatedEvents'] = $model->select_it(null, 'plans', ['title', 'slug', 'image', 'base_price', 'contact'],
+        $this->data['relatedEvents'] = $model->select_it(null, 'plans', ['title', 'slug', 'image', 'total_price', 'contact'],
             $generalWhere . ' AND (' . $audienceTitle . $relatedTitle . ')',
             array_merge($generalWhereParam, $audienceTitleParam, $relatedTitleParam),
             null, ['id DESC'], 5);
@@ -94,6 +96,9 @@ class EventController extends AbstractController
         // Register & Login actions
         $this->_register(['captcha' => ACTION]);
         $this->_login(['captcha' => ACTION]);
+
+        // Event submission
+        $this->_eventSubmit();
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح', $this->data['event']['title']);
 
@@ -107,8 +112,78 @@ class EventController extends AbstractController
 
     protected function _eventSubmit()
     {
-        if($this->auth->isLoggedIn()) {
+        if (!$this->auth->isLoggedIn()) return;
 
+        $model = new Model();
+        $this->data['eventSubmitErrors'] = [];
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_save_event'] = $form->csrfToken('saveUserEvent');
+
+        $form->setFieldsName([
+            'rule_agree'
+        ])->setDefaults('rule_agree', 'off')
+            ->setMethod('post', [], ['rule_agree']);
+        try {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
+                if (!$form->isChecked('rule_agree')) {
+                    $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، علامت موافق هستم را فعال کنید.');
+                } else {
+                    $values['total_amount'] = 0;
+                    foreach ($this->data['event']['options'] as $k => $option) {
+                        $chkName = 'select-chk-' . ($k + 1);
+                        $postChk = $_POST[$chkName] ?? null;
+                        if(isset($postChk)) {
+                            if(($option['radio'] == 1 && is_array($postChk)) || ($option['radio'] == 2 && is_string($postChk))) {
+                                if(is_array($postChk)) {
+                                    $validKeys = array_keys($option['name']);
+                                    foreach ($postChk as $k2) {
+                                        if(in_array($k2, $validKeys)) {
+                                            $values['total_amount'] += is_numeric($option['price'][$k2]) ? (int)$option['price'][$k2] : 0;
+                                        } else {
+                                            $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                                            return;
+                                        }
+                                    }
+                                } else {
+                                    if(isset($option['price'][$postChk])) {
+                                        $values['total_amount'] += is_numeric($option['price'][$postChk]) ? (int)$option['price'][$postChk] : 0;
+                                    } else {
+                                        $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                                        return;
+                                    }
+                                }
+                            } else {
+                                $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                                return;
+                            }
+                        } else {
+                            $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                            return;
+                        }
+                    }
+                }
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = false;
+//                $res = $model->update_it('users', [
+//                    'password' => password_hash($values['new-password'], PASSWORD_DEFAULT),
+//                ], 'id=:id', ['id' => $this->data['identity']->id]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->redirect(base_url('user/event/detail/' . $this->data['event']['slug']));
+            } else {
+                $this->data['eventSubmitErrors'] = $form->getError();
+            }
         }
     }
 }

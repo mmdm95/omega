@@ -13,7 +13,7 @@ class HomeController extends AbstractController
         $model = new Model();
 
         $this->data['topEvents'] = $model->select_it(null, 'plans', [
-            'title', 'slug', 'contact', 'capacity', 'base_price', 'image', 'start_at', 'end_at', 'active_at', 'deactive_at', 'place', 'status',
+            'title', 'slug', 'contact', 'capacity', 'total_price', 'image', 'start_at', 'end_at', 'active_at', 'deactive_at', 'place', 'status',
         ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], 3);
         //-----
         $this->data['feedback'] = $model->select_it(null, 'site_feedback', '*', 'show_in_page=:sip', ['sip' => 1]);

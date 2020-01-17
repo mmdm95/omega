@@ -120,7 +120,7 @@
                                                             / <?= convertNumbersToPersian($plan['capacity']); ?>
                                                         </td>
                                                         <td>
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['base_price'], true))); ?>
+                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($plan['total_price'], true))); ?>
                                                             تومان
                                                         </td>
                                                         <td width="100px" class="plan-status-sliders text-center">

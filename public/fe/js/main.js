@@ -330,6 +330,16 @@
         $.omega().scrollToElement(target, -30);
     });
 
+    // Show components according to id
+    var hash = window.location.hash.substr(1);
+    var modalArr = ['login_modal', 'signup_modal'];
+    if ($.inArray(hash, modalArr) !== -1) {
+        var selector = $('#' + hash);
+        if (selector.length && selector.hasClass('modal')) {
+            selector.modal('show');
+        }
+    }
+
     /**
      * Super global shop object that have required functionality
      * @constructor

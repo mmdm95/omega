@@ -137,14 +137,21 @@
                                                        placeholder="مثال: ۳۰" required
                                                        value="<?= set_value($planVals['capacity'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-6">
+                                            <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت طرح (تومان):</label>
-                                                <input name="base_price" type="text" class="form-control"
+                                                <label>قیمت کل طرح (تومان):</label>
+                                                <input name="total_price" type="text" class="form-control"
                                                        placeholder="مثال: ۱۰۰۰۰۰۰" required
+                                                       value="<?= set_value($planVals['total_price'] ?? ''); ?>">
+                                            </div>
+                                            <div class="form-group col-lg-4">
+                                                <span class="text-danger">*</span>
+                                                <label>قیمت پایه طرح (تومان):</label>
+                                                <input name="base_price" type="text" class="form-control"
+                                                       placeholder="مثال: ۱۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['base_price'] ?? ''); ?>">
                                             </div>
-                                            <div class="form-group col-lg-6">
+                                            <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
                                                 <label>قیمت پرداخت (تومان):</label>
                                                 <input name="min_price" type="text" class="form-control"

@@ -285,7 +285,7 @@ class UserController extends AbstractController
         $res = $form->checkForm()->isSuccess();
         if ($form->isSubmit()) {
             if ($res) {
-                $this->data['passwordSuccess'] = 'رمز عبور با موفقیت تغییر یافت شد.';
+                $this->redirect(base_url('logout?back_url=' . base_url('index#login_modal')), 'رمز عبور با موفقیت تغییر یافت، با رمز عبور جدید وارد شوید.', 1000);
             } else {
                 $this->data['passwordErrors'] = $form->getError();
             }
