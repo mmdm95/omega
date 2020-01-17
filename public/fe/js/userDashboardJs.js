@@ -1,9 +1,10 @@
 (function ($) {
     'use strict';
 
+    var
+        namespace = 'omega';
     $(function () {
         var
-            namespace = 'omega',
             omega = $.omega(),
             //-----
             inp_file,
@@ -34,7 +35,7 @@
                             var res = JSON.parse(response);
                             omega.processAjaxData(res, function (content) {
                                 if (res.success) {
-                                    if(content && content.length) {
+                                    if (content && content.length) {
                                         img_placeholder.attr('src', baseUrl + content[0] + '?' + Date.now());
                                     }
                                 }
@@ -72,6 +73,34 @@
 
         prepare();
         inpFileUploadChange();
+    });
+
+    $(function () {
+        var inp_action_toggle = $('.action-toggle');
+        inp_action_toggle.each(function () {
+            var $this, at_el, at, action;
+            //-----
+            $this = $(this);
+            at_el = $this.data('action-toggle-el');
+            at = $this.data('action-toggle');
+            action = $this.data('action');
+            //-----
+            $this.on('change.' + namespace, function () {
+                if ($(this).is(':checked')) {
+                    if (at) {
+                        switch (action.toLowerCase()) {
+                            case 'enable':
+                                if (true == at) {
+                                    at_el.attr('disabled', 'true');
+                                } else {
+                                    at_el.attr('disabled', 'false');
+                                }
+                                break;
+                        }
+                    }
+                }
+            });
+        });
     });
 
     $(function () {

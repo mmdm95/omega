@@ -52,6 +52,8 @@ class EventController extends AbstractController
         $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id']], false, true);
         //-----
         $this->data['event']['gallery'] = $model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
+        //-----
+        $this->data['event']['videos'] = $model->select_it(null, 'plan_videos', ['video'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
 
         // Event submission
         $this->_eventSubmit();
