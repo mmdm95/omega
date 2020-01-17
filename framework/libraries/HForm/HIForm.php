@@ -177,6 +177,14 @@ interface HIForm
     public function isLengthNotEquals($name, $length, $msg, $callback = null);
 
     /**
+     * Remove all error to form error(s) array
+     *
+     * @return mixed
+     *
+     */
+    public function removeErrors();
+
+    /**
      * Set error to form error(s) array
      *
      * @param string $msg

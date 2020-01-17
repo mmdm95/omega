@@ -43,9 +43,6 @@ class EventController extends AbstractController
             $this->redirect(base_url('event'));
         }
 
-        // Submit checker
-        $this->_eventSubmit();
-
         $this->data['param'] = $param;
         $this->data['event'] = $model->select_it(null, 'plans', '*', 'slug=:slug', ['slug' => $param[0]])[0];
         $this->data['event']['options'] = json_decode($this->data['event']['options'], true);
@@ -55,6 +52,9 @@ class EventController extends AbstractController
         $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id']], false, true);
         //-----
         $this->data['event']['gallery'] = $model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
+
+        // Event submission
+        $this->_eventSubmit();
         //-----
         $generalWhere = 'id!=:id';
         $generalWhereParam = ['id' => $this->data['event']['id']];
@@ -97,8 +97,7 @@ class EventController extends AbstractController
         $this->_register(['captcha' => ACTION]);
         $this->_login(['captcha' => ACTION]);
 
-        // Event submission
-        $this->_eventSubmit();
+//        var_dump($this->data['event']['options']);
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح', $this->data['event']['title']);
 
@@ -120,48 +119,67 @@ class EventController extends AbstractController
         $form = new Form();
         $this->data['form_token_save_event'] = $form->csrfToken('saveUserEvent');
 
-        $form->setFieldsName([
-            'rule_agree'
-        ])->setDefaults('rule_agree', 'off')
+        $form->setFieldsName(['save-event-btn', 'rule_agree'])
+            ->setDefaults('rule_agree', 'off')
             ->setMethod('post', [], ['rule_agree']);
         try {
             $form->beforeCheckCallback(function (&$values) use ($model, $form) {
                 if (!$form->isChecked('rule_agree')) {
                     $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، علامت موافق هستم را فعال کنید.');
                 } else {
-                    $values['total_amount'] = 0;
+                    $values['total_amount'] = $this->data['event']['base_price'];
+                    $values['options'] = [];
                     foreach ($this->data['event']['options'] as $k => $option) {
                         $chkName = 'select-chk-' . ($k + 1);
                         $postChk = $_POST[$chkName] ?? null;
-                        if(isset($postChk)) {
-                            if(($option['radio'] == 1 && is_array($postChk)) || ($option['radio'] == 2 && is_string($postChk))) {
-                                if(is_array($postChk)) {
+
+                        var_dump($postChk);
+
+                        if (isset($postChk)) {
+                            if (($option['radio'] == 1 && is_array($postChk)) || ($option['radio'] == 2 && is_string($postChk))) {
+                                if (is_array($postChk)) {
                                     $validKeys = array_keys($option['name']);
                                     foreach ($postChk as $k2) {
-                                        if(in_array($k2, $validKeys)) {
+                                        if (in_array($k2, $validKeys)) {
                                             $values['total_amount'] += is_numeric($option['price'][$k2]) ? (int)$option['price'][$k2] : 0;
+                                            $values['options'][$k]['title'] = $option['title'];
+                                            $values['options'][$k]['radio'] = $option['radio'];
+                                            $values['options'][$k]['name'][$k2] = $option['name'][$k2];
+                                            $values['options'][$k]['desc'][$k2] = $option['desc'][$k2];
+                                            $values['options'][$k]['price'][$k2] = $option['price'][$k2];
                                         } else {
                                             $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                                            return;
+                                            break;
                                         }
                                     }
                                 } else {
-                                    if(isset($option['price'][$postChk])) {
+                                    if (isset($option['price'][$postChk])) {
                                         $values['total_amount'] += is_numeric($option['price'][$postChk]) ? (int)$option['price'][$postChk] : 0;
+                                        $values['options'][$k]['title'] = $option['title'];
+                                        $values['options'][$k]['radio'] = $option['radio'];
+                                        $values['options'][$k]['name'][$postChk] = $option['name'][$postChk];
+                                        $values['options'][$k]['desc'][$postChk] = $option['desc'][$postChk];
+                                        $values['options'][$k]['price'][$postChk] = $option['price'][$postChk];
                                     } else {
                                         $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                                        return;
+                                        break;
                                     }
                                 }
                             } else {
                                 $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                                return;
+                                break;
                             }
                         } else {
                             $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                            return;
+                            break;
                         }
                     }
+
+                    if (count($form->getError()) && empty($values['options'])) {
+                        $form->removeErrors()->setError('هیچ آیتمی انتخاب نشده است.');
+                    }
+
+                    var_dump($values);
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = false;

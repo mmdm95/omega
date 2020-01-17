@@ -7644,6 +7644,10 @@ p {
 
 /* Author: MMDM*/
 
+strong, b {
+    font-family: "IRANYekanFN Bold";
+}
+
 /* Custom loader */
 .custom-loader-modal {
     width: 100%;

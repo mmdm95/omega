@@ -33,13 +33,13 @@
 }
 
 @font-face {
-    font-family: 'IRANYekanFN';
+    font-family: 'IRANYekanFN Bold';
     font-style: normal;
     font-weight: bold;
-    src: url("../fonts/iranyekan/eot/iranyekanwebregular(fanum).eot");
-    src: url("../fonts/iranyekan/eot/iranyekanwebregular(fanum).eot?#iefix") format("embedded-opentype"),
-    url("../fonts/iranyekan/woff2/iranyekanwebregular(fanum).woff2") format("woff2"),
-    url("../fonts/iranyekan/ttf/iranyekanwebregular(fanum).ttf") format("truetype");
+    src: url("../fonts/iranyekan/eot/iranyekanwebbold(fanum).eot");
+    src: url("../fonts/iranyekan/eot/iranyekanwebbold(fanum).eot?#iefix") format("embedded-opentype"),
+    url("../fonts/iranyekan/woff2/iranyekanwebbold(fanum).woff2") format("woff2"),
+    url("../fonts/iranyekan/ttf/iranyekanwebbold(fanum).ttf") format("truetype");
 }
 
 @font-face {
@@ -58,10 +58,14 @@
 }
 
 .iranyekan-regular {
-  font-family: 'IRANYekanFN' !important;
+  font-family: 'IRANYekanFN';
+}
+
+.iranyekan-bold {
+    font-family: 'IRANYekanFN Bold';
 }
 
 .iranyekan-light {
-    font-family: 'IRANYekanFN Light' !important;
+    font-family: 'IRANYekanFN Light';
 }
 

@@ -1540,6 +1540,18 @@ class Form implements HIForm
     }
 
     /**
+     * Remove all error to form error(s) array
+     *
+     * @return Form
+     *
+     */
+    public function removeErrors()
+    {
+        $this->errors = [];
+        return $this;
+    }
+
+    /**
      * Set error to form error(s) array
      *
      * @param string $msg
@@ -1624,6 +1636,7 @@ class Form implements HIForm
                 } catch (HFException $e) {
                     die($e->getMessage());
                 }
+
                 if ($this->csrf->validateToken($csrfToken, $this->csrfFieldNames['csrfName'])) {
                     if (isset($this->beforeFunction)) {
                         call_user_func_array($this->beforeFunction, [&$this->fieldsValues]);
