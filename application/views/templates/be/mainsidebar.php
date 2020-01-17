@@ -11,7 +11,7 @@
                 <div class="media">
                     <a href="<?= base_url() . 'admin/editUser/' . @$identity->id; ?>"
                        class="media-left">
-                        <img src="<?= asset_url($identity->image); ?>" class="img-fit"
+                        <img src="<?= base_url($identity->image); ?>" class="img-fit"
                              alt="">
                     </a>
                     <div class="media-body">

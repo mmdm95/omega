@@ -27,7 +27,7 @@
             <li class="dropdown dropdown-user">
                 <a class="dropdown-toggle" data-toggle="dropdown">
                     <img class="img-sm img-fit" style="max-height: none;"
-                         src="<?= asset_url("{$identity->image}"); ?>" alt="">
+                         src="<?= base_url("{$identity->image}"); ?>" alt="">
                     <span>
                         <?= set_value($identity->first_name ?? '', '', null, $identity->username); ?>
                     </span>

@@ -67,10 +67,10 @@ class UserController extends AbstractController
 
     public function ajaxUploadUserImageAction()
     {
-        if(!$this->auth->isLoggedIn() || !is_ajax()) {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
             message('error', 200, 'دسترسی غیر مجاز');
         }
-        if(empty($_FILES['file'])) {
+        if (empty($_FILES['file'])) {
             message('error', 200, 'پارامترهای وارد شده نامعتبر است.');
         }
 
@@ -81,40 +81,47 @@ class UserController extends AbstractController
         }
         //
         $imageExt = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+        $image = PROFILE_IMAGE_DIR . $this->data['identity']->username . '.' . $imageExt;
+        $model = new Model();
+        $model->transactionBegin();
+        $res = $model->update_it('users', ['image' => $image], 'id=:id', ['id' => $this->data['identity']->id]);
         //
-        $this->load->library('Upload/vendor/autoload');
-        $storage = new \Upload\Storage\FileSystem($userDir, true);
-        $file = new \Upload\File('file', $storage);
+        if ($res) {
+            $this->load->library('Upload/vendor/autoload');
+            $storage = new \Upload\Storage\FileSystem($userDir, true);
+            $file = new \Upload\File('file', $storage);
 
-        // Set file name to user's phone number
-        $file->setName($this->data['identity']->username);
+            // Set file name to user's phone number
+            $file->setName($this->data['identity']->username);
 
-        // Validate file upload
-        // MimeType List => http://www.iana.org/assignments/media-types/media-types.xhtml
-        $file->addValidations(array(
-            // Ensure file is of type "image/png"
-            new \Upload\Validation\Mimetype(['image/png', 'image/jpg', 'image/jpeg', 'image/gif']),
+            // Validate file upload
+            // MimeType List => http://www.iana.org/assignments/media-types/media-types.xhtml
+            $file->addValidations(array(
+                // Ensure file is of type "image/png"
+                new \Upload\Validation\Mimetype(['image/png', 'image/jpg', 'image/jpeg', 'image/gif']),
 
-            // Ensure file is no larger than 4M (use "B", "K", M", or "G")
-            new \Upload\Validation\Size('4M')
-        ));
+                // Ensure file is no larger than 4M (use "B", "K", M", or "G")
+                new \Upload\Validation\Size('4M')
+            ));
 
-        // Try to upload file
-        try {
-            // Success!
-            $res = $file->upload();
-        } catch (\Exception $e) {
-            // Fail!
-            $res = false;
+            // Try to upload file
+            try {
+                // Success!
+                $res = $file->upload();
+            } catch (\Exception $e) {
+                // Fail!
+                $res = false;
+            }
+            //
+            if ($res) {
+                $this->auth->storeIdentity([
+                    'image' => $image,
+                ]);
+                $model->transactionComplete();
+                message('success', 200, ['تصویر با موفقیت بروزرسانی شد.', $image]);
+            }
         }
-        //
-        if($res) {
-            $image = PROFILE_IMAGE_DIR . $this->data['identity']->username . '.' . $imageExt;
-            $this->auth->storeIdentity([
-                'image' => $image,
-            ]);
-            message('success', 200, ['تصویر با موفقیت بروزرسانی شد.', $image]);
-        }
+        $model->transactionRollback();
         message('error', 200, 'خطا در بروزرسانی تصویر');
     }
 
@@ -202,11 +209,11 @@ class UserController extends AbstractController
                 } else {
                     $this->auth->storeIdentity(array_merge($this->data['identity'], $updateFields));
                     $infoFlag = 0;
-                    if(!empty($this->data['identity']->full_name) && !empty($this->data['identity']->connector_phone) &&
+                    if (!empty($this->data['identity']->full_name) && !empty($this->data['identity']->connector_phone) &&
                         !empty($this->data['identity']->n_code) && !empty($this->data['identity']->gender) &&
                         !empty($this->data['identity']->grade)) {
                         if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
-                            if(!empty($this->data['identity']->school)) {
+                            if (!empty($this->data['identity']->school)) {
                                 $infoFlag = 1;
                             }
                         } else {
@@ -217,7 +224,7 @@ class UserController extends AbstractController
                     $res2 = $model->update_it('users', [
                         'info_flag' => $infoFlag
                     ], 'id=:id', ['id' => $this->data['identity']->id]);
-                    if(!$res2) {
+                    if (!$res2) {
                         $form->setError('خطا در انجام عملیات!');
                     }
                 }
@@ -258,7 +265,7 @@ class UserController extends AbstractController
                         $form->setError('نقش شما در این قسمت قابل تغییر نمی‌باشد، لطفا تلاش نفرمایید!');
                     }
                 }
-                if(!count($form->getError())) {
+                if (!count($form->getError())) {
                     if (password_verify($values['last-password'], $this->data['identity']->password)) {
                         $form->isLengthInRange('new-password', 8, 16, 'پسورد باید حداقل ۸ و حداکثر ۱۶ رقم باشد.');
                         $form->validatePassword('new-password', 2, 'پسورد باید شامل حروف و اعداد انگلیسی باشد.');
