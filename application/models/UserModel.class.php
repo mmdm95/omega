@@ -55,10 +55,6 @@ class UserModel extends HModel
                 'INNER',
                 'factors AS f',
                 'p.id=f.plan_id'
-            )->join(
-                'LEFT',
-                'zarinpal_payment AS zp',
-                'p.id=zp.plan_id'
             );
         } catch (\Aura\SqlQuery\Exception $e) {
             die('unexpected error: ' . $e->getMessage());

@@ -10,6 +10,8 @@ abstract class AbstractController extends HController
     protected $auth;
     protected $setting;
     protected $data = [];
+    //-----
+    const PAYMENT_TABLE_ZARINPAL = 'zarinpal_payment';
 
     public function __construct()
     {

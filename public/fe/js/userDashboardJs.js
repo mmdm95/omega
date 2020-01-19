@@ -87,19 +87,19 @@
             //-----
             $this.on('change.' + namespace, function () {
                 if ($(this).is(':checked')) {
-                    if (at) {
+                    if (typeof at !== typeof undefined) {
                         switch (action.toLowerCase()) {
                             case 'enable':
                                 if (true == at) {
-                                    at_el.attr('disabled', 'true');
+                                    $(at_el).attr('disabled', false);
                                 } else {
-                                    at_el.attr('disabled', 'false');
+                                    $(at_el).attr('disabled', true);
                                 }
                                 break;
                         }
                     }
                 }
-            });
+            }).trigger('change.' + namespace);
         });
     });
 

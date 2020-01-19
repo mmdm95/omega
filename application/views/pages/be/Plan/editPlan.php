@@ -402,6 +402,107 @@
 
                                     <div class="panel panel-white">
                                         <div class="panel-heading">
+                                            <h6 class="panel-title">گالری ویدیوها</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body slide-items">
+                                            <div class="col-sm-12 mb-20 text-right">
+                                                <a href="javascript:void(0);"
+                                                   class="btn btn-primary btn-icon add-slide-image ml-5"
+                                                   title="اضافه کردن ویدیو جدید" data-popup="tooltip">
+                                                    <i class="icon-plus2" aria-hidden="true"></i>
+                                                </a>
+                                            </div>
+
+                                            <?php if (@count($planVals['video_gallery'])): ?>
+                                                <?php foreach ($planVals['video_gallery'] as $key => $vid): ?>
+                                                    <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                        <div class="cursor-pointer pick-file-video border border-lg border-default"
+                                                             data-toggle="modal"
+                                                             data-target="#modal_full"
+                                                             style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                            <input class="image-file" type="hidden"
+                                                                   name="video_gallery[]"
+                                                                   value="<?= set_value($vid ?? ''); ?>">
+                                                            <div class="media stack-media-on-mobile">
+                                                                <div class="media-left">
+                                                                    <div class="thumb">
+                                                                        <a class="display-inline-block"
+                                                                           style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                            <img
+                                                                                    src="<?= set_value($vid ?? '', '', base_url($vid ?? ''), asset_url('be/images/video-placeholder.png')); ?>"
+                                                                                    class="img-rounded" alt=""
+                                                                                    style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                    data-base-url="<?= base_url(); ?>">
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body">
+                                                                    <h6 class="media-heading">
+                                                                        <a class="io-image-lbl text-grey-300">
+                                                                            انتخاب ویدیو <?= ($key + 1); ?>
+                                                                        </a>
+                                                                        <a class="io-image-name display-block">
+                                                                            <?= basename($vid); ?>
+                                                                        </a>
+                                                                    </h6>
+                                                                </div>
+                                                                <?php if ($key == 0): ?>
+                                                                    <small class="clear-video-val">&times;</small>
+                                                                <?php else: ?>
+                                                                    <small class="delete-new-image btn btn-danger">
+                                                                        &times;
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                    <div class="cursor-pointer pick-file-video border border-lg border-default"
+                                                         data-toggle="modal"
+                                                         data-target="#modal_full"
+                                                         style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                        <input class="image-file" type="hidden"
+                                                               name="video_gallery[]"
+                                                               value="">
+                                                        <div class="media stack-media-on-mobile">
+                                                            <div class="media-left">
+                                                                <div class="thumb">
+                                                                    <a class="display-inline-block"
+                                                                       style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                        <img
+                                                                                src="<?= asset_url('be/images/video-placeholder.png'); ?>"
+                                                                                class="img-rounded" alt=""
+                                                                                style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                data-base-url="<?= base_url(); ?>">
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading">
+                                                                    <a class="io-image-lbl text-grey-300">
+                                                                        انتخاب ویدیو 1
+                                                                    </a>
+                                                                    <a class="io-image-name display-block">
+                                                                    </a>
+                                                                </h6>
+                                                            </div>
+                                                            <small class="clear-video-val">&times;</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
                                             <h6 class="panel-title">آپشن‌های طرح</h6>
                                             <div class="heading-elements">
                                                 <ul class="icons-list">

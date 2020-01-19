@@ -7644,8 +7644,16 @@ p {
 
 /* Author: MMDM*/
 
+.order-code {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 strong, b {
     font-family: "IRANYekanFN Bold";
+}
+
+.img-profile-max-height {
+    max-height: 130px;
 }
 
 /* Custom loader */

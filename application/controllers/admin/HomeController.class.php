@@ -1452,7 +1452,7 @@ class HomeController extends HController
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
         $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery', 'video_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
@@ -1505,6 +1505,10 @@ class HomeController extends HController
                 if (!count($values['image_gallery'])) {
                     $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
                 }
+                // Validate video gallery
+                $values['video_gallery'] = array_filter($values['video_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
                 // Validate options structure
                 $values['option_group'] = $_POST['option_group'] ?? [];
                 $newOpt = [];
@@ -1575,7 +1579,17 @@ class HomeController extends HController
                     if (!$res2) break;
                 }
 
-                if ($res && $res2) {
+                // Insert videos to gallery table
+                $res3 = false;
+                foreach ($values['video_gallery'] as $video) {
+                    $res3 = $model->insert_it('plan_videos', [
+                        'plan_id' => $res,
+                        'video' => $video,
+                    ]);
+                    if (!$res3) break;
+                }
+
+                if ($res && $res2 && $res3) {
                     $model->transactionComplete();
                 } else {
                     $model->transactionRollback();
@@ -1646,7 +1660,7 @@ class HomeController extends HController
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
         $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery'])
+            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery', 'video_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
@@ -1701,6 +1715,10 @@ class HomeController extends HController
                 if (!count($values['image_gallery'])) {
                     $form->setError('انتخاب حداقل یک تصویر برای گالری تصاویر اجباری است.');
                 }
+                // Validate video gallery
+                $values['video_gallery'] = array_filter($values['video_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
                 // Validate options structure
                 $values['option_group'] = $_POST['option_group'] ?? [];
                 $newOpt = [];
@@ -1772,7 +1790,19 @@ class HomeController extends HController
                     if (!$res2) break;
                 }
 
-                if ($res && $res2 && $res3) {
+                // Delete previous gallery images
+                $res4 = $model->delete_it('plan_videos', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
+                // Insert images to gallery table
+                $res5 = false;
+                foreach ($values['video_gallery'] as $video) {
+                    $res5 = $model->insert_it('plan_videos', [
+                        'plan_id' => $this->data['param'][0],
+                        'video' => $video,
+                    ]);
+                    if (!$res5) break;
+                }
+
+                if ($res && $res2 && $res3 && $res4 && $res5) {
                     $model->transactionComplete();
                 } else {
                     $model->transactionRollback();
@@ -1797,6 +1827,7 @@ class HomeController extends HController
         $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
         $this->data['planVals']['contact'] = explode(',', $this->data['planVals']['contact']);
         $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $param[0]]), 'image');
+        $this->data['planVals']['video_gallery'] = array_column($model->select_it(null, 'plan_videos', ['video'], 'plan_id=:pId', ['pId' => $param[0]]), 'video');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش طرح');
@@ -1857,7 +1888,22 @@ class HomeController extends HController
 
     public function detailPlanAction($param)
     {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
 
+        $model = new Model();
+        if(!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/managePlan'));
+        }
+
+        $this->data['planVals'] = $model->select_it(null, 'plans', '*',
+            'id=:id', ['id' => $param[0]], null, ['id DESC'])[0];
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح‌ها');
+
+        $this->_render_page('pages/be/Plan/detailPlan');
     }
 
     public function deletePlanAction()
@@ -2646,6 +2692,44 @@ class HomeController extends HController
                 $this->data['success_others'] = 'عملیات با موفقیت انجام شد.';
             } else {
                 $this->data['errors_others'] = $formImages->getError();
+            }
+        }
+
+        // Contact panel setting form submit
+        $form = new Form();
+        $this->data['errors_contact'] = [];
+        $this->data['form_token_contact'] = $form->csrfToken('settingContact');
+        $form->setFieldsName([
+            'contact-desc', 'contact-mobile',
+            'contact-socialEmail', 'contact-telegram', 'contact-instagram', 'contact-facebook',
+        ])->setMethod('post');
+        try {
+            $form->afterCheckCallback(function ($values) use ($form) {
+                $this->data['setting']['contact']['description'] = $values['contact-desc'];
+                $this->data['setting']['contact']['mobiles'] = $values['contact-mobile'];
+                //-----
+                $this->data['setting']['contact']['socials']['email'] = $values['contact-socialEmail'];
+                $this->data['setting']['contact']['socials']['telegram'] = $values['contact-telegram'];
+                $this->data['setting']['contact']['socials']['instagram'] = $values['contact-instagram'];
+                $this->data['setting']['contact']['socials']['facebook'] = $values['contact-facebook'];
+
+                $this->setting = array_merge_recursive_distinct($this->setting, $this->data['setting']);
+                $res = write_json(CORE_PATH . 'config.json', $this->setting);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['success_contact'] = 'عملیات با موفقیت انجام شد.';
+            } else {
+                $this->data['errors_contact'] = $form->getError();
             }
         }
 

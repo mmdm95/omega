@@ -17,12 +17,14 @@ if (typeof jQuery == 'undefined') {
             function delete_slide_img(selector, e) {
                 e.stopPropagation();
 
-                var container = $('.slide-items');
+                var container = $(selector).closest('.slide-items');
                 $(selector).closest('.slide-item').fadeOut(400, function () {
                     $(this).remove();
 
+                    var is_video = container.find('.pick-file-video').length;
+                    var txt = is_video ? 'انتخاب ویدیو ' : 'انتخاب تصویر ';
                     container.find('.slide-item').each(function (i) {
-                        $(this).find('.io-image-lbl').text('انتخاب تصویر ' + (i + 1));
+                        $(this).find('.io-image-lbl').text(txt + (i + 1));
                     });
                 });
             }
@@ -34,14 +36,17 @@ if (typeof jQuery == 'undefined') {
             $('.add-slide-image').off('click').on('click', function (e) {
                 e.stopPropagation();
 
-                var container = $('.slide-items');
+                var container = $(this).closest('.slide-items');
                 var item = container.find('.slide-item').first().clone(true);
 
                 var deleteBtn = $('<small class="delete-new-image btn btn-danger" title="حذف">&times;</small>');
 
+                var is_video = container.find('.pick-file-video').length;
+
                 item.find('.clear-img-val').remove();
+                item.find('.clear-video-val').remove();
                 item.find('input').val('');
-                item.find('img').attr('src', baseUrl + 'public/be/images/placeholder.jpg');
+                item.find('img').attr('src', baseUrl + (is_video ? 'public/be/images/video-placeholder.png' : 'public/be/images/placeholder.jpg'));
                 item.find('a.io-image-name').text('');
 
                 deleteBtn.off('click').on('click', function (e) {
@@ -51,8 +56,9 @@ if (typeof jQuery == 'undefined') {
 
                 container.append(item);
 
+                var txt = is_video ? 'انتخاب ویدیو ' : 'انتخاب تصویر ';
                 container.find('.slide-item').each(function (i) {
-                    $(this).find('.io-image-lbl').text('انتخاب تصویر ' + (i + 1));
+                    $(this).find('.io-image-lbl').text(txt + (i + 1));
                 });
             });
 

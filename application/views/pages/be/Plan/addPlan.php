@@ -410,10 +410,10 @@
                                             </div>
                                         </div>
                                         <div class="panel-body slide-items">
-                                            <div class="col-sm-12 mb-20 text-left">
+                                            <div class="col-sm-12 mb-20 text-right">
                                                 <a href="javascript:void(0);"
                                                    class="btn btn-primary btn-icon add-slide-image ml-5"
-                                                   title="اضافه کردن تصویر جدید" data-popup="tooltip">
+                                                   title="اضافه کردن ویدیو جدید" data-popup="tooltip">
                                                     <i class="icon-plus2" aria-hidden="true"></i>
                                                 </a>
                                             </div>
@@ -421,11 +421,11 @@
                                             <?php if (count($errors) && count($planVals['video_gallery'])): ?>
                                                 <?php foreach ($planVals['video_gallery'] as $key => $vid): ?>
                                                     <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
-                                                        <div class="cursor-pointer pick-file border border-lg border-default"
+                                                        <div class="cursor-pointer pick-file-video border border-lg border-default"
                                                              data-toggle="modal"
                                                              data-target="#modal_full"
                                                              style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
-                                                            <input class="video-file" type="hidden"
+                                                            <input class="image-file" type="hidden"
                                                                    name="video_gallery[]"
                                                                    value="<?= set_value($vid ?? ''); ?>">
                                                             <div class="media stack-media-on-mobile">
@@ -452,7 +452,7 @@
                                                                     </h6>
                                                                 </div>
                                                                 <?php if ($key == 0): ?>
-                                                                    <small class="clear-img-val">&times;</small>
+                                                                    <small class="clear-video-val">&times;</small>
                                                                 <?php else: ?>
                                                                     <small class="delete-new-image btn btn-danger">
                                                                         &times;
@@ -464,11 +464,11 @@
                                                 <?php endforeach; ?>
                                             <?php else: ?>
                                                 <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
-                                                    <div class="cursor-pointer pick-file border border-lg border-default"
+                                                    <div class="cursor-pointer pick-file-video border border-lg border-default"
                                                          data-toggle="modal"
                                                          data-target="#modal_full"
                                                          style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
-                                                        <input class="video-file" type="hidden"
+                                                        <input class="image-file" type="hidden"
                                                                name="video_gallery[]"
                                                                value="">
                                                         <div class="media stack-media-on-mobile">
@@ -477,7 +477,7 @@
                                                                     <a class="display-inline-block"
                                                                        style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
                                                                         <img
-                                                                                src="<?= asset_url('be/images/placeholder.jpg'); ?>"
+                                                                                src="<?= asset_url('be/images/video-placeholder.png'); ?>"
                                                                                 class="img-rounded" alt=""
                                                                                 style="width: 100px; height: 100px; object-fit: contain;"
                                                                                 data-base-url="<?= base_url(); ?>">
@@ -493,7 +493,7 @@
                                                                     </a>
                                                                 </h6>
                                                             </div>
-                                                            <small class="clear-img-val">&times;</small>
+                                                            <small class="clear-video-val">&times;</small>
                                                         </div>
                                                     </div>
                                                 </div>

@@ -61,7 +61,7 @@
 
                 dateValues[handle].innerHTML = lbl;
             });
-            this.noUiSlider.on('end', function (values, handle) {
+            this.noUiSlider.on('change', function (values, handle) {
                 var val;
                 val = parseInt(values, 10);
                 $.change_plan_status($this, val);

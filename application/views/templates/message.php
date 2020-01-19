@@ -10,8 +10,8 @@
             font-style: normal;
             font-weight: 400;
             src: local("IRANSansWeb"), local("../fonts/IRANSansWeb"),
-            url("<?= BASE_PATH; ?>fonts/IRANSansWeb.woff") format("woff"),
-            url("<?= BASE_PATH; ?>fonts/IRANSansWeb.ttf") format("truetype")
+            url("<?= base_url('framework'); ?>/fonts/IRANSansWeb.woff") format("woff"),
+            url("<?= base_url('framework'); ?>/fonts/IRANSansWeb.ttf") format("truetype")
         }
 
         body {
@@ -20,7 +20,6 @@
         }
 
         .message {
-            width: 100%;
             height: auto;
             padding: 20px;
             border-radius: 7px;

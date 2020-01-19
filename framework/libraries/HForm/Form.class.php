@@ -642,7 +642,76 @@ class Form implements HIForm
     {
         try {
             $this->_validationHasError($value, $name);
+
             if (ctype_alnum($value) && !is_numeric($value)) {
+                return true;
+            }
+            return false;
+        } catch (HFException $e) {
+            die($e->getMessage());
+        }
+    }
+
+    /**
+     * Check if a name is valid persian name or not
+     *
+     * @param string $name
+     * @param string $msg - to not show the error put empty string in this and be sure remove empty messages is set to true
+     * @param callable|null $callback - use for doing something if validate is failed
+     * @return Form
+     *
+     */
+    public function validatePersianName($name, $msg = 'از حروف فارسی استفاده نشده است.', $callback = null)
+    {
+        if ($this->continueSubmit) {
+            $value = convertNumbersToPersian($this->fieldsValues[$name], true);
+
+            if (is_array($value)) {
+                $c = 0;
+                foreach ($value as $k => $v) {
+                    $result = $this->validatePersianNameOne($value, $name);
+                    if ($result === false) {
+                        $this->errors[] = $msg;
+                    } else {
+                        $c++;
+                    }
+                }
+
+                if ($c != count($value) && is_callable($callback)) {
+                    call_user_func_array($callback, [&$this->fieldsValues[$name]]);
+                }
+            } else {
+                $result = $this->validatePersianNameOne($value, $name);
+                if ($result === false) {
+                    if (is_callable($callback)) {
+                        call_user_func_array($callback, [&$this->fieldsValues[$name]]);
+                    }
+                    $this->errors[] = $msg;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Validate an persian name value
+     *
+     * @param $value
+     * @param string $name
+     * @return bool
+     *
+     */
+    protected function validatePersianNameOne($value, $name)
+    {
+        try {
+            $this->_validationHasError($value, $name);
+
+            // Persian numbers and characters
+//            if (preg_match('/^[\x{600}-\x{6FF}]+$/u', str_replace("\\\\", "", $value))) {
+
+            // Only persian characters
+            if (preg_match('/^[پچجحخهعغفقثصضشسیبلاتنمکگوئدذرزطظژؤإأءًٌٍَُِّ\s]+$/u', $value)) {
                 return true;
             }
             return false;

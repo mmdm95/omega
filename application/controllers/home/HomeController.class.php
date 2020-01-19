@@ -35,6 +35,73 @@ class HomeController extends AbstractController
         ]);
     }
 
+    public function faqAction()
+    {
+        $model = new Model();
+        $this->data['faq'] = $model->select_it(null, 'faq');
+        //-----
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'سؤالات متداول');
+
+        $this->_render_page([
+            'pages/fe/faqs',
+        ]);
+    }
+
+    public function contactUsAction()
+    {
+        $this->_contactSubmit();
+        //-----
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'سؤالات متداول');
+
+        $this->_render_page([
+            'pages/fe/contact',
+        ]);
+    }
+
+    protected function _contactSubmit()
+    {
+        //-----
+        $model = new Model();
+        $this->data['contactErrors'] = [];
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_contact'] = $form->csrfToken('contactForm');
+        $form->setFieldsName([
+            'subject', 'name', 'mobile', 'message',
+        ])->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function () use ($model, $form) {
+                $form->isRequired(['subject', 'name', 'phone', 'message'], 'تمام فیلدها اجباری هستند.');
+                $form->validatePersianName('name', 'نام باید حروف فارسی باشد.')
+                    ->validate('numeric', 'phone', 'شماره باید از نوع عدد باشد.');
+            })->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->insert_it('contact_us', [
+                    'full_name' => trim($values['name']),
+                    'phone' => trim($values['phone']),
+                    'subject' => trim($values['subject']),
+                    'body' => trim($values['message']),
+                    'status' => 0,
+                    'sent_at' => time(),
+                ]);
+
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['contactSuccess'] = 'پیام با موفقیت ارسال شد.';
+            } else {
+                $this->data['contactErrors'] = $form->getError();
+            }
+        }
+    }
+
     protected function _newsletter()
     {
         $model = new Model();

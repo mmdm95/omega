@@ -66,6 +66,9 @@
                                         <a href="#othersPanel" data-toggle="tab">تنظیمات سایر صفحات</a>
                                     </li>
                                     <li>
+                                        <a href="#contactPanel" data-toggle="tab">اطلاعات تماس</a>
+                                    </li>
+                                    <li>
                                         <a href="#footerPanel" data-toggle="tab">تنظیمات فوتر</a>
                                     </li>
                                 </ul>
@@ -548,6 +551,120 @@
                                 <!-- ********************* -->
                                 <!-- ***** TAB PANEL ***** -->
                                 <!-- ********************* -->
+                                <div class="tab-pane" id="contactPanel">
+                                    <div class="row no-padding pl-20 pr-20">
+                                        <div class="col-md-12">
+                                            <!--Error Check-->
+                                            <?php if (isset($errors_contact) && count($errors_contact)): ?>
+                                                <div class="alert alert-danger alert-styled-left alert-bordered
+                                                 no-border-top no-border-right no-border-bottom">
+                                                    <ul class="list-unstyled">
+                                                        <?php foreach ($errors_contact as $err): ?>
+                                                            <li>
+                                                                <i class="icon-dash" aria-hidden="true"></i>
+                                                                <?= $err; ?>
+                                                            </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                </div>
+                                            <?php elseif (isset($success_contact)): ?>
+                                                <div class="alert alert-success alert-styled-left alert-bordered
+                                                 no-border-top no-border-right no-border-bottom">
+                                                    <p>
+                                                        <?= $success_contact; ?>
+                                                    </p>
+                                                </div>
+                                            <?php endif; ?>
+                                            <!--Error Check End-->
+                                        </div>
+                                    </div>
+
+                                    <form action="<?= base_url(); ?>admin/setting#contactPanel" method="post">
+                                        <?= $data['form_token_contact']; ?>
+
+                                        <div class="p-20 mb-20 border-bottom border-top border-default bg-default">
+                                            <h4 class="no-margin">
+                                                <i class="icon-circle-small position-left text-info"></i>
+                                                اطلاعات تماس
+                                            </h4>
+                                        </div>
+                                        <div class="row pl-20 pr-20 pb-20">
+                                            <div class="form-group col-md-12">
+                                                <label>آدرس:</label>
+                                                <textarea class="form-control col-md-12 p-10"
+                                                          style="min-height: 100px; resize: vertical;"
+                                                          name="contact-desc"
+                                                          rows="4"
+                                                          cols="10"><?= $setting['contact']['description'] ?? ''; ?></textarea>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label>شماره‌های تماس:</label>
+                                                <input name="contact-mobile" type="text"
+                                                       class="form-control" placeholder="Press Enter"
+                                                       data-role="tagsinput"
+                                                       value="<?= $setting['contact']['mobiles'] ?? ''; ?>">
+                                            </div>
+                                        </div>
+
+                                        <hr>
+
+                                        <div class="p-20 mb-20 border-bottom border-top border-default bg-default">
+                                            <h4 class="no-margin">
+                                                <i class="icon-circle-small position-left text-info"></i>
+                                                راه‌های ارتباطی
+                                            </h4>
+                                        </div>
+                                        <div class="row pl-20 pr-20 pb-20">
+                                            <div class="col-lg-6 mt-10">
+                                                <div class="form-group">
+                                                    <label>آدرس ایمیل:</label>
+                                                    <input name="contact-socialEmail" type="text"
+                                                           class="form-control" placeholder=""
+                                                           value="<?= set_value($setting['contact']['socials']['email'] ?? ''); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mt-10">
+                                                <div class="form-group">
+                                                    <label>آدرس تلگرام:</label>
+                                                    <input name="contact-telegram" type="text"
+                                                           class="form-control" placeholder=""
+                                                           value="<?= set_value($setting['contact']['socials']['telegram'] ?? ''); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mt-10">
+                                                <div class="form-group">
+                                                    <label>آدرس اینستاگرام:</label>
+                                                    <input name="contact-instagram" type="text"
+                                                           class="form-control" placeholder=""
+                                                           value="<?= set_value($setting['contact']['socials']['instagram'] ?? ''); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mt-10">
+                                                <div class="form-group">
+                                                    <label>آدرس فیسبوک:</label>
+                                                    <input name="contact-facebook" type="text"
+                                                           class="form-control" placeholder=""
+                                                           value="<?= set_value($setting['contact']['socials']['facebook'] ?? ''); ?>">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="text-center">
+                                            <hr style="margin-bottom: 0;">
+                                            <button type="submit"
+                                                    class="btn btn-default btn-block pt-20 pb-20 no-border-radius-top">
+                                                <span class="h5">
+                                                <i class="icon-cog position-left"></i>
+                                                    ذخیره تنظیمات
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- ********************* -->
+                                <!-- ***** TAB PANEL ***** -->
+                                <!-- ********************* -->
                                 <div class="tab-pane" id="footerPanel">
                                     <div class="row no-padding pl-20 pr-20">
                                         <div class="col-md-12">
@@ -994,7 +1111,7 @@
                     <!-- Show active tab from url's hash -->
                     <script>
                         var hash = window.location.hash.substr(1);
-                        var tabs = ['mainPanel', 'imagesPanel', 'othersPanel', 'footerPanel'];
+                        var tabs = ['mainPanel', 'imagesPanel', 'othersPanel', 'contactPanel', 'footerPanel'];
 
                         if ($.inArray(hash, tabs) !== -1) {
                             $('a[href="#' + hash + '"]').tab('show');
