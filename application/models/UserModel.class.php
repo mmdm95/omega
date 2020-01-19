@@ -48,7 +48,9 @@ class UserModel extends HModel
     public function getEventDetail($params)
     {
         $select = $this->select();
-        $select->cols(['*'])->from('plans AS p');
+        $select->cols([
+            '*', 'p.options AS plan_options', 'f.options AS options'
+        ])->from('plans AS p');
 
         try {
             $select->join(

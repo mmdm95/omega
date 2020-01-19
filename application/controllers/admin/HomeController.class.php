@@ -1893,12 +1893,17 @@ class HomeController extends HController
         }
 
         $model = new Model();
-        if(!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plans', 'id=:id', ['id' => $param[0]])) {
             $this->redirect(base_url('admin/managePlan'));
         }
 
         $this->data['planVals'] = $model->select_it(null, 'plans', '*',
             'id=:id', ['id' => $param[0]], null, ['id DESC'])[0];
+        $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
+            //-----
+        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL', [],
+            ['plan_id'], null, null, null, true);
+        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id']], false, true);
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح‌ها');

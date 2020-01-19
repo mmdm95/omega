@@ -104,7 +104,7 @@ abstract class AbstractController extends HController
                 $form->isLengthInRange('password', 8, 16, 'تعداد رمز عبور باید بین ۸ تا ۱۶ کاراکتر باشد.');
                 $form->validatePersianMobile('mobile');
                 $form->validatePassword('password', 2, 'رمز عبور باید شامل حروف و اعداد باشد.');
-                if ($values['role'] == AUTH_ROLE_GUEST) {
+                if ($values['role'] == AUTH_ROLE_GUEST || !in_array($values['role'], [AUTH_ROLE_STUDENT, AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
                     $form->setError('نقش انتخاب شده نامعتبر است.');
                 }
                 $config = getConfig('config');
@@ -128,14 +128,18 @@ abstract class AbstractController extends HController
                     'ip_address' => get_client_ip_env(),
                     'created_on' => time(),
                     'active' => 1,
-                    'image' => PROFILE_DEFAULT_IMAGE
+                    'image' => PROFILE_DEFAULT_IMAGE,
+                ], [], true);
+                $res3 = $model->insert_it('users_roles', [
+                    'user_id' => $res,
+                    'role_id' => (int)$values['role'],
                 ]);
 
-                if (!$res || !$res2) {
+                if (!$res && $res2 && $res3) {
+                    $model->transactionComplete();
+                } else {
                     $model->transactionRollback();
                     $form->setError('خطا در انجام عملیات!');
-                } else {
-                    $model->transactionComplete();
                 }
             });
         } catch (Exception $e) {

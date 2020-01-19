@@ -74,7 +74,13 @@ class UserController extends AbstractController
     {
         $this->_checker();
         //-----
+        $this->_zarinpalCheck();
 
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'نتیجه پرداخت');
+
+        $this->_render_page([
+            'pages/fe/payment_result',
+        ]);
     }
 
     public function ajaxUploadUserImageAction()
