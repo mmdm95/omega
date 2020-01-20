@@ -163,7 +163,15 @@ abstract class AbstractController extends HController
 //                if (isset($_GET['back_url'])) {
 //                    $this->redirect(base_url('verifyPhone?back_url=' . $_GET['back_url']), $message, $delay);
 //                }
-                $this->redirect(base_url('user/dashboard'), $message, $delay);
+
+                $login = $this->auth->login($this->data['_username'], $this->data['_password'], false,
+                    false, 'active=:active', ['active' => 1]);
+                if (is_array($login)) {
+                    $form->setError($login['err']);
+                    $this->data['registerErrors'] = $form->getError();
+                } else {
+                    $this->redirect(base_url('user/dashboard'), $message, $delay);
+                }
             } else {
                 $this->data['registerErrors'] = $form->getError();
                 $this->data['registerValues'] = $form->getValues();
