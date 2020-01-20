@@ -1867,9 +1867,9 @@ class HomeController extends HController
         $model = new Model();
         $this->data['plans'] = $model->select_it(null, 'plans', '*', null, [], null, ['id DESC']);
         foreach ($this->data['plans'] as &$plan) {
-            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL', [],
+            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
                 ['plan_id'], null, null, null, true);
-            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id']], false, true);
+            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id'], 'pa' => '0'], false, true);
         }
 
         // Base configuration
@@ -1900,13 +1900,25 @@ class HomeController extends HController
         $this->data['planVals'] = $model->select_it(null, 'plans', '*',
             'id=:id', ['id' => $param[0]], null, ['id DESC'])[0];
         $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
-            //-----
-        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL', [],
+        $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', 'image',
+            'plan_id=:pId', ['pId' => $param[0]]), 'image');
+        $this->data['planVals']['video_gallery'] = array_column($model->select_it(null, 'plan_videos', 'video',
+            'plan_id=:pId', ['pId' => $param[0]]), 'video');
+        //-----
+        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
             ['plan_id'], null, null, null, true);
-        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id']], false, true);
+        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id'], 'pa' => '0'], false, true);
+        //-----
+        $factor = new FactorModel();
+        $this->data['planVals']['buyers'] = $factor->getBuyers(['plan_id' => $param[0], 'payed' => true]);
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح‌ها');
+
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
 
         $this->_render_page('pages/be/Plan/detailPlan');
     }

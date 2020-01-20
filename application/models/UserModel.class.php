@@ -62,12 +62,17 @@ class UserModel extends HModel
             die('unexpected error: ' . $e->getMessage());
         }
 
-        $select->where('p.slug=:slug AND f.user_id=:uId')
-            ->bindValues(['slug' => $params['slug'], 'uId' => $params['user_id']])
-            ->groupBy(['p.id']);
+        if (isset($params['slug'])) {
+            $select->where('p.slug=:slug')->bindValues(['slug' => $params['slug']]);
+        }
+        if (isset($params['user_id'])) {
+            $select->where('f.user_id=:uId')->bindValues(['uId' => $params['user_id']]);
+        }
+
+        $select->groupBy(['p.id']);
 
         $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
-        if(count($res)) return $res[0];
+        if (count($res)) return $res[0];
         return [];
     }
 }

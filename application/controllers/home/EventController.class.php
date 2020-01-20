@@ -47,9 +47,9 @@ class EventController extends AbstractController
         $this->data['event'] = $model->select_it(null, 'plans', '*', 'slug=:slug', ['slug' => $param[0]])[0];
         $this->data['event']['options'] = json_decode($this->data['event']['options'], true);
         //-----
-        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId', [],
+        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
             ['plan_id'], null, null, null, true);
-        $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id']], false, true);
+        $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id'], 'pa' => '0'], false, true);
         //-----
         $this->data['event']['gallery'] = $model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
         //-----

@@ -42,4 +42,35 @@ class FactorModel extends HModel
 //        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
         return [];
     }
+
+    public function getBuyers($params)
+    {
+        $select = $this->select();
+        $select->cols([
+            '*', 'f.options AS options'
+        ])->from('factors AS f');
+
+        try {
+            $select->join(
+                'LEFT',
+                'users AS u',
+                'f.user_id=u.id'
+            );
+        } catch (\Aura\SqlQuery\Exception $e) {
+            die('unexpected error: ' . $e->getMessage());
+        }
+
+        if (isset($params['plan_id'])) {
+            $select->where('f.plan_id=:pId')->bindValues(['pId' => $params['plan_id']]);
+        }
+        if (isset($params['payed']) && (bool)$params['payed']) {
+            $select->where('f.payed_amount IS NOT NULL AND f.payed_amount>:pa')->bindValues(['pa' => 0]);
+        }
+
+        $select->groupBy(['f.id']);
+
+        $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
+        if (count($res)) return $res[0];
+        return [];
+    }
 }

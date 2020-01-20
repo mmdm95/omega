@@ -55,6 +55,65 @@
                             <div class="col-md-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
+                                        <h6 class="panel-title">افراد ثبت نام شده در طرح</h6>
+                                        <div class="heading-elements">
+                                            <ul class="icons-list">
+                                                <li><a data-action="collapse"></a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="row panel-body">
+                                            <div class="col-md-12">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-bordered datatable-highlight">
+                                                        <thead>
+                                                        <tr class="bg-default">
+                                                            <th>#</th>
+                                                            <th>تصویر</th>
+                                                            <th>نام کاربری</th>
+                                                            <th>نام و نام خانوادگی</th>
+                                                            <th>مبلغ پرداخت شده</th>
+                                                            <th>تاریخ ذخیره طرح</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <?php foreach ($planVals['buyers'] as $key => $buyer): ?>
+                                                            <tr>
+                                                                <td width="50px">
+                                                                    <?= convertNumbersToPersian($key + 1); ?>
+                                                                </td>
+                                                                <td width="100px">
+                                                                    <a data-url="<?= base_url() . $buyer['image']; ?>"
+                                                                       data-popup="lightbox">
+                                                                        <img src=""
+                                                                             data-src="<?= base_url() . $buyer['image']; ?>"
+                                                                             alt="<?= $buyer['title']; ?>"
+                                                                             class="img-rounded img-preview lazy">
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    <?= mb_strlen($buyer['username']) == 11 ? convertNumbersToPersian($buyer['username']) : $buyer['username']; ?>
+                                                                </td>
+                                                                <td><?= $buyer['full_name']; ?></td>
+                                                                <td>
+                                                                    <?= convertNumbersToPersian(number_format(convertNumbersToPersian($buyer['payed_amount'], true))); ?>
+                                                                </td>
+                                                                <td>
+                                                                    <?= jDateTime::date('j F Y در ساعت H:i', $buyer['created_at']); ?>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="panel panel-white panel-collapsed">
+                                    <div class="panel-heading">
                                         <h6 class="panel-title">مشخصات طرح</h6>
                                         <div class="heading-elements">
                                             <ul class="icons-list">
@@ -64,11 +123,10 @@
                                     </div>
                                     <div class="panel-body">
                                         <div class="col-lg-6 col-lg-push-3 mb-20">
-                                            <img
-                                                    src="<?= set_value($planVals['image'] ?? '', '', base_url($planVals['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
-                                                    class="img-rounded img-full-x" alt=""
-                                                    style="object-fit: contain;"
-                                                    data-base-url="<?= base_url(); ?>">
+                                            <img src="<?= set_value($planVals['image'] ?? '', '', base_url($planVals['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                 class="img-rounded img-full-x" alt=""
+                                                 style="object-fit: contain;"
+                                                 data-base-url="<?= base_url(); ?>">
                                         </div>
 
                                         <div class="col-lg-12"></div>
@@ -163,7 +221,7 @@
                                     </div>
                                 </div>
 
-                                <div class="panel panel-white">
+                                <div class="panel panel-white panel-collapsed">
                                     <div class="panel-heading">
                                         <h6 class="panel-title">درباره طرح</h6>
                                         <div class="heading-elements">
@@ -172,16 +230,18 @@
                                             </ul>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-md-12 mt-12 panel-body">
-                                            <p class="text-justify">
-                                                <?= set_value($planVals['description'] ?? ''); ?>
-                                            </p>
+                                    <div class="panel-body">
+                                        <div class="row panel-body">
+                                            <div class="col-md-12">
+                                                <p class="text-justify no-margin">
+                                                    <?= set_value($planVals['description'] ?? ''); ?>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="panel panel-white">
+                                <div class="panel panel-white panel-collapsed">
                                     <div class="panel-heading">
                                         <h6 class="panel-title">محل برگزاری</h6>
                                         <div class="heading-elements">
@@ -215,7 +275,7 @@
                                     </div>
                                 </div>
 
-                                <div class="panel panel-white">
+                                <div class="panel panel-white panel-collapsed">
                                     <div class="panel-heading">
                                         <h6 class="panel-title">قوانین طرح</h6>
                                         <div class="heading-elements">
@@ -233,7 +293,7 @@
                                     </div>
                                 </div>
 
-                                <div class="panel panel-white">
+                                <div class="panel panel-white panel-collapsed">
                                     <div class="panel-heading">
                                         <h6 class="panel-title">گالری تصاویر</h6>
                                         <div class="heading-elements">
@@ -243,9 +303,81 @@
                                         </div>
                                     </div>
                                     <div class="panel-body">
+                                        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                                            <!-- Indicators -->
+                                            <ol class="carousel-indicators">
+                                                <?php foreach ($planVals['image_gallery'] as $k => $img): ?>
+                                                    <li data-target="#myCarousel" data-slide-to="<?= $k; ?>"
+                                                        class="<?= $k == 0 ? 'active' : ''; ?>"></li>
+                                                <?php endforeach; ?>
+                                            </ol>
 
+                                            <!-- Wrapper for slides -->
+                                            <div class="carousel-inner">
+                                                <?php foreach ($planVals['image_gallery'] as $k => $img): ?>
+                                                    <div class="item <?= $k == 0 ? 'active' : ''; ?>">
+                                                        <img src="<?= base_url($img); ?>" alt="<?= $img; ?>">
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+
+                                            <!-- Left and right controls -->
+                                            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                                                <span class="glyphicon glyphicon-chevron-right"></span>
+                                                <span class="sr-only">قبلی</span>
+                                            </a>
+                                            <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                                                <span class="glyphicon glyphicon-chevron-left"></span>
+                                                <span class="sr-only">بعدی</span>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <?php if (count($planVals['video_gallery'])): ?>
+                                    <div class="panel panel-white panel-collapsed">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">گالری ویدیوها</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div id="myCarousel" class="carousel slide" data-ride="carousel">
+                                                <!-- Indicators -->
+                                                <ol class="carousel-indicators">
+                                                    <?php foreach ($planVals['video_gallery'] as $k => $video): ?>
+                                                        <li data-target="#myCarousel" data-slide-to="<?= $k; ?>"
+                                                            class="<?= $k == 0 ? 'active' : ''; ?>"></li>
+                                                    <?php endforeach; ?>
+                                                </ol>
+
+                                                <!-- Wrapper for slides -->
+                                                <div class="carousel-inner">
+                                                    <?php foreach ($planVals['video_gallery'] as $k => $video): ?>
+                                                        <div class="item <?= $k == 0 ? 'active' : ''; ?>">
+                                                            <video>
+                                                                <source src="<?= base_url($video); ?>">
+                                                            </video>
+                                                        </div>
+                                                    <?php endforeach; ?>
+                                                </div>
+
+                                                <!-- Left and right controls -->
+                                                <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                                    <span class="sr-only">قبلی</span>
+                                                </a>
+                                                <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                                                    <span class="glyphicon glyphicon-chevron-left"></span>
+                                                    <span class="sr-only">بعدی</span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
 
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
@@ -271,7 +403,8 @@
                                                 <table class="table table-hover table-bordered mb-20">
                                                     <thead>
                                                     <tr class="bg-default">
-                                                        <th style="border: 1px solid #ddd;"><strong>عنوان و توضیح</strong></th>
+                                                        <th style="border: 1px solid #ddd;"><strong>عنوان و
+                                                                توضیح</strong></th>
                                                         <th style="border: 1px solid #ddd;"><strong>قیمت</strong></th>
                                                     </tr>
                                                     </thead>

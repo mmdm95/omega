@@ -461,6 +461,9 @@ class UserController extends AbstractController
                 $values['remained'] = convertNumbersToPersian((int)$this->data['event']['total_amount'], true) - convertNumbersToPersian((int)$this->data['event']['payed_amount'], true);
                 $values['maxRange'] = range(1, (int)((int)$values['remained'] / (int)$this->data['event']['min_price']));
                 $form->isIn('pay', $values['maxRange'], 'مبلغ انتخاب شده نامعتبر است.');
+                if((time() - (24 * 60 * 60)) >= $this->data['event']['start_at']) {
+                    $form->setError('تاریخ برای پرداخت طرح تمام شده است.');
+                }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $price = (int)$values['remained'] > ((int)$this->data['event']['min_price'] * (int)$values['pay']) ?
                     ((int)$this->data['event']['min_price'] * $values['pay']) :
@@ -576,8 +579,8 @@ class UserController extends AbstractController
                                 ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
                                 $model->update_it('factors', [],
                                     'factor_code=:fc', ['fc' => $curPay['factor_code']], [
-                                    'payed_amount' => 'payed_amount+' . (int)$curPay['amount']
-                                ]);
+                                        'payed_amount' => !empty($curFactor['payed_amount']) ? 'payed_amount+' . (int)$curPay['amount'] : (int)$curPay['amount']
+                                    ]);
                             }
                         } else if (intval($zarinpal->status) == Payment::PAYMENT_TRANSACTION_CANCELED_ZARINPAL) { // Transaction was canceled
                             $this->data['is_success'] = false;
