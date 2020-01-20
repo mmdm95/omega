@@ -32,7 +32,7 @@
                                                     <a href="<?= base_url('index'); ?>">صفحه اصلی</a>
                                                 </li>
                                                 <li>
-                                                    <a href="<?= base_url('event'); ?>">طرح‌ها</a>
+                                                    <a href="<?= base_url('event/events'); ?>">طرح‌ها</a>
                                                 </li>
                                                 <li>
                                                     <a href="<?= base_url('blog'); ?>">اخبار و اطلاعیه‌ها</a>

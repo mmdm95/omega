@@ -6,7 +6,7 @@ include_once 'AbstractController.class.php';
 
 class EventController extends AbstractController
 {
-    public function indexAction($param)
+    public function eventsAction($param)
     {
         $model = new Model();
         //-----
@@ -40,7 +40,7 @@ class EventController extends AbstractController
         $model = new Model();
 
         if (!isset($param[0]) || !$model->is_exist('plans', 'slug=:slug', ['slug' => $param[0]])) {
-            $this->redirect(base_url('event'));
+            $this->redirect(base_url('event/events'));
         }
 
         $this->data['param'] = $param;
