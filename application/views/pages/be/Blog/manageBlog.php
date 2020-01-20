@@ -85,7 +85,7 @@
                                                                     </a>
                                                                 </li>
                                                                 <li class="text-danger-600">
-                                                                    <a class="deleteStaticPageBtn"
+                                                                    <a class="deleteBlogBtn"
                                                                        title="حذف" data-popup="tooltip">
                                                                         <input type="hidden"
                                                                                value="<?= $blg['id']; ?>">

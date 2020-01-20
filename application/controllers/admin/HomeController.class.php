@@ -1124,6 +1124,31 @@ class HomeController extends HController
         $this->_render_page('pages/be/Blog/manageBlog');
     }
 
+    public function deleteBlogAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'blog';
+        if (!isset($id)) {
+            message('error', 200, 'نوشته نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نوشته وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'نوشته با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
     public function addStaticPageAction()
     {
         if (!$this->auth->isLoggedIn()) {
