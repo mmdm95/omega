@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 17, 2020 at 04:20 AM
+-- Generation Time: Jan 20, 2020 at 10:00 AM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.2.13
 
@@ -33,13 +33,6 @@ CREATE TABLE `block_list` (
   `n_code` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `block_list`
---
-
-INSERT INTO `block_list` (`id`, `n_code`) VALUES
-(1, '4420440392');
-
 -- --------------------------------------------------------
 
 --
@@ -61,13 +54,6 @@ CREATE TABLE `blog` (
   `created_at` int(11) UNSIGNED NOT NULL,
   `updated_at` int(11) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `blog`
---
-
-INSERT INTO `blog` (`id`, `image`, `title`, `slug`, `body`, `category_id`, `writer`, `updater`, `keywords`, `view`, `publish`, `created_at`, `updated_at`) VALUES
-(1, '', 'سایت جدید امگا', 'سایت-جدید-امگا', '<p>امگا سایت جدید خود را به شما معرفی می&zwnj;کند</p>', 1, 'godheeva@gmail.com', NULL, 'omega,امگا', 0, 1, 1578347661, NULL);
 
 -- --------------------------------------------------------
 
@@ -135,7 +121,7 @@ CREATE TABLE `factors` (
   `id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
   `plan_id` int(10) UNSIGNED NOT NULL,
-  `factor_code` int(8) UNSIGNED NOT NULL,
+  `factor_code` varchar(12) NOT NULL,
   `username` varchar(255) NOT NULL,
   `full_name` varchar(100) NOT NULL,
   `options` text NOT NULL,
@@ -156,13 +142,6 @@ CREATE TABLE `faq` (
   `question` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `faq`
---
-
-INSERT INTO `faq` (`id`, `answer`, `question`) VALUES
-(1, 'خیر نمی‌توان! طبق نظر مهندس گرامی‌فر', 'آیا می‌توان پولدار شد؟');
-
 -- --------------------------------------------------------
 
 --
@@ -175,13 +154,6 @@ CREATE TABLE `helpful_links` (
   `title` varchar(300) NOT NULL,
   `link` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `helpful_links`
---
-
-INSERT INTO `helpful_links` (`id`, `image`, `title`, `link`) VALUES
-(1, 'public/uploads/abstract_yin_yang-wallpaper-1920x1080.jpg', 'سایت الکی خوب', 'https://www.google.com');
 
 -- --------------------------------------------------------
 
@@ -267,12 +239,23 @@ CREATE TABLE `plans` (
   `publish` tinyint(1) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `plans`
+-- Table structure for table `plan_comments`
 --
 
-INSERT INTO `plans` (`id`, `title`, `slug`, `contact`, `capacity`, `total_price`, `base_price`, `min_price`, `image`, `description`, `rules`, `start_at`, `end_at`, `active_at`, `deactive_at`, `support_place`, `support_phone`, `place`, `options`, `lng`, `lat`, `status`, `forced_status`, `publish`) VALUES
-(1, 'طرح جابر بن حیان', 'طرح-جابر-بن-حیان', '6,7', 30, '1000000', '100000', '300000', 'public/uploads/apple_desktop-wallpaper-1920x1080.jpg', 'لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد. کتابهای زیادی در شصت و سه درصد گذشته، حال و آینده شناخت فراوان جامعه و متخصصان را می طلبد تا با نرم افزارها شناخت بیشتری را برای طراحان رایانه ای علی الخصوص طراحان خلاقی و فرهنگ پیشرو در زبان فارسی ایجاد کرد. در این صورت می توان امید داشت که تمام و دشواری موجود در ارائه راهکارها و شرایط سخت تایپ به پایان رسد وزمان مورد نیاز شامل حروفچینی دستاوردهای اصلی و جوابگوی سوالات پیوسته اهل دنیای موجود طراحی اساسا مورد استفاده قرار گیرد.', '<p>1- Be nice</p>\n<p>2- DBAA</p>', 1578934860, 1579540620, 1578330060, 1579194960, 'خونه عمه سعید', '09179516271', 'خونه عمم', '[{\"title\":\"\\u062c\\u062f\\u0648\\u0644 \\u06f1\",\"radio\":\"2\",\"name\":[\"\\u0637\\u0644\\u0627\\u06cc\\u06cc\",\"\\u0646\\u0642\\u0631\\u0647\\u200c\\u0627\\u06cc\"],\"price\":[\"200000\",\"150000\"],\"desc\":[\"\",\"\"]},{\"title\":\"\\u062c\\u062f\\u0648\\u0644 \\u06f2\",\"radio\":\"1\",\"name\":[\"\\u0631\\u06cc\\u0627\\u0636\\u06cc (\\u06f1\\u06f0 \\u062c\\u0644\\u0633\\u0647)\",\"\\u0628\\u0631\\u0646\\u0627\\u0645\\u0647 \\u0646\\u0648\\u06cc\\u0633\\u06cc\"],\"price\":[\"200000\",\"500000\"],\"desc\":[\"\\u06a9\\u0644\\u0627\\u0633\\u200c\\u0647\\u0627\\u06cc \\u06f1\\u06f0 \\u0646\\u0641\\u0631\\u06cc\",\"\\u062a\\u0648\\u0633\\u0637 \\u0627\\u0633\\u062a\\u0627\\u062f \\u0645\\u062d\\u0645\\u062f\"]}]', NULL, NULL, 1, 0, 1);
+CREATE TABLE `plan_comments` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `plan_id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(50) NOT NULL,
+  `mobile` varchar(11) NOT NULL,
+  `body` text NOT NULL,
+  `responder_id` int(10) UNSIGNED NOT NULL,
+  `respond` text NOT NULL,
+  `publish` tinyint(1) UNSIGNED NOT NULL,
+  `created_on` int(11) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -304,6 +287,18 @@ CREATE TABLE `plan_reserve` (
   `plan_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED NOT NULL,
   `reserve_at` int(11) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `plan_videos`
+--
+
+CREATE TABLE `plan_videos` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `plan_id` int(10) UNSIGNED NOT NULL,
+  `video` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -356,7 +351,15 @@ INSERT INTO `roles_pages_perms` (`id`, `role_id`, `page_id`, `perm_id`) VALUES
 (5, 1, 2, 1),
 (6, 1, 2, 2),
 (7, 1, 2, 3),
-(8, 1, 2, 4);
+(8, 1, 2, 4),
+(9, 2, 1, 1),
+(10, 2, 1, 2),
+(11, 2, 1, 3),
+(12, 2, 1, 4),
+(13, 2, 2, 1),
+(14, 2, 2, 2),
+(15, 2, 2, 3),
+(16, 2, 2, 4);
 
 -- --------------------------------------------------------
 
@@ -386,13 +389,6 @@ CREATE TABLE `static_pages` (
   `url_name` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
---
--- Dumping data for table `static_pages`
---
-
-INSERT INTO `static_pages` (`id`, `title`, `body`, `url_name`) VALUES
-(1, 'طریقه ثبت نام در طرح', '<p style=\"direction: rtl;\">خیلی ساده هست میتونید خودتون متوجه بشید...</p>', 'how-to-register-in-plan');
-
 -- --------------------------------------------------------
 
 --
@@ -420,6 +416,10 @@ CREATE TABLE `users` (
   `school` varchar(150) NOT NULL,
   `field` tinyint(1) UNSIGNED NOT NULL,
   `gpa` varchar(20) NOT NULL COMMENT 'معدل',
+  `illness` tinyint(1) UNSIGNED NOT NULL,
+  `illness_desc` text NOT NULL,
+  `allergy` tinyint(1) UNSIGNED NOT NULL,
+  `allergy_desc` text NOT NULL,
   `military_status` tinyint(1) UNSIGNED NOT NULL,
   `military_place` varchar(300) NOT NULL,
   `military_end_year` varchar(4) NOT NULL,
@@ -438,8 +438,9 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `father_name`, `phone`, `connector_phone`, `province`, `city`, `address`, `postal_code`, `n_code`, `id_code`, `birth_certificate_place`, `image`, `gender`, `grade`, `school`, `field`, `gpa`, `military_status`, `military_place`, `military_end_year`, `marital_status`, `children_count`, `info_flag`, `ip_address`, `activation_code`, `forgotten_password_code`, `forgotten_password_time`, `active`, `created_on`) VALUES
-(1, 'godheeva@gmail.com', '$2y$10$7T3XifCmmYtUphy6FK8rEuglwBqcVd6UJISYmsSldCpoXguTAgC3C', 'سعید گرامی فر', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '4420440392', '', '', 'public/fe/img/user-default.jpg', 0, 0, '', 0, '', 0, '', '', 0, 0, 0, '::1', NULL, NULL, NULL, 1, 1577480531);
+INSERT INTO `users` (`id`, `username`, `password`, `full_name`, `father_name`, `phone`, `connector_phone`, `province`, `city`, `address`, `postal_code`, `n_code`, `id_code`, `birth_certificate_place`, `image`, `gender`, `grade`, `school`, `field`, `gpa`, `illness`, `illness_desc`, `allergy`, `allergy_desc`, `military_status`, `military_place`, `military_end_year`, `marital_status`, `children_count`, `info_flag`, `ip_address`, `activation_code`, `forgotten_password_code`, `forgotten_password_time`, `active`, `created_on`) VALUES
+(1, 'godheeva@gmail.com', '$2y$10$7T3XifCmmYtUphy6FK8rEuglwBqcVd6UJISYmsSldCpoXguTAgC3C', 'سعید گرامی فر', '', '', '09179516271', '', '', '', '', '4420440392', '', '', 'public/users/profileImages/godheeva@gmail.com.png', 1, 16, 'امام حسین', 0, '', 2, '', 2, '', 0, '', '', 2, 0, 1, '::1', NULL, NULL, NULL, 1, 1577480531),
+(2, 'omegaadmin', '$2y$10$K9mRKnCSgJwoGCmo3UA.ZO5fkT1yjYBGTBdcKOMpqTYdhLJczX2CW', 'امگا', '', '', '', '', '', '', '', '', '', '', 'public/fe/img/user-default.jpg', 1, 0, '', 0, '', 0, '', 0, '', 0, '', '', 0, 0, 0, '::1', NULL, NULL, NULL, 1, 1577480531);
 
 -- --------------------------------------------------------
 
@@ -472,7 +473,8 @@ CREATE TABLE `users_roles` (
 --
 
 INSERT INTO `users_roles` (`id`, `user_id`, `role_id`) VALUES
-(1, 1, 1);
+(1, 1, 1),
+(2, 2, 2);
 
 -- --------------------------------------------------------
 
@@ -567,6 +569,12 @@ ALTER TABLE `plans`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `plan_comments`
+--
+ALTER TABLE `plan_comments`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `plan_images`
 --
 ALTER TABLE `plan_images`
@@ -576,6 +584,12 @@ ALTER TABLE `plan_images`
 -- Indexes for table `plan_reserve`
 --
 ALTER TABLE `plan_reserve`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `plan_videos`
+--
+ALTER TABLE `plan_videos`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -666,7 +680,7 @@ ALTER TABLE `contact_us`
 -- AUTO_INCREMENT for table `factors`
 --
 ALTER TABLE `factors`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `faq`
@@ -705,6 +719,12 @@ ALTER TABLE `plans`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `plan_comments`
+--
+ALTER TABLE `plan_comments`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `plan_images`
 --
 ALTER TABLE `plan_images`
@@ -717,6 +737,12 @@ ALTER TABLE `plan_reserve`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `plan_videos`
+--
+ALTER TABLE `plan_videos`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `roles`
 --
 ALTER TABLE `roles`
@@ -726,7 +752,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT for table `roles_pages_perms`
 --
 ALTER TABLE `roles_pages_perms`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `site_feedback`
@@ -744,7 +770,7 @@ ALTER TABLE `static_pages`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users_pages_perms`
@@ -756,7 +782,7 @@ ALTER TABLE `users_pages_perms`
 -- AUTO_INCREMENT for table `users_roles`
 --
 ALTER TABLE `users_roles`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables
