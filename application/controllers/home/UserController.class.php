@@ -38,7 +38,7 @@ class UserController extends AbstractController
         //-----
         if (!isset($param[0]) || !isset($param[1]) && $param[0] != 'detail') {
             $_SESSION['user-event'] = 'پارامترهای ورودی نامعتبر برای جزئیات طرح';
-            $this->redirect('user/dashboard');
+            $this->redirect(base_url('user/dashboard'));
         }
         //-----
         $this->data['param'] = $param;
@@ -56,7 +56,7 @@ class UserController extends AbstractController
         $model = new Model();
         if (!$model->is_exist('plans', 'slug=:slug', ['slug' => $param[1]]) || !count($this->data['event'])) {
             $_SESSION['user-event'] = 'جزئیاتی برای طرح درخواست شده وجود ندارد';
-            $this->redirect('user/dashboard');
+            $this->redirect(base_url('user/dashboard'));
         }
         // Payment form
         $this->_zarinpalPayment();
