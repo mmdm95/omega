@@ -170,7 +170,7 @@ abstract class AbstractController extends HController
                     $form->setError($login['err']);
                     $this->data['registerErrors'] = $form->getError();
                 } else {
-                    $this->redirect(base_url('user/dashboard'), $message, $delay);
+                    $this->redirect(base_url('user/dashboard#profile'), $message, $delay);
                 }
             } else {
                 $this->data['registerErrors'] = $form->getError();

@@ -124,7 +124,7 @@
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
                                                 <label>رمز عبور:</label>
-                                                <input name="password" type="password"
+                                                <input name="password" type="password" value=""
                                                        class="form-control required pass-format"
                                                        placeholder="حداقل ۸ کاراکتر و شامل اعداد و حروف انگلیسی"
                                                        data-popup="popover"
@@ -134,7 +134,7 @@
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
                                                 <label>تکرار رمز عبور:</label>
-                                                <input name="rePassword" type="password"
+                                                <input name="rePassword" type="password" value=""
                                                        class="form-control" placeholder="اجباری">
                                             </div>
                                             <div class="text-right col-md-12">
