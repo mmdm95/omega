@@ -146,14 +146,14 @@
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت پایه طرح (تومان):</label>
+                                                <label>مبلغ ورودی طرح (تومان):</label>
                                                 <input name="base_price" type="text" class="form-control"
                                                        placeholder="مثال: ۱۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['base_price'] ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت پرداخت (تومان):</label>
+                                                <label>قیمت پیش‌پرداخت (تومان):</label>
                                                 <input name="min_price" type="text" class="form-control"
                                                        placeholder="مثال: ۳۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['min_price'] ?? ''); ?>">

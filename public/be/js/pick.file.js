@@ -98,7 +98,9 @@ if (typeof jQuery == 'undefined') {
                 var self = $(this);
 
                 var modalOkClick = function (e) {
-                    var clickedFile = $('#modal_full').find('#table tr.selectable td.first a.name.image.xls');
+                    var clickedFile = $('#modal_full').find('#table tr.selectable td.first a.name.image.video');
+
+                    console.log(clickedFile);
 
                     if (clickedFile.length != 0) {
                         var clickedFileBaseName = $.get_base_name($(clickedFile).attr('href')),

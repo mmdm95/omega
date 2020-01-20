@@ -217,7 +217,7 @@ class HomeController extends HController
                     'full_name' => trim($values['name'])
                 ], 'id=:id', ['id' => $this->data['userVals']['id']]);
 
-                if(isset($_POST['role'])) {
+                if (isset($_POST['role'])) {
                     if ($this->data['identity']->role_id < 3) {
                         $res2 = $model->update_it('user_role', [
                             'role_id' => $_POST['role']
@@ -279,7 +279,7 @@ class HomeController extends HController
 
         $model = new Model();
         $where = '';
-        if($this->data['identity']->role_id != AUTH_ROLE_SUPER_USER) {
+        if ($this->data['identity']->role_id != AUTH_ROLE_SUPER_USER) {
             $where = 'r.role_id>:id AND ';
         }
         $this->data['users'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
@@ -1561,7 +1561,8 @@ class HomeController extends HController
                                         !empty($value['name'][$idx])) {
                                         $newOpt[$k]['name'][] = $value['name'][$idx];
                                         $newOpt[$k]['price'][] = !empty($value['price'][$idx])
-                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                            ? (is_numeric(convertNumbersToPersian($value['price'][$idx], true)) &&
+                                            convertNumbersToPersian($value['price'][$idx], true) > 0
                                                 ? convertNumbersToPersian($value['price'][$idx], true)
                                                 : 0)
                                             : '';
@@ -1616,7 +1617,7 @@ class HomeController extends HController
                 }
 
                 // Insert videos to gallery table
-                $res3 = false;
+                $res3 = true;
                 foreach ($values['video_gallery'] as $video) {
                     $res3 = $model->insert_it('plan_videos', [
                         'plan_id' => $res,
@@ -1771,7 +1772,8 @@ class HomeController extends HController
                                         !empty($value['name'][$idx])) {
                                         $newOpt[$k]['name'][] = $value['name'][$idx];
                                         $newOpt[$k]['price'][] = !empty($value['price'][$idx])
-                                            ? (is_numeric($value['price'][$idx]) && $value['price'][$idx] > 0
+                                            ? (is_numeric(convertNumbersToPersian($value['price'][$idx], true)) &&
+                                            convertNumbersToPersian($value['price'][$idx], true) > 0
                                                 ? convertNumbersToPersian($value['price'][$idx], true)
                                                 : 0)
                                             : '';
@@ -1829,7 +1831,7 @@ class HomeController extends HController
                 // Delete previous gallery images
                 $res4 = $model->delete_it('plan_videos', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
                 // Insert images to gallery table
-                $res5 = false;
+                $res5 = true;
                 foreach ($values['video_gallery'] as $video) {
                     $res5 = $model->insert_it('plan_videos', [
                         'plan_id' => $this->data['param'][0],
