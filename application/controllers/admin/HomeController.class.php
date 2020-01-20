@@ -182,14 +182,18 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editUser');
-        $form->setFieldsName(['name', 'username', 'role', 'password', 'rePassword'])->setMethod('post');
+        $form->setFieldsName(['name', 'username', 'password', 'rePassword'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
                 $form->isRequired(['username'], 'فیلدهای ضروری را خالی نگذارید.');
                 $form->validate('!numeric|string', 'name', 'نام و نام خانوادگی باید از نوع رشته باشد.');
 
-                if ($this->data['identity']->role_id <= AUTH_ROLE_ADMIN) {
-                    $form->isIn('role', array_column($this->data['roles'], 'id'), 'نقش انتخاب شده وجود ندارد.');
+                if (isset($_POST['role'])) {
+                    if ($this->data['identity']->role_id <= AUTH_ROLE_ADMIN) {
+                        if (!in_array($_POST['role'], array_column($this->data['roles'], 'id'))) {
+                            $form->setError('نقش انتخاب شده وجود ندارد.');
+                        }
+                    }
                 }
 
                 if ((trim($values['password']) != '' || trim($values['rePassword']) != '') && $values['password'] != $values['rePassword']) {
@@ -213,10 +217,14 @@ class HomeController extends HController
                     'full_name' => trim($values['name'])
                 ], 'id=:id', ['id' => $this->data['userVals']['id']]);
 
-                if ($this->data['identity']->role_id < 3) {
-                    $res2 = $model->update_it('user_role', [
-                        'role_id' => $values['role']
-                    ], 'user_id=:id', ['id' => $this->data['userVals']['id']]);
+                if(isset($_POST['role'])) {
+                    if ($this->data['identity']->role_id < 3) {
+                        $res2 = $model->update_it('user_role', [
+                            'role_id' => $_POST['role']
+                        ], 'user_id=:id', ['id' => $this->data['userVals']['id']]);
+                    } else {
+                        $res2 = true;
+                    }
                 } else {
                     $res2 = true;
                 }
@@ -270,11 +278,14 @@ class HomeController extends HController
         }
 
         $model = new Model();
+        $where = '';
+        if($this->data['identity']->role_id != AUTH_ROLE_SUPER_USER) {
+            $where = 'r.role_id>:id AND ';
+        }
         $this->data['users'] = $model->join_it(null, 'users AS u', 'users_roles AS r',
             ['u.id', 'u.username', 'u.full_name', 'u.created_on', 'u.active'], 'u.id=r.user_id',
-            '(r.role_id>:id OR r.role_id=:id2) AND u.id!=:curId', [
+            $where . 'u.id!=:curId', [
                 'id' => $this->data['identity']->role_id,
-                'id2' => AUTH_ROLE_SUPER_USER,
                 'curId' => $this->data['identity']->id,
             ], null, 'u.id DESC', null, null, false, 'LEFT');
 

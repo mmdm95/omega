@@ -18,7 +18,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                class="text-semibold">تغییر مشخصات کاربر</span>
+                                    class="text-semibold">تغییر مشخصات کاربر</span>
                         </h5>
                     </div>
                 </div>
@@ -105,19 +105,22 @@
                                                        placeholder="مثال: Heeva"
                                                        value="<?= isset($data['userVals']['username']) ? $data['userVals']['username'] : ''; ?>">
                                             </div>
-                                            <div class="form-group col-lg-4">
-                                                <span class="text-danger">*</span>
-                                                <label>انتخاب نقش:</label>
-                                                <select class="select <?= $data['identity']->role_id > 2 ? 'disabled' : '' ?>" name="role">
-                                                    <option value="-1">انتخاب کنید</option>
-                                                    <?php foreach ($data['roles'] as $role): ?>
-                                                        <option value="<?= $role['id']; ?>"
-                                                            <?= isset($data['userVals']['role_id']) && $role['id'] == $data['userVals']['role_id'] ? 'selected' : ''; ?>>
-                                                            <?= $role['description']; ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
+                                            <?php if ($identity->id != $param[0]): ?>
+                                                <div class="form-group col-lg-4">
+                                                    <span class="text-danger">*</span>
+                                                    <label>انتخاب نقش:</label>
+                                                    <select class="select <?= $data['identity']->role_id > 2 ? 'disabled' : '' ?>"
+                                                            name="role">
+                                                        <option value="-1">انتخاب کنید</option>
+                                                        <?php foreach ($data['roles'] as $role): ?>
+                                                            <option value="<?= $role['id']; ?>"
+                                                                <?= isset($data['userVals']['role_id']) && $role['id'] == $data['userVals']['role_id'] ? 'selected' : ''; ?>>
+                                                                <?= $role['description']; ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            <?php endif; ?>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
                                                 <label>رمز عبور:</label>
@@ -135,7 +138,8 @@
                                                        class="form-control" placeholder="اجباری">
                                             </div>
                                             <div class="text-right col-md-12">
-                                                <a href="<?= base_url('admin/manageUser'); ?>" class="btn btn-default mr-5">
+                                                <a href="<?= base_url('admin/manageUser'); ?>"
+                                                   class="btn btn-default mr-5">
                                                     بازگشت
                                                 </a>
                                                 <button type="submit"
