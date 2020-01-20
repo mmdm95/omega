@@ -108,17 +108,17 @@ class HomeController extends AbstractController
         $this->data['newsletterErrors'] = [];
         $this->load->library('HForm/Form');
         $form = new Form();
-        $this->data['form_token_newsletter'] = $form->csrfToken('addNewletter');
-        $form->setFieldsName(['mobile'])->setMethod('post');
+        $this->data['form_token_newsletter']  = $form->csrfToken('addNewletter');
+        $form->setFieldsName(['newsletter-mobile'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function () use ($model, $form) {
-                $form->isRequired(['mobile'], 'فیلد موبایل اجباری می‌باشد.')
-                    ->validatePersianMobile('mobile');
+                $form->isRequired(['newsletter-mobile'], 'فیلد موبایل اجباری می‌باشد.')
+                    ->validatePersianMobile('newsletter-mobile');
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = true;
-                if (!$model->is_exist('newsletters', 'mobile=:mobile', ['mobile' => $values['mobile']])) {
+                if (!$model->is_exist('newsletters', 'mobile=:mobile', ['mobile' => $values['newsletter-mobile']])) {
                     $res = $model->insert_it('newsletters', [
-                        'mobile' => trim($values['mobile']),
+                        'mobile' => trim($values['newsletter-mobile']),
                     ]);
                 }
 

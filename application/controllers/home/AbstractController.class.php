@@ -48,9 +48,9 @@ abstract class AbstractController extends HController
 
     public function logout()
     {
-        if($this->auth->isLoggedIn()) {
+        if ($this->auth->isLoggedIn()) {
             $this->auth->logout();
-            if($_GET['back_url']) {
+            if ($_GET['back_url']) {
                 $this->redirect($_GET['back_url']);
             } else {
                 $this->redirect(base_url('index'));
@@ -135,7 +135,7 @@ abstract class AbstractController extends HController
                     'role_id' => (int)$values['role'],
                 ]);
 
-                if (!$res && $res2 && $res3) {
+                if ($res && $res2 && $res3) {
                     $model->transactionComplete();
                 } else {
                     $model->transactionRollback();
@@ -160,10 +160,10 @@ abstract class AbstractController extends HController
 
                 $message = 'در حال پردازش عملیات ورود';
                 $delay = 1;
-                if (isset($_GET['back_url'])) {
-                    $this->redirect(base_url('verifyPhone?back_url=' . $_GET['back_url']), $message, $delay);
-                }
-                $this->redirect(base_url('verifyPhone'), $message, $delay);
+//                if (isset($_GET['back_url'])) {
+//                    $this->redirect(base_url('verifyPhone?back_url=' . $_GET['back_url']), $message, $delay);
+//                }
+                $this->redirect(base_url('user/dashboard'), $message, $delay);
             } else {
                 $this->data['registerErrors'] = $form->getError();
                 $this->data['registerValues'] = $form->getValues();
