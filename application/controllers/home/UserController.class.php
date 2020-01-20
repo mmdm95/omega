@@ -454,15 +454,19 @@ class UserController extends AbstractController
         $form->setFieldsName(['pay'])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                if ($this->data['identity']->info_flag == 0) {
-                    $_SESSION['event-eventSubmit'] = 'برای پرداخت ابتدا فیلدهای اجباری را تکمیل کنید.';
-                    $this->redirect(base_url('user/informationCompletion?back_url=' . base_url('user/event/detail/' . $this->data['event']['slug'])));
-                }
-                $values['remained'] = convertNumbersToPersian((int)$this->data['event']['total_amount'], true) - convertNumbersToPersian((int)$this->data['event']['payed_amount'], true);
-                $values['maxRange'] = range(1, (int)((int)$values['remained'] / (int)$this->data['event']['min_price']));
-                $form->isIn('pay', $values['maxRange'], 'مبلغ انتخاب شده نامعتبر است.');
-                if((time() - (24 * 60 * 60)) >= $this->data['event']['start_at']) {
-                    $form->setError('تاریخ برای پرداخت طرح تمام شده است.');
+                if (!$model->is_exist('block_list', 'n_code=:code', ['code' => $this->data['identity']->n_code])) {
+                    if ($this->data['identity']->info_flag == 0) {
+                        $_SESSION['event-eventSubmit'] = 'برای پرداخت ابتدا فیلدهای اجباری را تکمیل کنید.';
+                        $this->redirect(base_url('user/informationCompletion?back_url=' . base_url('user/event/detail/' . $this->data['event']['slug'])));
+                    }
+                    $values['remained'] = convertNumbersToPersian((int)$this->data['event']['total_amount'], true) - convertNumbersToPersian((int)$this->data['event']['payed_amount'], true);
+                    $values['maxRange'] = range(1, (int)((int)$values['remained'] / (int)$this->data['event']['min_price']));
+                    $form->isIn('pay', $values['maxRange'], 'مبلغ انتخاب شده نامعتبر است.');
+                    if ((time() - (24 * 60 * 60)) >= $this->data['event']['start_at']) {
+                        $form->setError('تاریخ برای پرداخت طرح تمام شده است.');
+                    }
+                } else {
+                    $form->setError('شما قادر به ثبت نام در این طرح نمی‌باشید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $price = (int)$values['remained'] > ((int)$this->data['event']['min_price'] * (int)$values['pay']) ?
