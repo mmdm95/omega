@@ -132,7 +132,10 @@ class EventController extends AbstractController
                     $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، گزینه موافق هستم را علامت بزنید.');
                 } else {
                     if ($model->is_exist('factors', 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']])) {
-                        $form->setError('این طرح قبلا برای شما ذخیره شده است. در صورتیکه پیش‌پرداخت را انجام نداده‌اید، اقدام نمایید.');
+                        $msg = 'کاربر گرامی، این طرح قبلا برای شما ثبت شده است. شما می‌توانید از طریق ';
+                        $msg .= "<a href='" . base_url('user/dashboard') . ">" . 'حساب کاربری' . '</a>';
+                        $msg .= ' نسبت به پرداخت وجه طرح اقدام نمایید.';
+                        $form->setError($msg);
                     } else {
                         $values['total_amount'] = $this->data['event']['base_price'];
                         $values['options'] = [];

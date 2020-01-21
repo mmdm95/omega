@@ -108,6 +108,7 @@ return array(
     // For release mode [release|rel]
     // For semi development! mode(semi development mode just shut E_NOTICE down) [semi_development|semi_dev]
     'mode' => 'development',
+//    'mode' => 'rel',
 
     //===============================================
     // Never delete this default notfound

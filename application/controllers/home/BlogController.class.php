@@ -56,7 +56,7 @@ class BlogController extends AbstractController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'بلاگ');
 
         $this->_render_page([
-            'pages/fe/blog',
+            'pages/fe/blog-details-standard',
         ]);
     }
 

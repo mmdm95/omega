@@ -219,7 +219,7 @@ class HomeController extends HController
 
                 if (isset($_POST['role'])) {
                     if ($this->data['identity']->role_id < 3) {
-                        $res2 = $model->update_it('user_role', [
+                        $res2 = $model->update_it('users_roles', [
                             'role_id' => $_POST['role']
                         ], 'user_id=:id', ['id' => $this->data['userVals']['id']]);
                     } else {

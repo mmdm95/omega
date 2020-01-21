@@ -47,6 +47,9 @@ return array(
              'dsn' => 'mysql:host=localhost;dbname=omega;charset=utf8',
              'username' => 'root',
              'password' => '',
+//            'dsn' => 'mysql:host=localhost;dbname=omegair_omega;charset=utf8',
+//            'username' => 'omegair_omega',
+//            'password' => 'omega1398omega',
             'options' => []
         )
     )
