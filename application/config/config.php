@@ -84,10 +84,7 @@ return array(
     //    'hello/*' => 'index'
     //);
     'routes' => array(
-//        'admin' => 'admin/admin',
-//        'admin/(:any)' => 'admin/admin/$1',
-//        'admin/(:any)/(:any)' => 'admin/admin/$1/$2',
-//        'admin/(:any)/(:any)/(:any)' => 'admin/admin/$1/$2/$3',
+        'blog/(:any)' => 'comingSoon',
     ),
 
     //===============================================

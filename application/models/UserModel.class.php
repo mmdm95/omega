@@ -19,7 +19,7 @@ class UserModel extends HModel
     {
         $select = $this->select();
         $select->cols([
-            'p.title', 'p.slug', 'p.contact', 'p.image',
+            'p.id', 'p.title', 'p.slug', 'p.contact', 'p.image',
             'p.start_at', 'p.end_at', 'p.status', 'MAX(zp.payment_date) AS payment_date',
             'f.total_amount', 'f.payed_amount', 'f.created_at'
         ])->from('plans AS p');
@@ -49,7 +49,7 @@ class UserModel extends HModel
     {
         $select = $this->select();
         $select->cols([
-            '*', 'p.options AS plan_options', 'f.options AS options'
+            '*', 'p.id AS id', 'f.id AS f_id', 'p.options AS plan_options', 'f.options AS options'
         ])->from('plans AS p');
 
         try {

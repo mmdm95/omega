@@ -51,6 +51,8 @@ class EventController extends AbstractController
             ['plan_id'], null, null, null, true);
         $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id'], 'pa' => '0'], false, true);
         //-----
+        $this->data['event']['brochure'] = $model->select_it(null, 'plan_brochure', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
+        //-----
         $this->data['event']['gallery'] = $model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
         //-----
         $this->data['event']['videos'] = $model->select_it(null, 'plan_videos', ['video'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
@@ -129,50 +131,61 @@ class EventController extends AbstractController
                 if (!$form->isChecked('rule_agree')) {
                     $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، گزینه موافق هستم را علامت بزنید.');
                 } else {
-                    if($model->is_exist('factors', 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']])){
+                    if ($model->is_exist('factors', 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']])) {
                         $form->setError('این طرح قبلا برای شما ذخیره شده است. در صورتیکه پیش‌پرداخت را انجام نداده‌اید، اقدام نمایید.');
                     } else {
                         $values['total_amount'] = $this->data['event']['base_price'];
                         $values['options'] = [];
                         foreach ($this->data['event']['options'] as $k => $option) {
-                            $chkName = 'select-chk-' . ($k + 1);
-                            $postChk = $_POST[$chkName] ?? null;
+                            if ($option['forced'] == 2) {
+                                foreach ($option['name'] as $k2 => $name) {
+                                    $values['total_amount'] += is_numeric($option['price'][$k2]) ? (int)$option['price'][$k2] : 0;
+                                    $values['options'][$k]['title'] = $option['title'];
+                                    $values['options'][$k]['radio'] = $option['radio'];
+                                    $values['options'][$k]['forced'] = $option['forced'];
+                                    $values['options'][$k]['name'][$k2] = $name[$k2];
+                                    $values['options'][$k]['desc'][$k2] = $option['desc'][$k2];
+                                    $values['options'][$k]['price'][$k2] = $option['price'][$k2];
+                                }
+                            } else {
+                                $chkName = 'select-chk-' . ($k + 1);
+                                $postChk = $_POST[$chkName] ?? null;
 
-                            if (isset($postChk)) {
-                                if (($option['radio'] == 1 && is_array($postChk)) || ($option['radio'] == 2 && is_string($postChk))) {
-                                    if (is_array($postChk)) {
-                                        $validKeys = array_keys($option['name']);
-                                        foreach ($postChk as $k2) {
-                                            if (in_array($k2, $validKeys)) {
-                                                $values['total_amount'] += is_numeric($option['price'][$k2]) ? (int)$option['price'][$k2] : 0;
+                                if (isset($postChk)) {
+                                    if (($option['radio'] == 1 && is_array($postChk)) || ($option['radio'] == 2 && is_string($postChk))) {
+                                        if (is_array($postChk)) {
+                                            $validKeys = array_keys($option['name']);
+                                            foreach ($postChk as $k2) {
+                                                if (in_array($k2, $validKeys)) {
+                                                    $values['total_amount'] += is_numeric($option['price'][$k2]) ? (int)$option['price'][$k2] : 0;
+                                                    $values['options'][$k]['title'] = $option['title'];
+                                                    $values['options'][$k]['radio'] = $option['radio'];
+                                                    $values['options'][$k]['forced'] = $option['forced'];
+                                                    $values['options'][$k]['name'][$k2] = $option['name'][$k2];
+                                                    $values['options'][$k]['desc'][$k2] = $option['desc'][$k2];
+                                                    $values['options'][$k]['price'][$k2] = $option['price'][$k2];
+                                                } else {
+                                                    $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                                                    break;
+                                                }
+                                            }
+                                        } else {
+                                            if (isset($option['price'][$postChk])) {
+                                                $values['total_amount'] += is_numeric($option['price'][$postChk]) ? (int)$option['price'][$postChk] : 0;
                                                 $values['options'][$k]['title'] = $option['title'];
                                                 $values['options'][$k]['radio'] = $option['radio'];
-                                                $values['options'][$k]['name'][$k2] = $option['name'][$k2];
-                                                $values['options'][$k]['desc'][$k2] = $option['desc'][$k2];
-                                                $values['options'][$k]['price'][$k2] = $option['price'][$k2];
+                                                $values['options'][$k]['name'][$postChk] = $option['name'][$postChk];
+                                                $values['options'][$k]['desc'][$postChk] = $option['desc'][$postChk];
+                                                $values['options'][$k]['price'][$postChk] = $option['price'][$postChk];
                                             } else {
                                                 $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
                                                 break;
                                             }
                                         }
                                     } else {
-                                        if (isset($option['price'][$postChk])) {
-                                            $values['total_amount'] += is_numeric($option['price'][$postChk]) ? (int)$option['price'][$postChk] : 0;
-                                            $values['options'][$k]['title'] = $option['title'];
-                                            $values['options'][$k]['radio'] = $option['radio'];
-                                            $values['options'][$k]['name'][$postChk] = $option['name'][$postChk];
-                                            $values['options'][$k]['desc'][$postChk] = $option['desc'][$postChk];
-                                            $values['options'][$k]['price'][$postChk] = $option['price'][$postChk];
-                                        } else {
-//                                        $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                                            $form->setError('error number 2');
-                                            break;
-                                        }
+                                        $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
+                                        break;
                                     }
-                                } else {
-//                                $form->setError('آیتم‌های خرید دستکاری شده‌اند! لطفا دوباره تلاش کنید.');
-                                    $form->setError('error number 1');
-                                    break;
                                 }
                             }
                         }
@@ -216,7 +229,7 @@ class EventController extends AbstractController
         $res = $form->checkForm()->isSuccess();
         if ($form->isSubmit()) {
             if ($res) {
-                if($this->data['identity']->info_flag == 1) {
+                if ($this->data['identity']->info_flag == 1) {
                     $this->redirect(base_url('user/event/detail/' . $this->data['event']['slug']));
                 }
                 $_SESSION['event-eventSubmit'] = 'برای پرداخت ابتدا فیلدهای اجباری را تکمیل کنید.';

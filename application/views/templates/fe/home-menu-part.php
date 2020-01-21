@@ -35,7 +35,7 @@
                                                     <a href="<?= base_url('event/events'); ?>">طرح‌ها</a>
                                                 </li>
                                                 <li>
-                                                    <a href="<?= base_url('blog'); ?>">اخبار و اطلاعیه‌ها</a>
+                                                    <a href="<?= base_url('blog/allBlog'); ?>">اخبار و اطلاعیه‌ها</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -51,7 +51,9 @@
                                             <?php if ($auth->isLoggedIn()): ?>
                                                 <li>
                                                     <a href="<?= base_url('user/dashboard'); ?>"
-                                                       class="access-link">داشبورد</a>
+                                                       class="access-link">
+                                                        حساب کاربری
+                                                    </a>
                                                 </li>
                                                 <li>
                                                     <a href="<?= base_url('logout'); ?>"
@@ -97,7 +99,9 @@
                                             <?php if ($auth->isLoggedIn()): ?>
                                                 <li>
                                                     <a href="<?= base_url('user/dashboard'); ?>"
-                                                       class="access-link">داشبورد</a>
+                                                       class="access-link">
+                                                        حساب کاربری
+                                                    </a>
                                                 </li>
                                                 <li>
                                                     <a href="<?= base_url('logout'); ?>">

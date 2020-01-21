@@ -296,6 +296,107 @@
 
                                     <div class="panel panel-white">
                                         <div class="panel-heading">
+                                            <h6 class="panel-title">تصاویر بروشور</h6>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="panel-body slide-items">
+                                            <div class="col-sm-12 mb-20 text-right">
+                                                <a href="javascript:void(0);"
+                                                   class="btn btn-primary btn-icon add-slide-image ml-5"
+                                                   title="اضافه کردن بروشور جدید" data-popup="tooltip">
+                                                    <i class="icon-plus2" aria-hidden="true"></i>
+                                                </a>
+                                            </div>
+
+                                            <?php if (count($errors) && count($planVals['brochure_gallery'])): ?>
+                                                <?php foreach ($planVals['brochure_gallery'] as $key => $img): ?>
+                                                    <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                        <div class="cursor-pointer pick-file border border-lg border-default"
+                                                             data-toggle="modal"
+                                                             data-target="#modal_full"
+                                                             style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                            <input class="image-file" type="hidden"
+                                                                   name="brochure_gallery[]"
+                                                                   value="<?= set_value($img ?? ''); ?>">
+                                                            <div class="media stack-media-on-mobile">
+                                                                <div class="media-left">
+                                                                    <div class="thumb">
+                                                                        <a class="display-inline-block"
+                                                                           style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                            <img
+                                                                                    src="<?= set_value($img ?? '', '', base_url($img ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                                    class="img-rounded" alt=""
+                                                                                    style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                    data-base-url="<?= base_url(); ?>">
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="media-body">
+                                                                    <h6 class="media-heading">
+                                                                        <a class="io-image-lbl text-grey-300">
+                                                                            انتخاب تصویر <?= ($key + 1); ?>
+                                                                        </a>
+                                                                        <a class="io-image-name display-block">
+                                                                            <?= basename($img); ?>
+                                                                        </a>
+                                                                    </h6>
+                                                                </div>
+                                                                <?php if ($key == 0): ?>
+                                                                    <small class="clear-img-val">&times;</small>
+                                                                <?php else: ?>
+                                                                    <small class="delete-new-image btn btn-danger">
+                                                                        &times;
+                                                                    </small>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <div class="col-lg-6 col-md-12 col-sm-12 mb-15 slide-item">
+                                                    <div class="cursor-pointer pick-file border border-lg border-default"
+                                                         data-toggle="modal"
+                                                         data-target="#modal_full"
+                                                         style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                        <input class="image-file" type="hidden"
+                                                               name="brochure_gallery[]"
+                                                               value="">
+                                                        <div class="media stack-media-on-mobile">
+                                                            <div class="media-left">
+                                                                <div class="thumb">
+                                                                    <a class="display-inline-block"
+                                                                       style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                        <img
+                                                                                src="<?= asset_url('be/images/placeholder.jpg'); ?>"
+                                                                                class="img-rounded" alt=""
+                                                                                style="width: 100px; height: 100px; object-fit: contain;"
+                                                                                data-base-url="<?= base_url(); ?>">
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                            <div class="media-body">
+                                                                <h6 class="media-heading">
+                                                                    <a class="io-image-lbl text-grey-300">
+                                                                        انتخاب تصویر 1
+                                                                    </a>
+                                                                    <a class="io-image-name display-block">
+                                                                    </a>
+                                                                </h6>
+                                                            </div>
+                                                            <small class="clear-img-val">&times;</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-white">
+                                        <div class="panel-heading">
                                             <h6 class="panel-title">گالری تصاویر</h6>
                                             <div class="heading-elements">
                                                 <ul class="icons-list">
@@ -532,6 +633,10 @@
                                                         </span>
                                                         در هر آپشن را فشار دهید.
                                                     </p>
+                                                    <p>
+                                                        <i class="icon-dash" aria-hidden="true"></i>
+                                                        در صورت انتخاب مورد اجباری، تمامی آیتم‌ها انتخاب شده و قابلیت عدم انتخاب را ندارند.
+                                                    </p>
                                                 </div>
                                             </div>
 
@@ -559,34 +664,67 @@
                                                             </div>
 
                                                             <div class="row position-relative mb-20">
-                                                                <div class="form-group col-xs-6 col-sm-6 mt-12">
+                                                                <div class="col-xs-6 col-sm-6 pt-20">
                                                                     <label>عنوان گروه:</label>
                                                                     <input type="text"
                                                                            name="option_group[<?= $k; ?>][title]"
                                                                            class="form-control p-item-input"
                                                                            value="<?= set_value($val['title'] ?? ''); ?>">
                                                                 </div>
-                                                                <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
-                                                                    <label class="form-check-label ltr">
-                                                                <span class="rtl text-indigo">
-                                                                    چند انتخابی
-                                                                </span>
-                                                                        <input type="radio" class="" checked="checked"
-                                                                               name="option_group[<?= $k; ?>][radio]"
-                                                                               value="1"
-                                                                            <?= set_value($val['radio'] ?? '', '1', 'checked', '', '=='); ?>>
-                                                                    </label>
+                                                                <div class="col-xs-3 col-sm-4 pt-20">
+                                                                    <div class="form-check form-check-right pt-20">
+                                                                        <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                چند انتخابی
+                                                                            </span>
+                                                                            <input type="radio" class="selection-radio-<?= $k; ?>"
+                                                                                   checked="checked"
+                                                                                   name="option_group[<?= $k; ?>][radio]"
+                                                                                   value="1"
+                                                                                <?= set_value($val['radio'] ?? '', '1', 'checked', '', '=='); ?>>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-right pt-20">
+                                                                        <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                تک انتخابی
+                                                                            </span>
+                                                                            <input type="radio" class="selection-radio-<?= $k; ?>"
+                                                                                   name="option_group[<?= $k; ?>][radio]"
+                                                                                   value="2"
+                                                                                <?= set_value($val['radio'] ?? '', '2', 'checked', '', '=='); ?>>
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
-                                                                    <label class="form-check-label ltr">
-                                                                <span class="rtl text-indigo">
-                                                                    تک انتخابی
-                                                                </span>
-                                                                        <input type="radio" class=""
-                                                                               name="option_group[<?= $k; ?>][radio]"
-                                                                               value="2"
-                                                                            <?= set_value($val['radio'] ?? '', '2', 'checked', '', '=='); ?>>
-                                                                    </label>
+                                                                <div class="col-xs-3 col-sm-2 pt-20">
+                                                                    <div class="form-check form-check-right pt-20">
+                                                                        <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                اختیاری
+                                                                            </span>
+                                                                            <input type="radio" class="action-toggle"
+                                                                                   name="option_group[<?= $k; ?>][forced]"
+                                                                                   data-action-toggle-el=".selection-radio-<?= $k; ?>"
+                                                                                   data-action-toggle="true"
+                                                                                   data-action="enable"
+                                                                                   value="1"
+                                                                                <?= set_value($val['forced'] ?? '', '2', 'checked', '', '=='); ?>>
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-right pt-20">
+                                                                        <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                اجباری
+                                                                            </span>
+                                                                            <input type="radio" class="action-toggle"
+                                                                                   name="option_group[<?= $k; ?>][forced]"
+                                                                                   data-action-toggle-el=".selection-radio-<?= $k; ?>"
+                                                                                   data-action-toggle="false"
+                                                                                   data-action="enable"
+                                                                                   value="2"
+                                                                                <?= set_value($val['forced'] ?? '', '2', 'checked', '', '=='); ?>>
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
 
@@ -653,28 +791,58 @@
                                                         </div>
 
                                                         <div class="row position-relative mb-20">
-                                                            <div class="form-group col-xs-6 col-sm-6 mt-12">
+                                                            <div class="col-xs-6 col-sm-6 pt-20">
                                                                 <label>عنوان گروه:</label>
                                                                 <input type="text" name="option_group[0][title]"
                                                                        class="form-control p-item-input">
                                                             </div>
-                                                            <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
-                                                                <label class="form-check-label ltr">
-                                                                <span class="rtl text-indigo">
-                                                                    چند انتخابی
-                                                                </span>
-                                                                    <input type="radio" class="" checked="checked"
-                                                                           name="option_group[0][radio]" value="1">
-                                                                </label>
+                                                            <div class="col-xs-3 col-sm-4">
+                                                                <div class="form-check form-check-right">
+                                                                    <label class="form-check-label ltr">
+                                                                        <span class="rtl text-indigo">
+                                                                            چند انتخابی
+                                                                        </span>
+                                                                        <input type="radio" class="selection-radio-0" checked="checked"
+                                                                               name="option_group[0][radio]" value="1">
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-right pt-20">
+                                                                    <label class="form-check-label ltr">
+                                                                        <span class="rtl text-indigo">
+                                                                            تک انتخابی
+                                                                        </span>
+                                                                        <input type="radio" class="selection-radio-0"
+                                                                               name="option_group[0][radio]" value="2">
+                                                                    </label>
+                                                                </div>
                                                             </div>
-                                                            <div class="form-check col-xs-3 col-sm-3 form-check-right pt-20">
-                                                                <label class="form-check-label ltr">
-                                                                <span class="rtl text-indigo">
-                                                                    تک انتخابی
-                                                                </span>
-                                                                    <input type="radio" class=""
-                                                                           name="option_group[0][radio]" value="2">
-                                                                </label>
+                                                            <div class="col-xs-3 col-sm-2">
+                                                                <div class="form-check form-check-right">
+                                                                    <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                اختیاری
+                                                                            </span>
+                                                                        <input type="radio" class="action-toggle" checked="checked"
+                                                                               name="option_group[0][forced]"
+                                                                               data-action-toggle-el=".selection-radio-0"
+                                                                               data-action-toggle="true"
+                                                                               data-action="enable"
+                                                                               value="1">
+                                                                    </label>
+                                                                </div>
+                                                                <div class="form-check form-check-right pt-20">
+                                                                    <label class="form-check-label ltr">
+                                                                            <span class="rtl text-indigo">
+                                                                                اجباری
+                                                                            </span>
+                                                                        <input type="radio" class="action-toggle"
+                                                                               data-action-toggle-el=".selection-radio-0"
+                                                                               data-action-toggle="false"
+                                                                               data-action="enable"
+                                                                               name="option_group[0][forced]"
+                                                                               value="2">
+                                                                    </label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="row position-relative property-each-item"

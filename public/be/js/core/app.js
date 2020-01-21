@@ -1131,4 +1131,40 @@ $(function () {
             })
         });
     }
+
+    (function ($) {
+        'use strict';
+
+        $(function () {
+            $.fn.toggler = function () {
+                var namespace = 'omega';
+                var inp_action_toggle = $(this);
+                inp_action_toggle.each(function () {
+                    var $this, at_el, at, action;
+                    //-----
+                    $this = $(this);
+                    at_el = $this.data('action-toggle-el');
+                    at = $this.data('action-toggle');
+                    action = $this.data('action');
+                    //-----
+                    $this.off('change.' + namespace).on('change.' + namespace, function () {
+                        if ($(this).is(':checked')) {
+                            if (typeof at !== typeof undefined) {
+                                switch (action.toLowerCase()) {
+                                    case 'enable':
+                                        if (true == at) {
+                                            $(at_el).attr('disabled', false);
+                                        } else {
+                                            $(at_el).attr('disabled', true);
+                                        }
+                                        break;
+                                }
+                            }
+                        }
+                    }).trigger('change.' + namespace);
+                });
+            };
+            $('.action-toggle').toggler();
+        });
+    })(jQuery);
 });

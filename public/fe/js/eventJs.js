@@ -8,6 +8,7 @@
             tableSingle,
             tableMulti,
             //-----
+            inpForcedRadio,
             inpRadio,
             inpCheckbox,
             inpRadioClass = '.event-radio-input',
@@ -93,6 +94,7 @@
             tableSingle = $('.table-single-select');
             tableMulti = $('.table-multi-select');
             //-----
+            inpForcedRadio = $('[data-is-forced="forced"]');
             inpRadio = $(inpRadioClass);
             inpCheckbox = $(inpCheckboxClass);
             //-----

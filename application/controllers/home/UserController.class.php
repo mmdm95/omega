@@ -79,7 +79,7 @@ class UserController extends AbstractController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'نتیجه پرداخت');
 
         $this->_render_page([
-            'pages/fe/payment_result',
+            'pages/fe/payment-result',
         ]);
     }
 
@@ -425,7 +425,8 @@ class UserController extends AbstractController
 //                ], 'id=:id', ['id' => $this->data['identity']->id]);
 
 //                if (!$res) {
-                $form->setError('خطا در انجام عملیات!');
+//                $form->setError('خطا در انجام عملیات!');
+                $form->setError('این امکان هنوز فعال نشده است!');
 //                }
             });
         } catch (Exception $e) {
@@ -453,7 +454,7 @@ class UserController extends AbstractController
         $this->data['form_token_payment'] = $form->csrfToken('paymentToken');
         $form->setFieldsName(['pay'])->setMethod('post');
         try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form) {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form) {
                 if (!$model->is_exist('block_list', 'n_code=:code', ['code' => $this->data['identity']->n_code])) {
                     if ($this->data['identity']->info_flag == 0) {
                         $_SESSION['event-eventSubmit'] = 'برای پرداخت ابتدا فیلدهای اجباری را تکمیل کنید.';
@@ -512,7 +513,7 @@ class UserController extends AbstractController
             $payRes = $zarinpal->create_request([
                 'Amount' => $parameters['price'],
                 'Description' => $parameters['desc'] ?? '',
-                'CallbackURL' => base_url('paymentResult')
+                'CallbackURL' => base_url('user/paymentResult')
             ])->get_result();
             if ($payRes->Status == Payment::PAYMENT_STATUS_OK_ZARINPAL) {
                 // Insert new payment in DB
@@ -520,6 +521,7 @@ class UserController extends AbstractController
                     'authority' => 'zarinpal-' . $payRes->Authority,
                     'user_id' => $this->data['identity']->id,
                     'plan_id' => $parameters['plan_id'],
+                    'amount' => $parameters['price'],
                 ]);
 
                 if ($res) {
@@ -559,13 +561,14 @@ class UserController extends AbstractController
                 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
 
             if (count($curPay)) {
+                $curPay = $curPay[0];
                 $curFactor = $model->select_it(null, 'factors', '*',
                     'user_id=:uId AND plan_id=:pId', ['uId' => $curPay['user_id'], 'pId' => $curPay['plan_id']]);
                 if (count($curFactor)) {
-                    $curPay = $curPay[0];
+                    $curFactor = $curFactor[0];
                     // Set factor_code to global data
                     $this->data['factor_code'] = $curFactor['factor_code'];
-                    if ($curPay['status'] != Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL) {
+                    if ($curPay['payment_status'] != Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL) {
                         $res = $zarinpal->verify_request($curPay['amount']);
                         if (intval($zarinpal->status) == Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL || // Successful transaction
                             intval($zarinpal->status) == Payment::PAYMENT_TRANSACTION_DUPLICATE_ZARINPAL) { // Duplicated transaction
@@ -579,10 +582,9 @@ class UserController extends AbstractController
                                 $model->update_it(self::PAYMENT_TABLE_ZARINPAL, [
                                     'payment_code' => $this->data['ref_id'],
                                     'payment_status' => $zarinpal->status,
-                                    'payment_date' => time(),
                                 ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
                                 $model->update_it('factors', [],
-                                    'factor_code=:fc', ['fc' => $curPay['factor_code']], [
+                                    'user_id=:uId AND plan_id=:pId', ['uId' => $curPay['user_id'], ['pId' => $curPay['plan_id']]], [
                                         'payed_amount' => !empty($curFactor['payed_amount']) ? 'payed_amount+' . (int)$curPay['amount'] : (int)$curPay['amount']
                                     ]);
                             }
@@ -599,10 +601,15 @@ class UserController extends AbstractController
                             $model->update_it(self::PAYMENT_TABLE_ZARINPAL, [
                                 'payment_code' => $this->data['ref_id'],
                                 'payment_status' => $zarinpal->status,
-                                'payment_date' => time(),
                             ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
                             $this->data['error'] = $zarinpal->get_message($zarinpal->status);
                         }
+
+                        // Update time anyway
+                        $model->update_it(self::PAYMENT_TABLE_ZARINPAL, [
+                            'payment_date' => time(),
+                        ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
+                        $this->data['error'] = $zarinpal->get_message($zarinpal->status);
                     } else {
                         $this->data['is_success'] = true;
                         $this->data['have_ref_id'] = true;

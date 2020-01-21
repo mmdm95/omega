@@ -20,6 +20,7 @@
             inputNameStart = 'option_group[',
             titleNameEnd = '][title]',
             radioNameEnd = '][radio]',
+            forcedNameEnd = '][forced]',
             nameNameEnd = '][name][]',
             descNameEnd = '][desc][]',
             priceNameEnd = '][price][]',
@@ -42,7 +43,13 @@
             var lastIndex = container.find(propertyItem).last().index() + 1;
             item.find('input[type=text][name$="' + titleNameEnd + '"]').attr('name', inputNameStart + lastIndex + titleNameEnd);
             item.find('input[type=radio][name$="' + radioNameEnd + '"]').attr('name', inputNameStart + lastIndex + radioNameEnd)
-                .prop('checked', false).attr('checked', false).first().prop('checked', 'checked').attr('checked', 'checked');
+                .prop('checked', false).attr('checked', false)
+                .attr('class', false).attr('class', 'selection-radio-' + lastIndex)
+                .first().prop('checked', 'checked').attr('checked', 'checked');
+            item.find('input[type=radio][name$="' + forcedNameEnd + '"]').attr('name', inputNameStart + lastIndex + forcedNameEnd)
+                .prop('checked', false).attr('checked', false)
+                .attr('data-action-toggle-el', false).attr('data-action-toggle-el', '.selection-radio-' + lastIndex)
+                .first().prop('checked', 'checked').attr('checked', 'checked');
             item.find('input[type=text][name$="' + nameNameEnd + '"]').attr('name', inputNameStart + lastIndex + nameNameEnd);
             item.find('input[type=text][name$="' + descNameEnd + '"]').attr('name', inputNameStart + lastIndex + descNameEnd);
             item.find('input[type=text][name$="' + priceNameEnd + '"]').attr('name', inputNameStart + lastIndex + priceNameEnd);
@@ -134,6 +141,8 @@
                 if ($this.data('tagsinput')) $this.tagsinput("destroy");
                 $this.tagsinput();
             });
+
+            $('.action-toggle').toggler();
 
             // re initiate ripple plugin
             // $('.btn').each(function () {

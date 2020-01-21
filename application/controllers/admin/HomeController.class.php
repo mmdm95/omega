@@ -1487,8 +1487,9 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery', 'video_gallery'])
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
+            'description', 'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules',
+            'brochure_gallery', 'image_gallery', 'video_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
@@ -1534,6 +1535,10 @@ class HomeController extends HController
                         $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
                     }
                 }
+                // Validate brochure gallery
+                $values['brochure_gallery'] = array_filter($values['brochure_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
                 // Validate image gallery
                 $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
                     return file_exists($val) && is_file($val);
@@ -1552,10 +1557,13 @@ class HomeController extends HController
                 if (is_array($values['option_group'])) {
                     foreach ($values['option_group'] as $key => $value) {
                         if (is_array($value)) {
-                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
-                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                            if (isset($value['title']) && is_string($value['title']) &&
+                                is_numeric($value['radio']) && is_numeric($value['forced']) &&
+                                in_array($value['radio'], [1, 2]) && in_array($value['forced'], [1, 2]) &&
+                                is_array($value['name']) && is_array($value['price'])) {
                                 $newOpt[$k]['title'] = $value['title'];
                                 $newOpt[$k]['radio'] = $value['radio'];
+                                $newOpt[$k]['forced'] = $value['forced'];
                                 foreach ($value['name'] as $idx => $name) {
                                     if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
                                         !empty($value['name'][$idx])) {
@@ -1616,6 +1624,16 @@ class HomeController extends HController
                     if (!$res2) break;
                 }
 
+                // Insert images to gallery table
+                $res4 = true;
+                foreach ($values['brochure_gallery'] as $img) {
+                    $res4 = $model->insert_it('plan_brochure', [
+                        'plan_id' => $res,
+                        'image' => $img,
+                    ]);
+                    if (!$res4) break;
+                }
+
                 // Insert videos to gallery table
                 $res3 = true;
                 foreach ($values['video_gallery'] as $video) {
@@ -1626,7 +1644,7 @@ class HomeController extends HController
                     if (!$res3) break;
                 }
 
-                if ($res && $res2 && $res3) {
+                if ($res && $res2 && $res3 && $res4) {
                     $model->transactionComplete();
                 } else {
                     $model->transactionRollback();
@@ -1696,8 +1714,9 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addPlan');
-        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date', 'description',
-            'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules', 'image_gallery', 'video_gallery'])
+        $form->setFieldsName(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
+            'description', 'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'support_place', 'rules',
+            'brochure_gallery', 'image_gallery', 'video_gallery'])
             ->xssOption('rules', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->xssOption('description', ['style', 'href', 'src', 'target', 'class'])
             ->setMethod('post');
@@ -1745,6 +1764,10 @@ class HomeController extends HController
                         $form->setError('زمان شروع ثبت نام باید از تاریخ پایان آن کمتر باشد.');
                     }
                 }
+                // Validate brochure gallery
+                $values['brochure_gallery'] = array_filter($values['brochure_gallery'], function ($val) {
+                    return file_exists($val) && is_file($val);
+                });
                 // Validate image gallery
                 $values['image_gallery'] = array_filter($values['image_gallery'], function ($val) {
                     return file_exists($val) && is_file($val);
@@ -1763,10 +1786,13 @@ class HomeController extends HController
                 if (is_array($values['option_group'])) {
                     foreach ($values['option_group'] as $key => $value) {
                         if (is_array($value)) {
-                            if (isset($value['title']) && is_string($value['title']) && is_numeric($value['radio']) &&
-                                in_array($value['radio'], [1, 2]) && is_array($value['name']) && is_array($value['price'])) {
+                            if (isset($value['title']) && is_string($value['title']) &&
+                                is_numeric($value['radio']) && is_numeric($value['forced']) &&
+                                in_array($value['radio'], [1, 2]) && in_array($value['forced'], [1, 2]) &&
+                                is_array($value['name']) && is_array($value['price'])) {
                                 $newOpt[$k]['title'] = $value['title'];
                                 $newOpt[$k]['radio'] = $value['radio'];
+                                $newOpt[$k]['forced'] = $value['forced'];
                                 foreach ($value['name'] as $idx => $name) {
                                     if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
                                         !empty($value['name'][$idx])) {
@@ -1816,6 +1842,18 @@ class HomeController extends HController
                     'options' => json_encode($values['option_group']),
                 ], 'id=:id', ['id' => $this->data['param'][0]]);
 
+                // Delete previous brochure images
+                $res6 = $model->delete_it('plan_brochure', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
+                // Insert images to gallery table
+                $res7 = true;
+                foreach ($values['brochure_gallery'] as $img) {
+                    $res7 = $model->insert_it('plan_brochure', [
+                        'plan_id' => $this->data['param'][0],
+                        'image' => $img,
+                    ]);
+                    if (!$res7) break;
+                }
+
                 // Delete previous gallery images
                 $res3 = $model->delete_it('plan_images', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
                 // Insert images to gallery table
@@ -1828,7 +1866,7 @@ class HomeController extends HController
                     if (!$res2) break;
                 }
 
-                // Delete previous gallery images
+                // Delete previous gallery videos
                 $res4 = $model->delete_it('plan_videos', 'plan_id=:pId', ['pId' => $this->data['param'][0]]);
                 // Insert images to gallery table
                 $res5 = true;
@@ -1840,7 +1878,7 @@ class HomeController extends HController
                     if (!$res5) break;
                 }
 
-                if ($res && $res2 && $res3 && $res4 && $res5) {
+                if ($res && $res2 && $res3 && $res4 && $res5 && $res6 && $res7) {
                     $model->transactionComplete();
                 } else {
                     $model->transactionRollback();
@@ -1864,6 +1902,7 @@ class HomeController extends HController
         $this->data['planVals'] = $model->select_it(null, 'plans', '*', 'id=:id', ['id' => $param[0]])[0];
         $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
         $this->data['planVals']['contact'] = explode(',', $this->data['planVals']['contact']);
+        $this->data['planVals']['brochure_gallery'] = array_column($model->select_it(null, 'plan_brochure', ['image'], 'plan_id=:pId', ['pId' => $param[0]]), 'image');
         $this->data['planVals']['image_gallery'] = array_column($model->select_it(null, 'plan_images', ['image'], 'plan_id=:pId', ['pId' => $param[0]]), 'image');
         $this->data['planVals']['video_gallery'] = array_column($model->select_it(null, 'plan_videos', ['video'], 'plan_id=:pId', ['pId' => $param[0]]), 'video');
 

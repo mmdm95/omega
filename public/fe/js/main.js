@@ -120,6 +120,14 @@
         fade: true,
         asNavFor: ".gallery-thumbs"
     });
+    $(".gallery-brochure").slick({
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        arrows: true,
+        prevArrow: '<span class="slick-arrow prev-arrow"><i class="la la-angle-right"></i></span>',
+        nextArrow: '<span class="slick-arrow next-arrow"><i class="la la-angle-left"></i></span>',
+        fade: true,
+    });
     $(".gallery-thumbs").slick({
         slidesToShow: 5,
         slidesToScroll: 1,

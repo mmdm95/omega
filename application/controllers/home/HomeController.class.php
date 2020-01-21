@@ -58,6 +58,11 @@ class HomeController extends AbstractController
         ]);
     }
 
+    public function comingSoonAction()
+    {
+        $this->load->view('templates/fe/coming-soon');
+    }
+
     protected function _contactSubmit()
     {
         //-----

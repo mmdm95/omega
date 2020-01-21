@@ -119,7 +119,6 @@ class PaymentZarinPal extends Payment
         if (!isset($data[$this->MerchantIDStr])) {
             $data[$this->MerchantIDStr] = $this->_parameters[$this->MerchantIDStr];
         }
-        var_dump($data);
         $this->_result = $this->_client->PaymentRequest($data);
 
         return $this;
