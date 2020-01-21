@@ -14,3 +14,19 @@
         </div>
     </div>
 </div>
+
+<!-- Tag -->
+<div class="widget-wrapper">
+    <div class="widget-default">
+        <div class="widget-header">
+            <h6 class="widget-title aviny">برچسب‌ها</h6>
+        </div>
+        <div class="widget-content">
+            <div class="tags-widget">
+                <ul>
+                    <li><a href="">Business</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div><!-- ends: .widget-wrapper -->

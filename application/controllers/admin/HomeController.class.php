@@ -961,16 +961,16 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addBlog');
-        $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
+        $form->setFieldsName(['title', 'category', 'abstract', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->setMethod('post', [], ['publish']);
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
-                if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
+                if ($model->is_exist('blog', 'title=:title', ['title' => trim($values['title'])])) {
                     $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                 }
                 if (!in_array($values['category'], array_column($this->data['categories'], 'id'))) {
@@ -980,6 +980,7 @@ class HomeController extends HController
                 $res = $model->insert_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
+                    'abstract' => trim($values['abstract']),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
                     'writer' => $this->data['identity']->username,
@@ -1042,17 +1043,17 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editBlog');
-        $form->setFieldsName(['title', 'category', 'body', 'publish', 'keywords'])
+        $form->setFieldsName(['title', 'category', 'abstract', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->setMethod('post', [], ['publish']);
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title', 'category', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
                 if ($values['title'] != $this->data['atcVals']['title']) {
-                    if ($model->is_exist('blog', 'title=:title', ['title' => $values['title']])) {
+                    if ($model->is_exist('blog', 'title=:title', ['title' => trim($values['title'])])) {
                         $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                     }
                 }
@@ -1063,6 +1064,7 @@ class HomeController extends HController
                 $res = $model->update_it('blog', [
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
+                    'abstract' => trim($values['abstract']),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
                     'updater' => $this->data['identity']->username,
@@ -1501,7 +1503,7 @@ class HomeController extends HController
                 });
 
                 $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Check plan duplicate
@@ -1517,7 +1519,7 @@ class HomeController extends HController
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
                 $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت ورودی طرح باید از نوع عدد باشد.');
                 $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
                 if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
                     (int)$values['total_price'] < (int)$values['min_price']) {
@@ -1558,11 +1560,13 @@ class HomeController extends HController
                     foreach ($values['option_group'] as $key => $value) {
                         if (is_array($value)) {
                             if (isset($value['title']) && is_string($value['title']) &&
-                                is_numeric($value['radio']) && is_numeric($value['forced']) &&
-                                in_array($value['radio'], [1, 2]) && in_array($value['forced'], [1, 2]) &&
+                                (!isset($value['radio']) || (isset($value['radio']) && is_numeric($value['radio'])))
+                                && is_numeric($value['forced']) &&
+                                (!isset($value['radio']) || (isset($value['radio']) && in_array($value['radio'], [1, 2])))
+                                && in_array($value['forced'], [1, 2]) &&
                                 is_array($value['name']) && is_array($value['price'])) {
                                 $newOpt[$k]['title'] = $value['title'];
-                                $newOpt[$k]['radio'] = $value['radio'];
+                                $newOpt[$k]['radio'] = $value['radio'] ?? '1';
                                 $newOpt[$k]['forced'] = $value['forced'];
                                 foreach ($value['name'] as $idx => $name) {
                                     if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&
@@ -1611,7 +1615,8 @@ class HomeController extends HController
                     'support_phone' => trim($values['support_phone']),
                     'place' => trim($values['place']),
                     'options' => json_encode($values['option_group']),
-                    'status' => PLAN_STATUS_DEACTIVATE,
+                    'publish' => 1,
+                    'status' => PLAN_STATUS_ACTIVATE,
                 ], [], true);
 
                 // Insert images to gallery table
@@ -1728,7 +1733,7 @@ class HomeController extends HController
                 });
 
                 $form->isRequired(['image', 'title', 'capacity', 'total_price', 'base_price', 'min_price', 'start_date', 'end_date',
-                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description', 'rules']
+                        'active_date', 'deactive_date', 'audience', 'place', 'support_phone', 'description']
                     , 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Check plan duplicate
@@ -1746,7 +1751,7 @@ class HomeController extends HController
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
                 $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'base_price', 'قیمت پایه طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'قیمت ورودی طرح باید از نوع عدد باشد.');
                 $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
                 if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
                     (int)$values['total_price'] < (int)$values['min_price']) {
@@ -1787,11 +1792,13 @@ class HomeController extends HController
                     foreach ($values['option_group'] as $key => $value) {
                         if (is_array($value)) {
                             if (isset($value['title']) && is_string($value['title']) &&
-                                is_numeric($value['radio']) && is_numeric($value['forced']) &&
-                                in_array($value['radio'], [1, 2]) && in_array($value['forced'], [1, 2]) &&
+                                (!isset($value['radio']) || (isset($value['radio']) && is_numeric($value['radio'])))
+                                && is_numeric($value['forced']) &&
+                                (!isset($value['radio']) || (isset($value['radio']) && in_array($value['radio'], [1, 2])))
+                                && in_array($value['forced'], [1, 2]) &&
                                 is_array($value['name']) && is_array($value['price'])) {
                                 $newOpt[$k]['title'] = $value['title'];
-                                $newOpt[$k]['radio'] = $value['radio'];
+                                $newOpt[$k]['radio'] = $value['radio'] ?? '1';
                                 $newOpt[$k]['forced'] = $value['forced'];
                                 foreach ($value['name'] as $idx => $name) {
                                     if (isset($value['name'][$idx]) && isset($value['price'][$idx]) &&

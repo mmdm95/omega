@@ -58,14 +58,14 @@
 }
 
 .iranyekan-regular {
-  font-family: 'IRANYekanFN';
+  font-family: 'IRANYekanFN' !important;
 }
 
 .iranyekan-bold {
-    font-family: 'IRANYekanFN Bold';
+    font-family: 'IRANYekanFN Bold' !important;
 }
 
 .iranyekan-light {
-    font-family: 'IRANYekanFN Light';
+    font-family: 'IRANYekanFN Light' !important;
 }
 

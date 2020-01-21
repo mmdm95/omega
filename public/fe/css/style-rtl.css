@@ -1176,7 +1176,7 @@
     color: #f5548e;
 }
 
-.bg-primary, .atbd_listing_meta .atbd_listing_price, .atbdp-widget-categories .atbdp_parent_category li a:hover span, .atbdp-widget-tags ul li a:hover, .sort-rating .custom-control-label span, .tags-widget ul li a:hover, .listing-info .listing-info--meta .atbd_listing_category a span, .atbd_listing_gallery .gallery-images .slick-arrow:hover, .atbd_review_module .review_pagination .pagination .page-item .page-link:hover, .atbd_review_module .review_pagination .pagination .page-item.active .page-link, .social.social--small ul li a:hover, .select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-selection--multiple .select2-selection__choice, .pagination .nav-links .page-numbers.current, .price-range.rs-primary .ui-slider-horizontal .ui-slider-range, .range-slider.rs-primary .ui-slider-horizontal .ui-slider-range, .all-listing-wrapper .atbd_listing_action_btn .view-mode .action-btn.active, .dashboard-nav .dashboard-nav-area .nav .nav-link.active:before, .atbd_saved_items_wrapper .atbdb_content_module_contents .table tr td .remove-favorite:hover, .post-bottom .tags ul li a:hover, .post-bottom .social-share ul li a:hover, .comments-area .comment-lists ul .depth-1 .media .media-body .media_top .reply:hover {
+.bg-primary, .atbd_listing_meta .atbd_listing_price, .atbdp-widget-categories .atbdp_parent_category li a:hover span, .atbdp-widget-tags ul li a:hover, .sort-rating .custom-control-label span, .tags-widget ul li a:hover, .listing-info .listing-info--meta .atbd_listing_category a span, .atbd_listing_gallery .gallery-images .slick-arrow:hover, .gallery-brochure .slick-arrow:hover, .atbd_review_module .review_pagination .pagination .page-item .page-link:hover, .atbd_review_module .review_pagination .pagination .page-item.active .page-link, .social.social--small ul li a:hover, .select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-selection--multiple .select2-selection__choice, .pagination .nav-links .page-numbers.current, .price-range.rs-primary .ui-slider-horizontal .ui-slider-range, .range-slider.rs-primary .ui-slider-horizontal .ui-slider-range, .all-listing-wrapper .atbd_listing_action_btn .view-mode .action-btn.active, .dashboard-nav .dashboard-nav-area .nav .nav-link.active:before, .atbd_saved_items_wrapper .atbdb_content_module_contents .table tr td .remove-favorite:hover, .post-bottom .tags ul li a:hover, .post-bottom .social-share ul li a:hover, .comments-area .comment-lists ul .depth-1 .media .media-body .media_top .reply:hover {
     background: #f5548e;
 }
 
@@ -3939,7 +3939,8 @@ p {
     margin: 0;
 }
 
-.atbd_listing_gallery .gallery-images .slick-arrow {
+.atbd_listing_gallery .gallery-images .slick-arrow,
+.gallery-brochure .slick-arrow {
     position: absolute;
     display: flex;
     align-items: center;
@@ -3947,7 +3948,7 @@ p {
     width: 2.4rem;
     height: 2.4rem;
     border-radius: 20rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.35);
     color: #fff;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -3957,11 +3958,13 @@ p {
     font-size: 0.8rem;
 }
 
-.atbd_listing_gallery .gallery-images .slick-arrow.prev-arrow {
+.atbd_listing_gallery .gallery-images .slick-arrow.prev-arrow,
+.gallery-brochure .slick-arrow.prev-arrow {
     right: 0.66667rem;
 }
 
-.atbd_listing_gallery .gallery-images .slick-arrow.next-arrow {
+.atbd_listing_gallery .gallery-images .slick-arrow.next-arrow,
+.gallery-brochure .slick-arrow.next-arrow {
     left: 0.66667rem;
 }
 
@@ -3974,7 +3977,8 @@ p {
     text-align: center;
 }
 
-.atbd_listing_gallery .gallery-images .single-image img {
+.atbd_listing_gallery .gallery-images .single-image img,
+.gallery-brochure .single-image img {
     display: inline-block;
     width: 100%;
     height: auto;

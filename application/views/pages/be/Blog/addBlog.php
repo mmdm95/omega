@@ -107,6 +107,14 @@
                                                 </select>
                                             </div>
                                             <div class="form-group col-lg-12">
+                                                <span class="text-danger">*</span>
+                                                <label>خلاصه نوشته:</label>
+                                                <textarea rows="5" cols="12" class="form-control"
+                                                          name="abstract"
+                                                          style="min-height: 100px; resize: vertical;"
+                                                          placeholder="خلاصه"><?= $atcVals['abstract'] ?? ''; ?></textarea>
+                                            </div>
+                                            <div class="form-group col-lg-12">
                                                 <label>کلمات کلیدی:</label>
                                                 <input name="keywords" type="text"
                                                        class="form-control" placeholder="Press Enter"

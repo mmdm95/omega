@@ -69,8 +69,6 @@ class FactorModel extends HModel
 
         $select->groupBy(['f.id']);
 
-        $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
-        if (count($res)) return $res[0];
-        return [];
+        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
     }
 }

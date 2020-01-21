@@ -158,7 +158,7 @@
                                             </p>
                                         </div>
                                         <div class="col-lg-4 border border-default p-20">
-                                            <label>قیمت پایه طرح (تومان):</label>
+                                            <label>قیمت ورودی طرح (تومان):</label>
                                             <p class="text-primary-600">
                                                 <?= convertNumbersToPersian(number_format(convertNumbersToPersian($planVals['base_price'], true))) . ' تومان'; ?>
                                             </p>
