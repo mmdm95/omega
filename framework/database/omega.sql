@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 20, 2020 at 10:00 AM
+-- Generation Time: Jan 21, 2020 at 06:42 AM
 -- Server version: 10.1.37-MariaDB
 -- PHP Version: 7.2.13
 
@@ -237,6 +237,18 @@ CREATE TABLE `plans` (
   `status` int(1) UNSIGNED NOT NULL,
   `forced_status` tinyint(1) UNSIGNED NOT NULL,
   `publish` tinyint(1) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `plan_brochure`
+--
+
+CREATE TABLE `plan_brochure` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `plan_id` int(10) UNSIGNED NOT NULL,
+  `image` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -569,6 +581,12 @@ ALTER TABLE `plans`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `plan_brochure`
+--
+ALTER TABLE `plan_brochure`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `plan_comments`
 --
 ALTER TABLE `plan_comments`
@@ -641,6 +659,12 @@ ALTER TABLE `users_roles`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_urp_u` (`user_id`),
   ADD KEY `fk_urp_r` (`role_id`);
+
+--
+-- Indexes for table `zarinpal_payment`
+--
+ALTER TABLE `zarinpal_payment`
+  ADD PRIMARY KEY (`authority`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -719,6 +743,12 @@ ALTER TABLE `plans`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
+-- AUTO_INCREMENT for table `plan_brochure`
+--
+ALTER TABLE `plan_brochure`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `plan_comments`
 --
 ALTER TABLE `plan_comments`
@@ -770,7 +800,7 @@ ALTER TABLE `static_pages`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users_pages_perms`
@@ -782,7 +812,7 @@ ALTER TABLE `users_pages_perms`
 -- AUTO_INCREMENT for table `users_roles`
 --
 ALTER TABLE `users_roles`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables
