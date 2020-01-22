@@ -30,7 +30,8 @@ defined('PROFILE_IMAGE_DIR') OR define('PROFILE_IMAGE_DIR', 'public/users/profil
 defined('PLAN_STATUS_ACTIVATE') OR define('PLAN_STATUS_ACTIVATE', 1);
 defined('PLAN_STATUS_DEACTIVATE') OR define('PLAN_STATUS_DEACTIVATE', 2);
 defined('PLAN_STATUS_FULL') OR define('PLAN_STATUS_FULL', 3);
-defined('PLAN_STATUS_CLOSED') OR define('PLAN_STATUS_CLOSED', 4);
+defined('PLAN_STATUS_IN_PROGRESS') OR define('PLAN_STATUS_IN_PROGRESS', 4);
+defined('PLAN_STATUS_CLOSED') OR define('PLAN_STATUS_CLOSED', 5);
 
 // My custom payment status
 defined('OWN_PAYMENT_STATUS_SUCCESSFUL') OR define('OWN_PAYMENT_STATUS_SUCCESSFUL', 1);
@@ -84,7 +85,7 @@ return array(
     //    'hello/*' => 'index'
     //);
     'routes' => array(
-//        'blog/(:any)' => 'comingSoon',
+        'blog/(:any)' => 'comingSoon',
     ),
 
     //===============================================

@@ -85,7 +85,7 @@
                                                 </div>
                                             <?php endif; ?>
 
-                                            <div class="col-lg-12 mb-15">
+                                            <div class="form-group col-lg-12">
                                                 <div class="help-block alert alert-info no-border-right no-border-top no-border-bottom border-lg p-10">
                                                     ابعاد تصویر بهتر است با هم برابر باشد. مانند
                                                     <span class="display-inline-block ltr">

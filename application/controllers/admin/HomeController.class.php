@@ -961,15 +961,19 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('addBlog');
-        $form->setFieldsName(['title', 'category', 'abstract', 'body', 'publish', 'keywords'])
+        $form->setFieldsName(['image', 'title', 'category', 'abstract', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->setMethod('post', [], ['publish']);
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['image', 'title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
+                }
                 if ($model->is_exist('blog', 'title=:title', ['title' => trim($values['title'])])) {
                     $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
                 }
@@ -978,12 +982,13 @@ class HomeController extends HController
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->insert_it('blog', [
+                    'image' => trim($values['image']),
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'abstract' => trim($values['abstract']),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
-                    'writer' => $this->data['identity']->username,
+                    'writer' => $this->data['identity']->full_name ?? $this->data['identity']->username,
                     'updater' => null,
                     'keywords' => $values['keywords'],
                     'publish' => $form->isChecked('publish') ? 1 : 0,
@@ -1008,16 +1013,28 @@ class HomeController extends HController
             }
         }
 
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'افزودن نوشته جدید');
 
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
         $this->_render_page([
             'pages/be/Blog/addBlog',
-            'templates/be/browser-tiny-func'
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
         ]);
     }
 
@@ -1043,15 +1060,19 @@ class HomeController extends HController
         $this->load->library('HForm/Form');
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editBlog');
-        $form->setFieldsName(['title', 'category', 'abstract', 'body', 'publish', 'keywords'])
+        $form->setFieldsName(['image', 'title', 'category', 'abstract', 'body', 'publish', 'keywords'])
             ->setDefaults('publish', 'off')
             ->xssOption('body', ['style', 'href', 'src', 'target', 'class'], ['video'])
             ->setMethod('post', [], ['publish']);
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['image', 'title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
 
+                // Validate main image
+                if (!file_exists($values['image'])) {
+                    $form->setError('تصویر شاخص نامعتبر است.');
+                }
                 if ($values['title'] != $this->data['atcVals']['title']) {
                     if ($model->is_exist('blog', 'title=:title', ['title' => trim($values['title'])])) {
                         $form->setError('این نوشته وجود دارد. لطفا دوباره تلاش کنید.');
@@ -1062,12 +1083,13 @@ class HomeController extends HController
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->update_it('blog', [
+                    'image' => trim($values['image']),
                     'title' => trim($values['title']),
                     'slug' => url_title(trim($values['title'])),
                     'abstract' => trim($values['abstract']),
                     'body' => $values['body'],
                     'category_id' => $values['category'],
-                    'updater' => $this->data['identity']->username,
+                    'updater' => $this->data['identity']->full_name ?? $this->data['identity']->username,
                     'keywords' => $values['keywords'],
                     'publish' => $form->isChecked('publish') ? 1 : 0,
                     'updated_at' => time(),
@@ -1092,16 +1114,28 @@ class HomeController extends HController
 
         $this->data['atcVals'] = $model->select_it(null, 'blog', '*', 'id=:id', ['id' => $param[0]])[0];
 
-        // Extra js
-        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
-        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
-
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'ویرایش نوشته');
 
+        $this->load->helper('easy file manager');
+        //Security options
+        $this->data['upload']['allow_upload'] = allow_upload(false);
+        $this->data['upload']['allow_create_folder'] = allow_create_folder(false);
+        $this->data['upload']['allow_direct_link'] = allow_direct_link();
+        $this->data['upload']['MAX_UPLOAD_SIZE'] = max_upload_size();
+
+        // Extra css
+        $this->data['css'][] = $this->asset->css('be/css/efm.css');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/plugins/forms/tags/tagsinput.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/tinymce/tinymce.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pick.file.js');
+
         $this->_render_page([
             'pages/be/Blog/editBlog',
-            'templates/be/browser-tiny-func'
+            'templates/be/browser-tiny-func',
+            'templates/be/efm'
         ]);
     }
 
@@ -1953,7 +1987,7 @@ class HomeController extends HController
         foreach ($this->data['plans'] as &$plan) {
             $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
                 ['plan_id'], null, null, null, true);
-            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id'], 'pa' => '0'], false, true);
+            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id'], 'pa' => 0], false, true);
         }
 
         // Base configuration
@@ -1991,7 +2025,7 @@ class HomeController extends HController
         //-----
         $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
             ['plan_id'], null, null, null, true);
-        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id'], 'pa' => '0'], false, true);
+        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id'], 'pa' => 0], false, true);
         //-----
         $factor = new FactorModel();
         $this->data['planVals']['buyers'] = $factor->getBuyers(['plan_id' => $param[0], 'payed' => true]);

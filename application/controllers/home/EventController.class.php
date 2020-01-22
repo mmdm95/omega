@@ -49,7 +49,7 @@ class EventController extends AbstractController
         //-----
         $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
             ['plan_id'], null, null, null, true);
-        $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id'], 'pa' => '0'], false, true);
+        $this->data['event']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['event']['id'], 'pa' => 0], false, true);
         //-----
         $this->data['event']['brochure'] = $model->select_it(null, 'plan_brochure', ['image'], 'plan_id=:pId', ['pId' => $this->data['event']['id']]);
         //-----
@@ -128,14 +128,14 @@ class EventController extends AbstractController
             ->setMethod('post', [], ['rule_agree']);
         try {
             $form->beforeCheckCallback(function (&$values) use ($model, $form) {
-                if (!$form->isChecked('rule_agree')) {
-                    $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، گزینه موافق هستم را علامت بزنید.');
+                if ($model->is_exist('factors', 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']])) {
+                    $msg = 'کاربر گرامی، این طرح قبلا برای شما ثبت شده است. شما می‌توانید از طریق ';
+                    $msg .= "<a href='" . base_url('user/dashboard') . "'>" . 'حساب کاربری' . '</a>';
+                    $msg .= ' نسبت به پرداخت وجه طرح اقدام نمایید.';
+                    $form->setError($msg);
                 } else {
-                    if ($model->is_exist('factors', 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']])) {
-                        $msg = 'کاربر گرامی، این طرح قبلا برای شما ثبت شده است. شما می‌توانید از طریق ';
-                        $msg .= "<a href='" . base_url('user/dashboard') . ">" . 'حساب کاربری' . '</a>';
-                        $msg .= ' نسبت به پرداخت وجه طرح اقدام نمایید.';
-                        $form->setError($msg);
+                    if (!$form->isChecked('rule_agree')) {
+                        $form->setError('لطفا ابتدا قوانین و مقررات را مطالعه کنید و در صورت موافق بودن با آنها، گزینه موافق هستم را علامت بزنید.');
                     } else {
                         $values['total_amount'] = $this->data['event']['base_price'];
                         $values['options'] = [];
@@ -146,7 +146,7 @@ class EventController extends AbstractController
                                     $values['options'][$k]['title'] = $option['title'];
                                     $values['options'][$k]['radio'] = $option['radio'];
                                     $values['options'][$k]['forced'] = $option['forced'];
-                                    $values['options'][$k]['name'][$k2] = $name[$k2];
+                                    $values['options'][$k]['name'][$k2] = $option['name'][$k2];
                                     $values['options'][$k]['desc'][$k2] = $option['desc'][$k2];
                                     $values['options'][$k]['price'][$k2] = $option['price'][$k2];
                                 }

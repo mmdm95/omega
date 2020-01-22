@@ -14,6 +14,7 @@
             status_activate = <?= PLAN_STATUS_ACTIVATE; ?>;
             status_deactivate = <?= PLAN_STATUS_DEACTIVATE; ?>;
             status_full = <?= PLAN_STATUS_FULL; ?>;
+            status_in_progress = <?= PLAN_STATUS_IN_PROGRESS; ?>;
             status_closed = <?= PLAN_STATUS_CLOSED; ?>;
         </script>
 

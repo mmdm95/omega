@@ -46,7 +46,7 @@ class BlogModel extends HModel
     {
         $select = $this->select();
         $select->cols([
-            '*', 'b.id As id', 'c.id AS c_id'
+            '*', 'b.id As id', 'b.publish AS publish', 'c.id AS c_id', 'c.publish AS c_publish'
         ])->from('blog AS b');
 
         try {
@@ -59,10 +59,39 @@ class BlogModel extends HModel
             die('unexpected error: ' . $e->getMessage());
         }
 
-        if($params['slug']) {
+        if ($params['slug']) {
             $select->where('slug=:slug')->bindValues(['slug' => $params['slug']]);
         }
-        $select->where('publish=:pub')->bindValues(['pub' => 1]);
+        $select->where('b.publish=:pub')->bindValues(['pub' => 1]);
+
+        $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
+        if (count($res)) return $res[0];
+        return [];
+    }
+
+    public function getSiblingBlog($where, $param = [])
+    {
+        $select = $this->select();
+        $select->cols([
+            'b.title', 'b.id AS id', 'c.category_name', 'c.id AS c_id'
+        ])->from('blog AS b');
+
+        try {
+            $select->join(
+                'LEFT',
+                'categories AS c',
+                'b.category_id=c.id'
+            );
+        } catch (\Aura\SqlQuery\Exception $e) {
+            die('unexpected error: ' . $e->getMessage());
+        }
+
+        $select->where($where);
+        if (!empty($param) && is_array($param)) {
+            $select->bindValues($param);
+        }
+
+        $select->where('b.publish=:pub')->bindValues(['pub' => 1]);
 
         $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
         if (count($res)) return $res[0];

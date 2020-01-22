@@ -58,6 +58,8 @@ class UserController extends AbstractController
             $_SESSION['user-event'] = 'جزئیاتی برای طرح درخواست شده وجود ندارد';
             $this->redirect(base_url('user/dashboard'));
         }
+        // Event delete form
+        $this->_deleteEvent();
         // Payment form
         $this->_zarinpalPayment();
         // Export ticket
@@ -188,7 +190,8 @@ class UserController extends AbstractController
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form, $formFields) {
                 $form->isRequired([
-                    'full-name', 'n-code', 'e-phone', 'gender', 'grade', 'illness', 'allergy'
+                    'full-name', 'n-code', 'e-phone', 'gender', 'grade', 'illness', 'allergy',
+                    'city', 'province', 'address'
                 ], 'فیلدهای اجباری را خالی نگذارید.');
                 $form->validatePersianName('full-name', 'نام و نام خانوادگی باید فقط حروف باشد.')
                     ->validateNationalCode('n-code')
@@ -230,6 +233,9 @@ class UserController extends AbstractController
                 //-----
                 if (!in_array($this->data['identity']->role_id, [AUTH_ROLE_COLLEGE_STUDENT, AUTH_ROLE_GRADUATE])) {
                     $form->isRequired(['school'], 'فیلدهای اجباری را خالی نگذارید.');
+                    if ($values['grade'] >= 12) {
+                        $form->isRequired('degree', 'فیلدهای اجباری را خالی نگذارید.');
+                    }
                     $form->isIn('degree', array_merge([0], array_keys(EDU_FIELDS)), 'رشته تحصیلی انتخاب شده نامعتبر است.');
                     if (!empty(trim($values['school']))) {
                         $form->validatePersianName('school', 'مدرسه محل تحصیل باید فقط حروف باشد.');
@@ -400,6 +406,53 @@ class UserController extends AbstractController
                 $this->redirect(base_url('logout?back_url=' . base_url('index#login_modal')), 'رمز عبور با موفقیت تغییر یافت، با رمز عبور جدید وارد شوید.', 1);
             } else {
                 $this->data['passwordErrors'] = $form->getError();
+            }
+        }
+    }
+
+    //-----
+
+    protected function _deleteEvent()
+    {
+        if (!$this->_checker(true)) return;
+        //-----
+        $model = new Model();
+        $this->data['deleteEventErrors'] = [];
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_delete_event'] = $form->csrfToken('deleteEventToken');
+        $form->setFieldsName(['delete-event'])->setMethod('post');
+        try {
+            $form->beforeCheckCallback(function () use ($form) {
+                if (!empty($this->data['event']['payed_amount'])) {
+                    $msg = 'بدلیل پرداخت وجه برای طرح، قادر به حذف آن نیستید. برای حذف با پشتیبانی تماس حاصل فرمایید.';
+                    $_SESSION['user-event-delete'] = $msg;
+                    $form->setError($msg);
+                }
+            })->afterCheckCallback(function () use ($model, $form) {
+                $model->transactionBegin();
+                //-----
+                $res = $model->delete_it('factors', 'factor_code=:code', ['code' => $this->data['event']['factor_code']]);
+                $res2 = $model->delete_it(self::PAYMENT_TABLE_ZARINPAL, 'user_id=:uId AND plan_id=:pId',
+                    ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']]);
+                //-----
+                if ($res && $res2) {
+                    $model->transactionComplete();
+                } else {
+                    $model->transactionRollback();
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->redirect(base_url('user/dashboard'));
+            } else {
+                $this->data['deleteEventErrors'] = $form->getError();
             }
         }
     }
@@ -584,8 +637,8 @@ class UserController extends AbstractController
                                     'payment_status' => $zarinpal->status,
                                 ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
                                 $model->update_it('factors', [],
-                                    'user_id=:uId AND plan_id=:pId', ['uId' => $curPay['user_id'], ['pId' => $curPay['plan_id']]], [
-                                        'payed_amount' => !empty($curFactor['payed_amount']) ? 'payed_amount+' . (int)$curPay['amount'] : (int)$curPay['amount']
+                                    'user_id=:uId AND plan_id=:pId', ['uId' => $curPay['user_id'], 'pId' => $curPay['plan_id']], [
+                                        'payed_amount' => 'payed_amount+' . (int)convertNumbersToPersian($curPay['amount'], true)
                                     ]);
                             }
                         } else if (intval($zarinpal->status) == Payment::PAYMENT_TRANSACTION_CANCELED_ZARINPAL) { // Transaction was canceled

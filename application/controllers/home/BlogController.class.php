@@ -48,6 +48,21 @@ class BlogController extends AbstractController
         //-----
         $blog = new BlogModel();
         $this->data['blog'] = $blog->getBlogDetail(['slug' => $param[0]]);
+        $next = $model->select_it(null, 'blog', ['']);
+        $this->data['nextBlog'] = [];
+        $this->data['prevBlog'] = [];
+        //-----
+        $this->data['comments'] = $model->select_it(null, 'comments', '*',
+            'blog_id=:bId AND publish=:pub', ['bId' => $this->data['blog']['id'], 'pub' => 1], null, ['id DESC'], 5);
+        $this->data['commentsCount'] = $model->it_count('comments',
+            'blog_id=:bId AND publish=:pub', ['bId' => $this->data['blog']['id'], 'pub' => 1]);
+        //-----
+        $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name'],
+            'publish=:pub', ['pub' => 1]);
+        //-----
+        $this->data['related'] = $model->select_it(null, 'blog', [
+            'image', 'title', 'slug', 'writer', 'created_at', 'updated_at'
+        ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], 5);
 
         // Register & Login actions
         $this->_register(['captcha' => ACTION]);

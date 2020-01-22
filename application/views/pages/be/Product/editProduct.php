@@ -117,7 +117,7 @@
                                             </div>
                                         </div>
                                         <div class="panel-body">
-                                            <div class="col-lg-12 mb-15">
+                                            <div class="form-group col-lg-12">
                                                 <div class="cursor-pointer pick-file border border-lg border-default"
                                                      data-toggle="modal"
                                                      data-target="#modal_full"

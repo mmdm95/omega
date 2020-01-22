@@ -89,7 +89,7 @@
                         <p class="m-0 copy-text">
                             ©
                             <?= convertNumbersToPersian(date('Y')); ?>
-                            امگا. طراحی و توسعه توسط
+                            اُمگا. طراحی و توسعه توسط
                             <a href="">
                                 هیوا
                             </a>

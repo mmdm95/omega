@@ -9,6 +9,8 @@
                 return 'غیر فعال';
             case status_full:
                 return 'ظرفیت تکمیل';
+            case status_in_progress:
+                return 'در حال برگزاری';
             case status_closed:
                 return 'بسته شده';
         }

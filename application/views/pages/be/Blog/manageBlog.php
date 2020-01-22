@@ -21,7 +21,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                class="text-semibold">نوشته‌ها</span>
+                                    class="text-semibold">نوشته‌ها</span>
                         </h5>
                     </div>
                 </div>
@@ -60,6 +60,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
+                                                    <th>تصویر</th>
                                                     <th>عنوان نوشته</th>
                                                     <th>عملیات</th>
                                                 </tr>
@@ -71,8 +72,18 @@
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
+                                                        <td width="100px">
+                                                            <a data-url="<?= base_url() . $blg['image']; ?>"
+                                                               data-popup="lightbox">
+                                                                <img src=""
+                                                                     data-src="<?= base_url() . $blg['image']; ?>"
+                                                                     alt="<?= $blg['title']; ?>"
+                                                                     class="img-rounded img-preview lazy">
+                                                            </a>
+                                                        </td>
                                                         <td>
-                                                            <a href="<?= base_url('blog/' . $blg['slug']); ?>" target="_blank">
+                                                            <a href="<?= base_url('blog/detail/' . $blg['slug']); ?>"
+                                                               target="_blank">
                                                                 <?= $blg['title']; ?>
                                                             </a>
                                                         </td>

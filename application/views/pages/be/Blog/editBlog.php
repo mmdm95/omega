@@ -87,6 +87,41 @@
                                                 </div>
                                             <?php endif; ?>
 
+                                            <div class="form-group col-lg-12">
+                                                <div class="cursor-pointer pick-file border border-lg border-default"
+                                                     data-toggle="modal"
+                                                     data-target="#modal_full"
+                                                     style="border-style: dashed; padding: 0 10px 10px 0; box-sizing: border-box;">
+                                                    <input class="image-file" type="hidden"
+                                                           name="image"
+                                                           value="<?= set_value($atcVals['image'] ?? ''); ?>">
+                                                    <div class="media stack-media-on-mobile">
+                                                        <div class="media-left">
+                                                            <div class="thumb">
+                                                                <a class="display-inline-block"
+                                                                   style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
+                                                                    <img
+                                                                            src="<?= set_value($atcVals['image'] ?? '', '', base_url($atcVals['image'] ?? ''), asset_url('be/images/placeholder.jpg')); ?>"
+                                                                            class="img-rounded" alt=""
+                                                                            style="width: 100px; height: 100px; object-fit: contain;"
+                                                                            data-base-url="<?= base_url(); ?>">
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="media-body">
+                                                            <h6 class="media-heading">
+                                                                <a class="text-grey-300">
+                                                                    <span class="text-danger">*</span>
+                                                                    انتخاب تصویر شاخص:
+                                                                </a>
+                                                                <a class="io-image-name display-block">
+                                                                    <?= basename(set_value($atcVals['image'] ?? '')); ?>
+                                                                </a>
+                                                            </h6>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div class="form-group col-lg-8">
                                                 <span class="text-danger">*</span>
                                                 <label>عنوان نوشته:</label>
@@ -155,6 +190,10 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Standard width modal -->
+                <?php $this->view('templates/be/file-picker', $data) ?>
+                <!-- /standard width modal -->
 
                 <!-- Footer -->
                 <?php $this->view("templates/be/copyright", $data); ?>
