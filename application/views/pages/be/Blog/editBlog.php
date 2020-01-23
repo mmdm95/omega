@@ -150,6 +150,7 @@
                                                           placeholder="خلاصه"><?= $atcVals['abstract'] ?? ''; ?></textarea>
                                             </div>
                                             <div class="form-group col-lg-12">
+                                                <span class="text-danger">*</span>
                                                 <label>کلمات کلیدی:</label>
                                                 <input name="keywords" type="text"
                                                        class="form-control" placeholder="Press Enter"

@@ -342,10 +342,17 @@
     // Show components according to id
     var hash = window.location.hash.substr(1);
     var modalArr = ['login_modal', 'signup_modal'];
+    var elemArr = ['newsletterSection', 'submitComment'];
     if ($.inArray(hash, modalArr) !== -1) {
         var selector = $('#' + hash);
         if (selector.length && selector.hasClass('modal')) {
             selector.modal('show');
+        }
+    }
+    if ($.inArray(hash, elemArr) !== -1) {
+        var selector = $('#' + hash);
+        if (selector.length) {
+            $.omega().scrollToElement(selector, -30);
         }
     }
 

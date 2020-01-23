@@ -14,12 +14,12 @@ class BlogModel extends HModel
         $this->db = $this->getDb();
     }
 
-    public function getAllBlog($limit = null, $offset = 0)
+    public function getAllBlog($limit = null, $offset = 0, $where = '', $bindParams = [])
     {
         $select = $this->select();
         $select->cols([
             'b.image', 'b.title', 'b.slug', 'b.writer', 'b.created_at',
-            'b.updated_at', 'c.category_name'
+            'b.updated_at', 'c.id AS c_id', 'c.category_name'
         ])->from('blog AS b');
 
         try {
@@ -32,7 +32,14 @@ class BlogModel extends HModel
             die('unexpected error: ' . $e->getMessage());
         }
 
-        $select->where('publish=:pub')->bindValues(['pub' => 1]);
+        if (!empty($where) && is_string($where)) {
+            $select->where($where);
+        }
+        if (!empty($bindParams) && is_array($bindParams)) {
+            $select->bindValues($bindParams);
+        }
+
+        $select->where('b.publish=:pub')->bindValues(['pub' => 1]);
 
         if (!empty((int)$limit)) {
             $select->limit($limit);
@@ -42,11 +49,46 @@ class BlogModel extends HModel
         return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
     }
 
+    public function getRelatedBlog($blog, $limit = 3)
+    {
+        if (!isset($blog['id'])) return [];
+        //-----
+        $relatedWhere = 'b.id!=:bId';
+        $relatedParams = ['bId' => $blog['id']];
+        $where = '';
+        $params = [];
+        //-----
+        if (isset($blog['title'])) {
+            $where .= 'b.title LIKE :bTitle';
+            $params['bTitle'] = '%' . $blog['title'] . '%';
+            $where .= ' OR b.body LIKE :bBody';
+            $params['bBody'] = '%' . $blog['title'] . '%';
+        }
+        if (isset($blog['keywords'])) {
+            $keywords = array_map('trim', explode(',', $blog['keywords']));
+            foreach ($keywords as $k => $keyword) {
+                $where .= ' OR b.keywords LIKE :key_' . $k;
+                $params['key_' . $k] = '%' . $keyword . '%';
+            }
+        }
+        if (isset($blog['c_id'])) {
+            $where .= ' OR b.category_id=:catId';
+            $params['catId'] = $blog['c_id'];
+        }
+        //-----
+        $where = trim(trim($where), 'OR');
+        //-----
+        $relatedWhere .= !empty($where) ? ' AND (' . $where . ')' : '';
+
+        return $this->getAllBlog(3, 0, $relatedWhere, array_merge($relatedParams, $params));
+    }
+
     public function getBlogDetail($params)
     {
         $select = $this->select();
         $select->cols([
-            '*', 'b.id As id', 'b.publish AS publish', 'c.id AS c_id', 'c.publish AS c_publish'
+            '*', 'b.id As id', 'b.publish AS publish', 'b.keywords',
+            'c.id AS c_id', 'c.publish AS c_publish'
         ])->from('blog AS b');
 
         try {
@@ -69,11 +111,11 @@ class BlogModel extends HModel
         return [];
     }
 
-    public function getSiblingBlog($where, $param = [])
+    public function getSiblingBlog($where, $bindParams = [], $orderBy = [])
     {
         $select = $this->select();
         $select->cols([
-            'b.title', 'b.id AS id', 'c.category_name', 'c.id AS c_id'
+            'b.title', 'b.slug', 'b.id AS id', 'b.created_at', 'b.updated_at', 'c.category_name', 'c.id AS c_id'
         ])->from('blog AS b');
 
         try {
@@ -87,14 +129,50 @@ class BlogModel extends HModel
         }
 
         $select->where($where);
-        if (!empty($param) && is_array($param)) {
-            $select->bindValues($param);
+        if (!empty($bindParams) && is_array($bindParams)) {
+            $select->bindValues($bindParams);
+        }
+        if (!empty($orderBy) && is_array($orderBy)) {
+            $select->orderBy($orderBy);
         }
 
-        $select->where('b.publish=:pub')->bindValues(['pub' => 1]);
+        $select->where('b.publish=:pub')->bindValues(['pub' => 1])
+            ->limit(1);
 
         $res = $this->db->fetchAll($select->getStatement(), $select->getBindValues());
         if (count($res)) return $res[0];
         return [];
+    }
+
+    public function getBlogComments($where, $bindParams = [], $orderBy = [], $limit = 5)
+    {
+        $select = $this->select();
+        $select->cols([
+            'c.id', 'c.name', 'c.body', 'c.respond', 'c.respond_on', 'c.created_on', 'u.full_name'
+        ])->from('comments AS c');
+
+        try {
+            $select->join(
+                'LEFT',
+                'users AS u',
+                'c.responder_id=u.id'
+            );
+        } catch (\Aura\SqlQuery\Exception $e) {
+            die('unexpected error: ' . $e->getMessage());
+        }
+
+        $select->where($where);
+
+        if (!empty($bindParams) && is_array($bindParams)) {
+            $select->bindValues($bindParams);
+        }
+        if (!empty((int)$limit)) {
+            $select->limit($limit);
+        }
+        if(!empty($orderBy) && is_array($orderBy)) {
+            $select->orderBy($orderBy);
+        }
+
+        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
     }
 }

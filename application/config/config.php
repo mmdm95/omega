@@ -85,7 +85,7 @@ return array(
     //    'hello/*' => 'index'
     //);
     'routes' => array(
-        'blog/(:any)' => 'comingSoon',
+//        'blog/(:any)' => 'comingSoon',
     ),
 
     //===============================================

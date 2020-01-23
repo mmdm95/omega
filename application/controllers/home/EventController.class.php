@@ -210,12 +210,10 @@ class EventController extends AbstractController
                     'plan_id' => $this->data['event']['id'],
                     'factor_code' => $factorCode,
                     'username' => $this->data['identity']->username,
-                    'full_name' => $this->data['identity']->full_name,
                     'options' => json_encode($values['options']),
                     'total_amount' => convertNumbersToPersian($values['total_amount'], true),
-                    'created_at' => time()
-                ], [
-                    'payed_amount' => null
+                    'created_at' => time(),
+                    'payed_amount' => 0
                 ]);
 
                 if ($res) {

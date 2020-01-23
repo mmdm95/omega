@@ -968,7 +968,7 @@ class HomeController extends HController
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['image', 'title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['image', 'title', 'category', 'abstract', 'body', 'keywords'], 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Validate main image
                 if (!file_exists($values['image'])) {
@@ -1067,7 +1067,7 @@ class HomeController extends HController
 
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
-                $form->isRequired(['image', 'title', 'category', 'abstract', 'body'], 'فیلدهای ضروری را خالی نگذارید.');
+                $form->isRequired(['image', 'title', 'category', 'abstract', 'body', 'keywords'], 'فیلدهای ضروری را خالی نگذارید.');
 
                 // Validate main image
                 if (!file_exists($values['image'])) {

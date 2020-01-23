@@ -636,7 +636,9 @@ class UserController extends AbstractController
                                     'payment_code' => $this->data['ref_id'],
                                     'payment_status' => $zarinpal->status,
                                 ], 'authority=:auth', ['auth' => 'zarinpal-' . $authority]);
-                                $model->update_it('factors', [],
+                                $model->update_it('factors', [
+                                    'full_name' => $this->data['identity']->full_name,
+                                ],
                                     'user_id=:uId AND plan_id=:pId', ['uId' => $curPay['user_id'], 'pId' => $curPay['plan_id']], [
                                         'payed_amount' => 'payed_amount+' . (int)convertNumbersToPersian($curPay['amount'], true)
                                     ]);

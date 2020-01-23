@@ -52,6 +52,10 @@ class FactorModel extends HModel
 
         try {
             $select->join(
+                'INNER',
+                'plans AS p',
+                'p.id=f.plan_id'
+            )->join(
                 'LEFT',
                 'users AS u',
                 'f.user_id=u.id'
