@@ -7957,6 +7957,13 @@ strong, b {
 }
 
 .blog-card-size {
-    height: 230px;
-    overflow: hidden;
+    height: auto;
+    overflow: auto;
+}
+
+@media (min-width: 768px) {
+    .blog-card-size {
+        height: 230px;
+        overflow: hidden;
+    }
 }

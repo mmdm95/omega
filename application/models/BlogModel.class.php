@@ -14,12 +14,12 @@ class BlogModel extends HModel
         $this->db = $this->getDb();
     }
 
-    public function getAllBlog($limit = null, $offset = 0, $where = '', $bindParams = [])
+    public function getAllBlog($limit = null, $offset = 0, $where = '', $bindParams = [], $getQuery = false)
     {
         $select = $this->select();
         $select->cols([
-            'b.image', 'b.title', 'b.slug', 'b.writer', 'b.created_at',
-            'b.updated_at', 'c.id AS c_id', 'c.category_name'
+            'b.image', 'b.title', 'b.slug', 'b.abstract', 'b.writer',
+            'b.created_at', 'b.updated_at', 'c.id AS c_id', 'c.category_name'
         ])->from('blog AS b');
 
         try {
@@ -45,6 +45,10 @@ class BlogModel extends HModel
             $select->limit($limit);
         }
         $select->orderBy(['b.id DESC'])->offset($offset);
+
+        if ((bool)$getQuery) {
+            return $select->getStatement();
+        }
 
         return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
     }
@@ -144,7 +148,7 @@ class BlogModel extends HModel
         return [];
     }
 
-    public function getBlogComments($where, $bindParams = [], $orderBy = [], $limit = 5)
+    public function getBlogComments($where, $bindParams = [], $orderBy = [], $limit = 5, $offset = 0)
     {
         $select = $this->select();
         $select->cols([
@@ -167,9 +171,9 @@ class BlogModel extends HModel
             $select->bindValues($bindParams);
         }
         if (!empty((int)$limit)) {
-            $select->limit($limit);
+            $select->limit($limit)->offset((int)$offset);
         }
-        if(!empty($orderBy) && is_array($orderBy)) {
+        if (!empty($orderBy) && is_array($orderBy)) {
             $select->orderBy($orderBy);
         }
 

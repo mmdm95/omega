@@ -83,22 +83,139 @@ class BlogController extends AbstractController
         ]);
     }
 
-    public function searchAction($param)
+    public function ajaxLoadMoreCommentsAction()
     {
-        $query = '';
-        if (isset($param[0]) && isset($param[1])) {
-            $query = $param[1];
+        if (!is_ajax()) {
+            message('error', 200, 'دسترسی غیر مجاز');
         }
+        if (empty($_POST['blogId']) || empty($_POST['page']) || !is_numeric($_POST['blogId'])) {
+            message('error', 200, 'پارامترهای وارد شده نامعتبر است.');
+        }
+        $page = is_numeric($_POST['page']) ? $_POST['page'] : 2;
+        $page = $page < 2 ? 2 : $page;
+
+        //-----
+        $blog = new BlogModel();
+        $offset = ($page - 1) * 5;
+        $data['comments'] = $blog->getBlogComments('c.blog_id=:bId AND c.publish=:pub',
+            ['bId' => $_POST['blogId'], 'pub' => 1], ['id DESC'], 5, $offset);
 
         $model = new Model();
-        switch (strtolower($param[0])) {
-            case 'category':
-                break;
-            case 'writer':
-                break;
-            case 'tag':
-                break;
+        $commentsCount = $model->it_count('comments',
+            'blog_id=:bId AND publish=:pub', ['bId' => $_POST['blogId'], 'pub' => 1]);
+
+        message('success', 200,
+            [$this->load->view('templates/fe/comments/comment', $data, true), $commentsCount > ($page * 5)]);
+    }
+
+    //-----
+
+    public function searchAction($param)
+    {
+        $query = isset($param[1]) ? urldecode($param[1]) : (isset($param[0]) ? urldecode($param[0]) : '');
+        if(empty($query)) {
+            if(isset($_GET['blog-query'])) {
+                $param = [$_GET['blog-query']];
+                $query = urldecode($param[0]);
+            } else {
+                $param = ['all'];
+                $query = 'نمایش خمه';
+            }
         }
+        //-----
+        $this->data['param'] = $param;
+        $this->data['searchText'] = $query;
+        $this->data['searchTitle'] = '';
+        //-----
+        $where = '';
+        $bindValues = [];
+
+        $model = new Model();
+        $blog = new BlogModel();
+        if (isset($param[1])) {
+            switch (strtolower($param[0])) {
+                case 'category':
+                    $this->data['searchTitle'] = 'دسته‌بندی - ';
+                    //-----
+                    $where .= '(c.category_name LIKE :cat';
+                    $bindValues['cat'] = '%' . $query . '%';
+                    //+++++
+                    $where .= ') AND ';
+                    break;
+                case 'writer':
+                    $this->data['searchTitle'] = 'نویسنده - ';
+                    //-----
+                    $where .= '(b.writer LIKE :writer';
+                    $bindValues['writer'] = '%' . $query . '%';
+                    //+++++
+                    $where .= ') AND ';
+                    break;
+                case 'tag':
+                    $this->data['searchTitle'] = 'کلمات کلیدی - ';
+                    //-----
+                    $where .= 'b.keywords LIKE :kw';
+                    $bindValues['kw'] = '%' . $query . '%';
+                    //+++++
+                    $where .= ') AND ';
+                    break;
+            }
+            //-----
+            $sub = $blog->getAllBlog(null, 0, $where . ' b.publish=:pub', [], true);
+            $this->data['pagination']['total'] = $model->it_count($sub, null,
+                array_merge($bindValues, ['pub' => 1]), false, true);
+            $this->data['pagination']['page'] = isset($param[3]) && strtolower($param[2]) == 'page' ? (int)$param[3] : 1;
+            $this->data['pagination']['limit'] = 12;
+            $this->data['pagination']['offset'] = ($this->data['pagination']['page'] - 1) * $this->data['pagination']['limit'];
+            $this->data['pagination']['firstPage'] = 1;
+            $this->data['pagination']['lastPage'] = ceil($this->data['pagination']['total'] / $this->data['pagination']['limit']);
+            //-----
+            $this->data['result'] = $blog->getAllBlog($this->data['pagination']['limit'], $this->data['pagination']['offset'],
+                $where . ' b.publish=:pub', array_merge($bindValues, ['pub' => 1]));
+        } else {
+            $this->data['searchTitle'] = 'همه - ';
+            if (!empty($query)) {
+                $where .= '(b.title LIKE :title OR ';
+                $bindValues['title'] = '%' . $query . '%';
+                //+++++
+                $where .= 'b.abstract LIKE :abs OR ';
+                $bindValues['abs'] = '%' . $query . '%';
+                //+++++
+                $where .= 'b.writer LIKE :writer OR ';
+                $bindValues['writer'] = '%' . $query . '%';
+                //+++++
+                $where .= 'b.keywords LIKE :kw OR ';
+                $bindValues['kw'] = '%' . $query . '%';
+                //+++++
+                $where .= 'c.category_name LIKE :cat';
+                $bindValues['cat'] = '%' . $query . '%';
+                //+++++
+                $where .= ') AND ';
+            }
+            //-----
+            $sub = $blog->getAllBlog(null, 0, $where . ' b.publish=:pub', [], true);
+            $this->data['pagination']['total'] = $model->it_count($sub, null,
+                array_merge($bindValues, ['pub' => 1]), false, true);
+            $this->data['pagination']['page'] = isset($param[2]) && strtolower($param[1]) == 'page' ? (int)$param[2] : 1;
+            $this->data['pagination']['limit'] = 12;
+            $this->data['pagination']['offset'] = ($this->data['pagination']['page'] - 1) * $this->data['pagination']['limit'];
+            $this->data['pagination']['firstPage'] = 1;
+            $this->data['pagination']['lastPage'] = ceil($this->data['pagination']['total'] / $this->data['pagination']['limit']);
+            //-----
+            $this->data['result'] = $blog->getAllBlog($this->data['pagination']['limit'], $this->data['pagination']['offset'],
+                $where . ' b.publish=:pub', array_merge($bindValues, ['pub' => 1]));
+        }
+        //-----
+        $this->data['searchTitle'] .= $query;
+
+        // Register & Login actions
+        $this->_register(['captcha' => ACTION]);
+        $this->_login(['captcha' => ACTION]);
+
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جستحو', $query);
+
+        $this->_render_page([
+            'pages/fe/blog-search',
+        ]);
     }
 
     //-----
@@ -124,7 +241,7 @@ class BlogController extends AbstractController
                     } else {
                         $form->validatePersianName('name', 'نام باید حروف فارسی باشد.');
                         //-----
-                        if(!empty($values['mobile'])) {
+                        if (!empty($values['mobile'])) {
                             $form->validatePersianMobile('mobile');
                         }
                         //-----

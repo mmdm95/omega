@@ -1,49 +1,60 @@
-<li class="depth-1">
-    <div class="media">
-        <div>
-            <a href="" class="cmnt_avatar">
-                <img src="img/auth2.png" alt="" class="media-object rounded-circle">
-            </a>
-        </div>
-        <div class="media-body">
-            <div class="media_top">
-                <div class="heading_left">
-                    <a href="#">
-                        <h6 class="media-heading">Thesera Minton</h6>
-                    </a>
-                    <span>April 29, 2019</span>
-                </div>
-                <a href="#" class="reply"><i class="la la-reply"></i> Reply</a>
+<?php foreach ($comments as $comment): ?>
+    <li class="depth-1">
+        <div class="media">
+            <div>
+                <a href="javascript:void(0);" class="cmnt_avatar">
+                    <img src="<?= base_url(PROFILE_DEFAULT_IMAGE); ?>" alt=""
+                         class="media-object rounded-circle">
+                </a>
             </div>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do they eiusmod
-                tempor unt ut labore et dolore magna aliquat enim ad minim.</p>
-        </div>
-    </div><!-- ends: .media -->
-    <ul class="children list-unstyled">
-        <!-- Nested media object -->
-        <li class="depth-2">
-            <div class="media">
-                <div>
-                    <a href="#" class="cmnt_avatar">
-                        <img src="img/auth3.png" class="media-object rounded-circle"
-                             alt="Sample Image">
-                    </a>
-                </div>
-                <div class="media-body">
-                    <div class="media_top">
-                        <div class="heading_left">
-                            <a href="#">
-                                <h6 class="media-heading">Toriesta PingPong</h6>
-                            </a>
-                            <span>April 29, 2019</span>
-                        </div>
-                        <a href="#" class="reply"><i class="la la-reply"></i> Reply</a>
+            <div class="media-body">
+                <div class="media_top">
+                    <div class="heading_left">
+                        <a href="javascript:void(0);">
+                            <h6 class="media-heading iranyekan-regular"><?= $comment['name']; ?></h6>
+                        </a>
+                        <span>
+                            <?= jDateTime::date('j F Y', $comment['created_on']); ?>
+                        </span>
                     </div>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do they
-                        eiusmod tempor unt ut labore et dolore magna aliquat enim ad
-                        minim.</p>
                 </div>
+                <p>
+                    <?= $comment['body']; ?>
+                </p>
             </div>
-        </li>
-    </ul><!-- ends: .children -->
-</li><!-- ends: .depth-1 -->
+        </div><!-- ends: .media -->
+        <?php if (!empty($comment['respond']) && !empty($comment['respond_on'])): ?>
+            <ul class="children list-unstyled">
+                <!-- Nested media object -->
+                <li class="depth-2">
+                    <div class="media">
+                        <div>
+                            <a href="#" class="cmnt_avatar">
+                                <img src="<?= asset_url('fe/img/omega-comment.png'); ?>"
+                                     class="media-object rounded-circle"
+                                     alt="omega">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <div class="media_top">
+                                <div class="heading_left">
+                                    <a href="javascript:void(0);">
+                                        <h6 class="media-heading iranyekan-regular">
+                                            <?= $comment['full_name'] ?? 'اُمگا'; ?>
+                                        </h6>
+                                    </a>
+                                    <span>
+                                        <?= jDateTime::date('j F Y', $comment['respond_on']); ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <p>
+                                <?= $comment['respond']; ?>
+                            </p>
+                        </div>
+                    </div>
+                </li>
+            </ul><!-- ends: .children -->
+        <?php endif; ?>
+    </li><!-- ends: .depth-1 -->
+<?php endforeach; ?>
