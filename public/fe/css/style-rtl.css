@@ -3471,7 +3471,8 @@ p {
 
 .search-widget .input-group input {
     width: 100%;
-    border-radius: 1.66667rem;
+    /*border-radius: 1.66667rem;*/
+    border-radius: 0;
     background: #fff;
     border: 0 none;
     height: 3.33333rem;

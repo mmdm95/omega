@@ -133,12 +133,13 @@ class BlogController extends AbstractController
         $model = new Model();
         $blog = new BlogModel();
         if (isset($param[1])) {
+            $this->data['searchTitle'] .= $query;
             switch (strtolower($param[0])) {
                 case 'category':
                     $this->data['searchTitle'] = 'دسته‌بندی - ';
                     //-----
-                    $where .= '(c.category_name LIKE :cat';
-                    $bindValues['cat'] = '%' . $query . '%';
+                    $where .= '(c.id=:cat';
+                    $bindValues['cat'] = $query;
                     //+++++
                     $where .= ') AND ';
                     break;
@@ -153,7 +154,7 @@ class BlogController extends AbstractController
                 case 'tag':
                     $this->data['searchTitle'] = 'کلمات کلیدی - ';
                     //-----
-                    $where .= 'b.keywords LIKE :kw';
+                    $where .= '(b.keywords LIKE :kw';
                     $bindValues['kw'] = '%' . $query . '%';
                     //+++++
                     $where .= ') AND ';
@@ -171,8 +172,14 @@ class BlogController extends AbstractController
             //-----
             $this->data['result'] = $blog->getAllBlog($this->data['pagination']['limit'], $this->data['pagination']['offset'],
                 $where . ' b.publish=:pub', array_merge($bindValues, ['pub' => 1]));
+            //-----
+            if (strtolower($param[0]) == 'category') {
+                $category = $model->select_it(null, 'categories', 'category_name', 'id=:id', ['id' => $query]);
+                $this->data['searchTitle'] .= count($category) ? $category[0]['category_name'] : 'ناشناخته';
+            }
         } else {
             $this->data['searchTitle'] = 'همه - ';
+            $this->data['searchTitle'] .= $query;
             if (!empty($query)) {
                 $where .= '(b.title LIKE :title OR ';
                 $bindValues['title'] = '%' . $query . '%';
@@ -205,7 +212,6 @@ class BlogController extends AbstractController
                 $where . ' b.publish=:pub', array_merge($bindValues, ['pub' => 1]));
         }
         //-----
-        $this->data['searchTitle'] .= $query;
 
         // Register & Login actions
         $this->_register(['captcha' => ACTION]);
