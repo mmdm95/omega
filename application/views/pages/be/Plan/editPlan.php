@@ -139,7 +139,7 @@
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت کل طرح (تومان):</label>
+                                                <label>هزینه کل طرح (تومان):</label>
                                                 <input name="total_price" type="text" class="form-control"
                                                        placeholder="مثال: ۱۰۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['total_price'] ?? ''); ?>">
@@ -153,7 +153,7 @@
                                             </div>
                                             <div class="form-group col-lg-4">
                                                 <span class="text-danger">*</span>
-                                                <label>قیمت پیش‌پرداخت (تومان):</label>
+                                                <label>هزینه پیش‌پرداخت (تومان):</label>
                                                 <input name="min_price" type="text" class="form-control"
                                                        placeholder="مثال: ۳۰۰۰۰۰" required
                                                        value="<?= set_value($planVals['min_price'] ?? ''); ?>">
@@ -750,7 +750,7 @@
                                                                                value="<?= set_value($val['desc'][$k2] ?? ''); ?>">
                                                                     </div>
                                                                     <div class="form-group col-xs-4 mt-12">
-                                                                        <label>قیمت آپشن:</label>
+                                                                        <label>هزینه آپشن:</label>
                                                                         <input type="text"
                                                                                name="option_group[<?= $k; ?>][price][]"
                                                                                class="form-control p-item-input"
@@ -864,7 +864,7 @@
                                                                        class="form-control p-item-input">
                                                             </div>
                                                             <div class="form-group col-xs-4 mt-12">
-                                                                <label>قیمت آپشن:</label>
+                                                                <label>هزینه آپشن:</label>
                                                                 <input type="text" name="option_group[0][price][]"
                                                                        class="form-control p-item-input">
                                                             </div>

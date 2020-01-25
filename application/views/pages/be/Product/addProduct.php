@@ -200,7 +200,7 @@
                                                        value="<?= set_value($pVals['guarantee'] ?? ''); ?>">
                                             </div>
                                             <div class="form-group col-lg-4 col-md-4 col-sm-5">
-                                                <label>قیمت گارانتی:</label>
+                                                <label>هزینه گارانتی:</label>
                                                 <input name="guarantee-price" type="text" class="form-control"
                                                        placeholder="به تومان"
                                                        value="<?= set_value($pVals['guarantee-price'] ?? ''); ?>">
@@ -297,7 +297,7 @@
                                                                        value="<?= set_value($pVals['color']['count'][$key] ?? ''); ?>">
                                                             </div>
                                                             <div class="col-sm-4">
-                                                                <label>قیمت:</label>
+                                                                <label>هزینه:</label>
                                                                 <input name="color[price][]" type="text"
                                                                        class="form-control color-item-input"
                                                                        placeholder="به تومان"
@@ -334,7 +334,7 @@
                                                                    placeholder="عدد">
                                                         </div>
                                                         <div class="col-sm-4">
-                                                            <label>قیمت:</label>
+                                                            <label>هزینه:</label>
                                                             <input name="color[price][]" type="text"
                                                                    class="form-control color-item-input"
                                                                    placeholder="به تومان">

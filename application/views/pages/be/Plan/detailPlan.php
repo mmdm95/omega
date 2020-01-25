@@ -53,6 +53,37 @@
                     <div class="col-md-10">
                         <div class="row">
                             <div class="col-md-12">
+                                <?php if (isset($exportErrors) && count($exportErrors)): ?>
+                                    <div class="alert alert-danger alert-styled-left alert-bordered
+                                                 no-border-top no-border-right no-border-bottom">
+                                        <ul class="list-unstyled">
+                                            <?php foreach ($exportErrors as $err): ?>
+                                                <li>
+                                                    <i class="icon-dash" aria-hidden="true"></i>
+                                                    <?= $err; ?>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (count($planVals['buyers'])): ?>
+                                    <form action="<?= base_url('admin/detailPlan/' . $param[0]); ?>" method="post"
+                                          class="display-block">
+                                        <?= $form_token_export; ?>
+
+                                        <h6 class="no-margin">
+                                            <button type="submit" name="export"
+                                                    class="panel shadow-depth2 btn btn-lg btn-info p-20 text-left">
+                                                <i class="icon-file-excel img-sm img-circle bg-orange p-10 position-left"
+                                                   aria-hidden="true"></i>
+                                                <span class="pt-10">
+                                                    خروجی اکسل از ثبت نام کننده‌ها
+                                                </span>
+                                            </button>
+                                        </h6>
+                                    </form>
+                                <?php endif; ?>
+
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
                                         <h6 class="panel-title">افراد ثبت نام شده در طرح</h6>
@@ -84,23 +115,23 @@
                                                                     <?= convertNumbersToPersian($key + 1); ?>
                                                                 </td>
                                                                 <td width="100px">
-                                                                    <a data-url="<?= base_url() . $buyer['image']; ?>"
+                                                                    <a data-url="<?= base_url($buyer['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
                                                                        data-popup="lightbox">
                                                                         <img src=""
-                                                                             data-src="<?= base_url() . $buyer['image']; ?>"
+                                                                             data-src="<?= base_url($buyer['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
                                                                              alt="<?= $buyer['title']; ?>"
-                                                                             class="img-rounded img-preview lazy">
+                                                                             class="img-circle img-lg img-fit img-preview lazy">
                                                                     </a>
                                                                 </td>
                                                                 <td>
-                                                                    <?= mb_strlen($buyer['username']) == 11 ? convertNumbersToPersian($buyer['username']) : $buyer['username']; ?>
+                                                                    <?= mb_strlen($buyer['f_username']) == 11 ? convertNumbersToPersian($buyer['f_username']) : $buyer['username']; ?>
                                                                 </td>
-                                                                <td><?= $buyer['full_name']; ?></td>
+                                                                <td><?= $buyer['f_full_name']; ?></td>
                                                                 <td>
                                                                     <?= convertNumbersToPersian(number_format(convertNumbersToPersian($buyer['payed_amount'], true))); ?>
                                                                 </td>
                                                                 <td>
-                                                                    <?= jDateTime::date('j F Y در ساعت H:i', $buyer['created_at']); ?>
+                                                                    <?= jDateTime::date('j F Y در ساعت H:i', $buyer['f_created_at']); ?>
                                                                 </td>
                                                             </tr>
                                                         <?php endforeach; ?>
@@ -152,19 +183,19 @@
                                             </p>
                                         </div>
                                         <div class="col-lg-4 border border-default p-20">
-                                            <label>قیمت کل طرح (تومان):</label>
+                                            <label>هزینه کل طرح (تومان):</label>
                                             <p class="text-primary-600">
                                                 <?= convertNumbersToPersian(number_format(convertNumbersToPersian($planVals['total_price'], true))) . ' تومان'; ?>
                                             </p>
                                         </div>
                                         <div class="col-lg-4 border border-default p-20">
-                                            <label>قیمت ورودی طرح (تومان):</label>
+                                            <label>هزینه ورودی طرح (تومان):</label>
                                             <p class="text-primary-600">
                                                 <?= convertNumbersToPersian(number_format(convertNumbersToPersian($planVals['base_price'], true))) . ' تومان'; ?>
                                             </p>
                                         </div>
                                         <div class="col-lg-4 border border-default p-20">
-                                            <label>قیمت پیش‌پرداخت (تومان):</label>
+                                            <label>هزینه پیش‌پرداخت (تومان):</label>
                                             <p class="text-primary-600">
                                                 <?= convertNumbersToPersian(number_format(convertNumbersToPersian($planVals['min_price'], true))) . ' تومان'; ?>
                                             </p>
@@ -405,14 +436,14 @@
                                                     <tr class="bg-default">
                                                         <th style="border: 1px solid #ddd;"><strong>عنوان و
                                                                 توضیح</strong></th>
-                                                        <th style="border: 1px solid #ddd;"><strong>قیمت</strong></th>
+                                                        <th style="border: 1px solid #ddd;"><strong>هزینه</strong></th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
                                                     <?php foreach ($option['name'] as $k2 => $name): ?>
                                                         <tr>
                                                             <td>
-                                                                <h4><?= $name; ?></h4>
+                                                                <h5><?= $name; ?></h5>
                                                                 <?php if (!empty($option['desc'][$k2])): ?>
                                                                     <p class="no-margin">
                                                                         <?= $option['desc'][$k2]; ?>

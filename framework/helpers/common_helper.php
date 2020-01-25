@@ -96,7 +96,7 @@ if (!function_exists('array_merge_recursive_distinct')) {
 if (!function_exists('createCaptcha')) {
     function createCaptcha($action = 'default', $code = null)
     {
-        if(empty($code)) {
+        if (empty($code)) {
             $code = generateRandomString(6, GRS_NUMBER | GRS_LOWER_CHAR);
         }
 
@@ -110,13 +110,13 @@ if (!function_exists('createCaptcha')) {
         $green = rand(125, 175);
         $blue = rand(125, 175);
 
-        for($i = 0; $i < 5; $i++) {
-            $colors[] = imagecolorallocate($image, $red - 20*$i, $green - 20*$i, $blue - 20*$i);
+        for ($i = 0; $i < 5; $i++) {
+            $colors[] = imagecolorallocate($image, $red - 20 * $i, $green - 20 * $i, $blue - 20 * $i);
         }
 
         imagefill($image, 0, 0, $colors[0]);
 
-        for($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             imagesetthickness($image, rand(2, 10));
             $line_color = $colors[rand(1, 4)];
             imagerectangle($image, rand(-10, 160), rand(-10, 10), rand(-10, 160), rand(40, 60), $line_color);
@@ -132,18 +132,18 @@ if (!function_exists('createCaptcha')) {
         $captcha_string = $code;
 
         $captchaSesName = getConfig('config');
-        if(!$captchaSesName['captcha_session_name']) {
+        if (!$captchaSesName['captcha_session_name']) {
             $captchaSesName = 'captcha_text';
         } else {
             $captchaSesName = $captchaSesName['captcha_session_name'];
         }
         $_SESSION[$captchaSesName][$action] = encryption_decryption(ED_ENCRYPT, $captcha_string);
 
-        for($i = 0; $i < $string_length; $i++) {
-            $letter_space = 140/$string_length;
+        for ($i = 0; $i < $string_length; $i++) {
+            $letter_space = 140 / $string_length;
             $initial = 15;
 
-            imagettftext($image, 20, rand(-15, 15), $initial + $i*$letter_space, rand(25, 35), $textcolors[rand(0, 1)], $fonts[array_rand($fonts)], $captcha_string[$i]);
+            imagettftext($image, 20, rand(-15, 15), $initial + $i * $letter_space, rand(25, 35), $textcolors[rand(0, 1)], $fonts[array_rand($fonts)], $captcha_string[$i]);
         }
 
         header('Content-type: image/png');

@@ -1,10 +1,15 @@
 <?php
 defined('BASE_PATH') OR exit('No direct script access allowed');
 
+use Apfelbox\FileDownload\FileDownload;
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 use HForm\Form;
 use HPayment\PaymentFactory;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use voku\helper\AntiXSS;
 
 
@@ -1550,12 +1555,12 @@ class HomeController extends HController
                 $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
-                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'base_price', 'قیمت ورودی طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                $form->validate('numeric', 'total_price', 'هزینه کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'هزینه ورودی طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'هزینه پرداخت باید از نوع عدد باشد.');
                 if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
                     (int)$values['total_price'] < (int)$values['min_price']) {
-                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                    $form->setError('هزینه طرح باید عددی بزرگتر از هزینه پرداخت باشد.');
                 }
                 // Validate date timestamps
                 if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
@@ -1782,12 +1787,12 @@ class HomeController extends HController
                 $form->validate('numeric', 'capacity', 'ظرفیت باید از نوع عدد باشد.')
                     ->isInRange('capacity', 1, PHP_INT_MAX, 'ظرفیت عددی مثبت و بیشتر از ۱ است.');
                 // Validate prices
-                $form->validate('numeric', 'total_price', 'قیمت کل طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'base_price', 'قیمت ورودی طرح باید از نوع عدد باشد.');
-                $form->validate('numeric', 'min_price', 'قیمت پرداخت باید از نوع عدد باشد.');
+                $form->validate('numeric', 'total_price', 'هزینه کل طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'base_price', 'هزینه ورودی طرح باید از نوع عدد باشد.');
+                $form->validate('numeric', 'min_price', 'هزینه پرداخت باید از نوع عدد باشد.');
                 if (is_numeric($values['total_price']) && is_numeric($values['min_price']) &&
                     (int)$values['total_price'] < (int)$values['min_price']) {
-                    $form->setError('قیمت طرح باید عددی بزرگتر از قیمت پرداخت باشد.');
+                    $form->setError('هزینه طرح باید عددی بزرگتر از هزینه پرداخت باشد.');
                 }
                 // Validate date timestamps
                 if (!isValidTimeStamp($values['start_date']) || !isValidTimeStamp($values['end_date']) ||
@@ -2013,6 +2018,8 @@ class HomeController extends HController
             $this->redirect(base_url('admin/managePlan'));
         }
 
+        $this->data['param'] = $param;
+        //-----
         $this->data['planVals'] = $model->select_it(null, 'plans', '*',
             'id=:id', ['id' => $param[0]], null, ['id DESC'])[0];
         $this->data['planVals']['options'] = json_decode($this->data['planVals']['options'], true);
@@ -2027,8 +2034,95 @@ class HomeController extends HController
         //-----
         $factor = new FactorModel();
         $this->data['planVals']['buyers'] = $factor->getBuyers(['plan_id' => $param[0], 'payed' => true]);
-        //-----
 
+        // Export file name
+        $name = url_title($this->data['planVals']['title']);
+
+        // Exportation form
+        $this->data['exportErrors'] = [];
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_export'] = $form->csrfToken('exportation');
+        $form->setFieldsName(['export'])->setMethod('post');
+        try {
+            $form->afterCheckCallback(function () use ($model, $form, $name) {
+                $this->load->library('PhpSpreadsheet/vendor/autoload');
+                // Spreadsheet name
+                // Create empty xlsx file
+                fopen(PUBLIC_PATH . $name . '.xlsx', "w");
+                // Create IO for file
+                $spreadsheet = IOFactory::load(PUBLIC_PATH . $name . '.xlsx');
+                $spreadsheetArray = [
+                    0 => [
+                        '#',
+                        'نام کاربری',
+                        'نام و نام خانوادگی',
+                        'هزینه پرداخت شده (تومان)‌',
+                        'هزینه کل (تومان)',
+                        'تاریخ ثبت نام در طرح'
+                    ]
+                ];
+                $totalPayedAmount = 0;
+                $totalAmount = 0;
+                $totalBuyers = count($this->data['planVals']['buyers']);
+                foreach ($this->data['planVals']['buyers'] as $k => $buyer) {
+                    $spreadsheetArray[($k + 1)][] = $k + 1;
+                    // User's image
+//                    $drawing = new Drawing();
+//                    $drawing->setName($this->data['planVals']['f_username']);
+//                    $drawing->setDescription($this->data['planVals']['f_username']);
+//                    $drawing->setPath(base_url($this->data['planVals']['u_image'] ?? PROFILE_DEFAULT_IMAGE)); // put your path and image here
+//                    $drawing->setCoordinates('');
+//                    $drawing->setWidth(50);
+//                    $drawing->getShadow()->setVisible(true);
+//                    $drawing->getShadow()->setDirection(0);
+//                    $drawing->setWorksheet($spreadsheet->getActiveSheet());
+
+                    $spreadsheetArray[($k + 1)][] = $buyer['f_username'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['f_full_name'];
+                    $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['payed_amount'], true));
+                    $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['total_amount'], true));
+                    $spreadsheetArray[($k + 1)][] = jDateTime::date('j F Y در ساعت H:i');
+                    //-----
+                    $totalPayedAmount += (int)convertNumbersToPersian($buyer['payed_amount'], true);
+                    $totalAmount += (int)convertNumbersToPersian($buyer['total_amount'], true);
+                }
+                $spreadsheetArray[$totalBuyers + 1][] = '';
+                $spreadsheetArray[$totalBuyers + 1][] = 'مجموع هزینه‌های پرداخت شده (تومان)';
+                $spreadsheetArray[$totalBuyers + 1][] = number_format(convertNumbersToPersian($totalPayedAmount, true));
+                $spreadsheetArray[$totalBuyers + 1][] = '';
+                $spreadsheetArray[$totalBuyers + 1][] = 'هزینه کل (تومان)';
+                $spreadsheetArray[$totalBuyers + 1][] = number_format(convertNumbersToPersian($totalAmount, true));
+
+                // Add whole array to spreadsheet
+                $spreadsheet->getActiveSheet()->fromArray($spreadsheetArray);
+                // Create writer
+                $writer = new Xlsx($spreadsheet);
+                $writer->save(PUBLIC_PATH . $name . ".xlsx");
+
+                $this->load->library('File-Download/vendor/autoload');
+                $download = FileDownload::createFromFilePath(PUBLIC_PATH . $name . '.xlsx');
+                $download->sendDownload($name . '.xlsx');
+
+                $res = false;
+                if (!$res) {
+                    $form->setError('خطا در انجام عملیات!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+            } else {
+                $this->data['exportErrors'] = $form->getError();
+            }
+        }
+
+        // Remove excel file
+        @unlink(PUBLIC_PATH . $name . '.xlsx');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح‌ها');

@@ -35,10 +35,10 @@ class FactorModel extends HModel
             die('unexpected error: ' . $e->getMessage());
         }
 
-        if(!empty($where) && is_string($where)) {
+        if (!empty($where) && is_string($where)) {
             $select->where($where);
         }
-        if(!empty($bindValues) && is_array($bindValues)) {
+        if (!empty($bindValues) && is_array($bindValues)) {
             $select->bindValues($bindValues);
         }
 
@@ -54,7 +54,8 @@ class FactorModel extends HModel
     {
         $select = $this->select();
         $select->cols([
-            '*', 'f.options AS options'
+            '*', 'f.options AS options', 'f.full_name AS f_full_name', 'f.created_at AS f_created_at', 'f.username AS f_username',
+            'u.image AS u_image', 'p.image AS p_image'
         ])->from('factors AS f');
 
         try {

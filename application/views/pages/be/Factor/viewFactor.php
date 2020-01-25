@@ -286,7 +286,7 @@ use HPayment\Payment; ?>
                                                     <tr class="bg-default">
                                                         <th style="border: 1px solid #ddd;"><strong>عنوان و
                                                                 توضیح</strong></th>
-                                                        <th style="border: 1px solid #ddd;"><strong>قیمت</strong></th>
+                                                        <th style="border: 1px solid #ddd;"><strong>هزینه</strong></th>
                                                     </tr>
                                                     </thead>
                                                     <tbody>
