@@ -60,9 +60,9 @@ class BlogController extends AbstractController
         ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], 5);
         //-----
         $this->data['comments'] = $blog->getBlogComments('c.blog_id=:bId AND c.publish=:pub',
-            ['bId' => $this->data['blog']['id'], 'pub' => 1], ['id DESC'], 5);
+            ['bId' => $this->data['blog']['id'], 'pub' => 2], ['id DESC'], 5);
         $this->data['commentsCount'] = $model->it_count('comments',
-            'blog_id=:bId AND publish=:pub', ['bId' => $this->data['blog']['id'], 'pub' => 1]);
+            'blog_id=:bId AND publish=:pub', ['bId' => $this->data['blog']['id'], 'pub' => 2]);
         //-----
         $this->data['categories'] = $model->select_it(null, 'categories', ['id', 'category_name'],
             'publish=:pub', ['pub' => 1]);

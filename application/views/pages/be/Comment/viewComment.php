@@ -52,7 +52,7 @@
                                     <div class="panel-heading">
                                         <h6 class="panel-title ">مشاهده نظر</h6>
                                         <div class="heading-elements">
-                                            <?php if ($comment['status'] < 2): ?>
+                                            <?php if ($comment['publish'] < 2): ?>
                                                 <a href="javascript:void(0);"
                                                    id="acceptCommentBtn"
                                                    class="btn btn-default btn-rounded heading-btn-group border-success-600 text-success-600 p-10"
@@ -61,7 +61,7 @@
                                                     <i class="icon-check" aria-hidden="true"></i>
                                                 </a>
                                             <?php endif; ?>
-                                            <?php if ($comment['status'] == 2): ?>
+                                            <?php if ($comment['publish'] == 2): ?>
                                                 <a href="javascript:void(0);"
                                                    id="declineCommentBtn"
                                                    class="btn btn-default btn-rounded heading-btn-group border-orange-600 text-orange-600 p-10"
@@ -87,40 +87,48 @@
                                                        style="width: 45px; height: 45px; font-size: 24px;"></i>
                                                     <a href="" class="display-inline-block">
                                                         <div class="text-small display-inline-block">
-                                                            <?php if ($comment['status'] == 1): ?>
+                                                            <?php if ($comment['publish'] == 1): ?>
                                                                 <span class="label label-primary">
                                                                     در حال بررسی
                                                                 </span>
-                                                            <?php elseif ($comment['status'] == 2): ?>
+                                                            <?php elseif ($comment['publish'] == 2): ?>
                                                                 <span class="label label-success">
                                                                     تایید شده
                                                                 </span>
                                                             <?php endif; ?>
                                                         </div>
                                                         <div>
-                                                            <?php if (!empty($comment['first_name']) || !empty($comment['last_name'])): ?>
-                                                                <?= $comment['first_name'] . ' ' . $comment['last_name']; ?>
-                                                            <?php else: ?>
-                                                                <?= $comment['username']; ?>
-                                                            <?php endif; ?>
+                                                            <?= $comment['name']; ?>
                                                         </div>
                                                     </a>
                                                     <span class="text-muted text-small display-inline-block">
                                                         <i class="icon-dash" aria-hidden="true"></i>
-                                                        <?= jDateTime::date('j F Y', $comment['comment_date']); ?>
+                                                        <?= jDateTime::date('j F Y', $comment['created_on']); ?>
                                                     </span>
                                                 </h5>
+                                                <ul class="list-unstyled text-muted mb-5">
+                                                    <?php if (!empty($comment['mobile'])): ?>
+                                                        <li class="text-grey">
+                                                            <i class="icon-mobile position-left"></i>
+                                                            <?= convertNumbersToPersian($comment['mobile']); ?>
+                                                        </li>
+                                                    <?php endif; ?>
+                                                    <li class="text-grey">
+                                                        <i class="icon-location3 position-left"></i>
+                                                        <?= $comment['ip_address']; ?>
+                                                    </li>
+                                                </ul>
                                             </div>
                                             <div class="col-md-12 mt-15"></div>
-                                            
+
                                             <!-- Product-->
                                             <div class="col-lg-6 col-md-6">
                                                 <div class="panel panel-body">
                                                     <div class="media">
                                                         <div class="media-left">
-                                                            <a href="<?= base_url($comment['image']); ?>"
+                                                            <a href="<?= base_url($blog['image']); ?>"
                                                                data-popup="lightbox">
-                                                                <img src="<?= base_url($comment['image']); ?>"
+                                                                <img src="<?= base_url($blog['image']); ?>"
                                                                      style="width: 70px; height: 70px;"
                                                                      class="img-circle" alt="">
                                                             </a>
@@ -128,113 +136,28 @@
 
                                                         <div class="media-body">
                                                             <h6 class="media-heading">
-                                                                <a href="<?= base_url('product/' . $comment['product_code'] . '/' . url_title($comment['product_title'])); ?>"
+                                                                <a href="<?= base_url('blog/detail/' . $blog['slug']); ?>"
                                                                    target="_blank">
-                                                                    <?= $comment['product_title']; ?>
+                                                                    <?= $blog['title']; ?>
                                                                 </a>
                                                             </h6>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- User-->
-                                            <div class="col-lg-6 col-md-6">
-                                                <div class="panel panel-body">
-                                                    <div class="media">
-                                                        <div class="media-left">
-                                                            <a href="<?= asset_url($comment['u_image']); ?>"
-                                                               data-popup="lightbox">
-                                                                <img src="<?= asset_url($comment['u_image']); ?>"
-                                                                     style="width: 70px; height: 70px;"
-                                                                     class="img-circle" alt="">
-                                                            </a>
-                                                        </div>
-
-                                                        <div class="media-body">
-                                                            <h6 class="media-heading">
-                                                                <?= $comment['username']; ?>
-                                                            </h6>
-                                                            <p class="text-muted">
-                                                                <?= $comment['first_name'] . ' ' . $comment['last_name']; ?>
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <div class="col-md-12"></div>
 
-                                            <?php
-                                            $pros = array_map('trim', explode(',', $comment['pros']));
-                                            $pros = array_filter($pros, function ($p) {
-                                                return !empty($p);
-                                            });
-                                            $cons = array_map('trim', explode(',', $comment['cons']));
-                                            $cons = array_filter($cons, function ($c) {
-                                                return !empty($c);
-                                            });
-                                            ?>
-                                            <div class="col-lg-6 col-md-12">
-                                                <h6>
-                                                    <i class="icon-thumbs-up2 position-left bg-info btn-rounded p-10"
-                                                       style="width: 45px; height: 45px; font-size: 24px;"></i>
-                                                    <span class="text-bold text-primary">
-                                                        <?= convertNumbersToPersian($comment['helpful']); ?>
-                                                    </span>
-                                                    <small>
-                                                        نفر این نظر را مفید می‌دانند
-                                                    </small>
-                                                </h6>
-                                                <div class="col-lg-12 alert-info jumbotron pr-20 pl-20">
-                                                    <?php if (count($pros)): ?>
-                                                        <ul class="list-unstyled">
-                                                            <?php foreach ($pros as $p): ?>
-                                                                <li>
-                                                                    <i class="icon-circle-small text-info"></i>
-                                                                    <?= $p; ?>
-                                                                </li>
-                                                            <?php endforeach; ?>
-                                                        </ul>
-                                                    <?php else: ?>
-                                                        <p class="text-muted">
-                                                            موردی ثبت نشده است
-                                                        </p>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 col-md-12">
-                                                <h6>
-                                                    <i class="icon-thumbs-down2 position-left bg-danger btn-rounded p-10"
-                                                       style="width: 45px; height: 45px; font-size: 24px;"></i>
-                                                    <span class="text-bold text-danger">
-                                                        <?= convertNumbersToPersian($comment['useless']); ?>
-                                                    </span>
-                                                    <small>
-                                                        نفر این نظر را مفید نمی‌دانند
-                                                    </small>
-                                                </h6>
-                                                <div class="col-lg-12 alert-danger jumbotron pr-20 pl-20">
-                                                    <?php if (count($cons)): ?>
-                                                        <ul class="list-unstyled">
-                                                            <?php foreach ($cons as $c): ?>
-                                                                <li>
-                                                                    <i class="icon-circle-small text-danger"></i>
-                                                                    <?= $c; ?>
-                                                                </li>
-                                                            <?php endforeach; ?>
-                                                        </ul>
-                                                    <?php else: ?>
-                                                        <p class="text-muted">
-                                                            موردی ثبت نشده است
-                                                        </p>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
                                             <div class="col-md-12">
                                                 <div class="col-lg-12 jumbotron pr-20 pl-20">
+                                                    <h6 class="mb-15">
+                                                        تاریخ پاسخ:
+                                                        <span>
+                                                            <?= jDateTime::date('j F Y', $comment['respond_on']); ?>
+                                                        </span>
+                                                    </h6>
                                                     <p class="text-black text-light"
                                                        style="font-size: 15px; line-height: 26px;">
-                                                        <?= nl2br($comment['body']); ?>
+                                                        <?= nl2br($comment['respond']); ?>
                                                     </p>
                                                 </div>
                                             </div>

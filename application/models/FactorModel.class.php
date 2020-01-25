@@ -1,8 +1,6 @@
 <?php
 defined('BASE_PATH') OR exit('No direct script access allowed');
 
-use HPayment\PaymentClasses\PaymentZarinPal;
-
 require_once LIB_PATH . 'HPayment/vendor/autoload.php';
 
 class FactorModel extends HModel
@@ -15,32 +13,41 @@ class FactorModel extends HModel
         $this->db = $this->getDb();
     }
 
-    public function getFactors($where = '', $params = [])
+    public function getFactors($where = '', $bindValues = [], $limit = null, $offset = 0)
     {
-//        $select = $this->select();
-//        $select->cols([
-//            ''
-//        ])->from($this->table);
-//
-//        try {
-//            $select->join(
-//                'INNER',
-//                '',
-//                ''
-//            );
-//        } catch (\Aura\SqlQuery\Exception $e) {
-//            die('unexpected error: ' . $e->getMessage());
-//        }
-//
-//        if(!empty($where) && is_string($where)) {
-//            $select->where('f.user_id=:uId');
-//            if(is_array($params) && count($params)) {
-//                $select->bindValues($params);
-//            }
-//        }
-//
-//        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
-        return [];
+        $select = $this->select();
+        $select->cols([
+            'f.user_id AS u_id', 'f.factor_code', 'f.username AS f_username', 'f.full_name AS f_full_name', 'f.options AS f_options',
+            'p.id AS p_id', 'p.title', 'p.slug', 'p.image AS p_image', 'u.id AS u_id', 'u.username', 'u.full_name', 'u.image AS u_image'
+        ])->from($this->table);
+
+        try {
+            $select->join(
+                'LEFT',
+                'plans AS p',
+                'f.plan_id=p.id'
+            )->join(
+                'LEFT',
+                'users AS u',
+                'f.user_id=u.id'
+            );
+        } catch (\Aura\SqlQuery\Exception $e) {
+            die('unexpected error: ' . $e->getMessage());
+        }
+
+        if(!empty($where) && is_string($where)) {
+            $select->where($where);
+        }
+        if(!empty($bindValues) && is_array($bindValues)) {
+            $select->bindValues($bindValues);
+        }
+
+        if (!empty($limit) && is_numeric($limit)) {
+            $select->limit((int)$limit);
+        }
+        $select->offset((int)$offset);
+
+        return $this->db->fetchAll($select->getStatement(), $select->getBindValues());
     }
 
     public function getBuyers($params)

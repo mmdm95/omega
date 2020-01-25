@@ -60,10 +60,11 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>کد سفارش</th>
-                                                    <th>تاریخ ثبت سفارش</th>
-                                                    <th>تاریخ پرداخت</th>
-                                                    <th>مبلغ قابل پرداخت</th>
+                                                    <th>کاربر</th>
+                                                    <th>طرح</th>
+                                                    <th>شماره فاکتور</th>
+                                                    <th>تاریخ ثبت فاکتور</th>
+                                                    <th>مبلغ پرداخت شده/مبلغ کل</th>
                                                     <th>وضعیت پرداخت</th>
                                                     <th>عملیات</th>
                                                 </tr>
@@ -76,43 +77,62 @@
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
+                                                            <a data-url="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                               data-popup="lightbox">
+                                                                <img src=""
+                                                                     data-src="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                                     alt="<?= $factor['full_name'] ?? $factor['f_full_name']; ?>"
+                                                                     class="img-rounded img-lg img-fit img-preview lazy">
+                                                            </a>
+                                                            <?php if (!empty($factor['u_id'])): ?>
+                                                                <a href="<?= base_url('admin/editUser/' . $factor['u_id']); ?>"
+                                                                   class="btn-link">
+                                                                    <?= $factor['full_name'] ?? $factor['username']; ?>
+                                                                </a>
+                                                            <?php else: ?>
+                                                                <?= $factor['f_full_name'] ?? $factor['f_username']; ?>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <a data-url="<?= base_url($factor['p_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                               data-popup="lightbox">
+                                                                <img src=""
+                                                                     data-src="<?= base_url($factor['p_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                                     alt="<?= $factor['title']; ?>"
+                                                                     class="img-rounded img-lg img-fit img-preview lazy">
+                                                            </a>
+                                                            <?php if (!empty($factor['p_id'])): ?>
+                                                                <a href="<?= base_url('event/detail/' . $factor['slug']); ?>"
+                                                                   class="btn-link">
+                                                                    <?= $factor['title']; ?>
+                                                                </a>
+                                                            <?php else: ?>
+                                                                ناشناخته
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
                                                             <?= $factor['factor_code']; ?>
                                                         </td>
                                                         <td>
-                                                            <?= jDateTime::date('Y/m/d - H:i', $factor['order_date']); ?>
+                                                            <?= jDateTime::date('j F Y در ساعت H:i', $factor['created_at']); ?>
                                                         </td>
                                                         <td>
-                                                            <?= jDateTime::date('Y/m/d - H:i', $factor['payment_date']) ?: '<i class="icon-dash text-danger"></i>'; ?>
-                                                        </td>
-                                                        <td class="<?= $factor['payment_status'] == OWN_PAYMENT_STATUS_SUCCESSFUL ? 'success' : 'warning'; ?>">
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($factor['final_amount'], true))) ?>
+                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($factor['payed_amount'], true))); ?>
+                                                            تومان
+                                                            /
+                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($factor['total_amount'], true))); ?>
                                                             تومان
                                                         </td>
                                                         <td align="center">
-                                                            <?php if ($factor['payment_status'] == OWN_PAYMENT_STATUS_SUCCESSFUL): ?>
+                                                            <?php if (!empty($factor['payed_amount'])): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-success">
-                                                                    موفق
+                                                                    پرداخت شده
                                                                 </span>
-                                                            <?php elseif ($factor['payment_status'] == OWN_PAYMENT_STATUS_FAILED): ?>
+                                                            <?php elseif ($factor['payment_status']): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-danger">
-                                                                    ناموفق
-                                                                </span>
-                                                            <?php elseif ($factor['payment_status'] == OWN_PAYMENT_STATUS_NOT_PAYED): ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-grey-300">
-                                                                    در انتظار پرداخت
-                                                                </span>
-                                                            <?php elseif ($factor['payment_status'] == OWN_PAYMENT_STATUS_WAIT): ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-info">
-                                                                    <?= $factor['payment_title']; ?>
-                                                                </span>
-                                                            <?php else: ?>
-                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-grey-800">
-                                                                    نامشخص
+                                                                    پرداخت نشده
                                                                 </span>
                                                             <?php endif; ?>
                                                         </td>
@@ -122,14 +142,6 @@
                                                                     <a href="<?= base_url(); ?>admin/viewFactor/<?= $factor['id']; ?>"
                                                                        title="مشاهده" data-popup="tooltip">
                                                                         <i class="icon-eye"></i>
-                                                                    </a>
-                                                                </li>
-                                                                <li class="text-danger-600">
-                                                                    <a class="deleteFactorBtn"
-                                                                       title="حذف" data-popup="tooltip">
-                                                                        <input type="hidden"
-                                                                               value="<?= $factor['id']; ?>">
-                                                                        <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>
                                                             </ul>

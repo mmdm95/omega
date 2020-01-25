@@ -191,7 +191,7 @@ class UserController extends AbstractController
             $form->beforeCheckCallback(function ($values) use ($model, $form, $formFields) {
                 $form->isRequired([
                     'full-name', 'n-code', 'e-phone', 'gender', 'grade', 'illness', 'allergy',
-                    'city', 'province', 'address'
+                    'city', 'province'
                 ], 'فیلدهای اجباری را خالی نگذارید.');
                 $form->validatePersianName('full-name', 'نام و نام خانوادگی باید فقط حروف باشد.')
                     ->validateNationalCode('n-code')

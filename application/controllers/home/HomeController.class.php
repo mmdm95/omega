@@ -48,7 +48,7 @@ class HomeController extends AbstractController
         $this->data['page'] = $model->select_it(null, 'static_pages', ['title', 'body'], 'url_name=:url', ['url' => $param[0]])[0];
         //-----
 
-        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), '');
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), $this->data['page']['title']);
 
         $this->_render_page('pages/fe/page-static');
     }

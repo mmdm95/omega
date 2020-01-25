@@ -4,6 +4,7 @@ defined('BASE_PATH') OR exit('No direct script access allowed');
 use HAuthentication\Auth;
 use HAuthentication\HAException;
 use HForm\Form;
+use HPayment\PaymentFactory;
 use voku\helper\AntiXSS;
 
 
@@ -12,6 +13,8 @@ class HomeController extends HController
     private $auth;
     private $data = [];
     private $setting;
+    //-----
+    const PAYMENT_TABLE_ZARINPAL = 'zarinpal_payment';
 
     public function __construct()
     {
@@ -1405,14 +1408,9 @@ class HomeController extends HController
             $this->redirect(base_url('admin/manageComment'));
         }
 
-        $cmtPr = $model->join_it(null, 'comments AS c', 'products AS p', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'p.product_title', 'p.image', 'p.product_code',
-            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.body'
-        ], 'c.product_id=p.id', null, [], null, null, null, null, true, 'LEFT');
-        $this->data['comment'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.user_id', 'c.product_id', 'c.status', 'c.comment_date', 'c.product_title', 'c.image', 'c.body', 'u.image AS u_image',
-            'c.cons', 'c.pros', 'c.helpful', 'c.useless', 'c.product_code', 'u.username', 'u.first_name', 'u.last_name'
-        ], 'c.user_id=u.id', 'c.id=:id', ['id' => $param[0]], null, 'c.comment_date DESC', null, null, false, 'RIGHT')[0];
+        $blog = new BlogModel();
+        $this->data['comment'] = $model->select_it(null, 'comments', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['blog'] = $blog->getAllBlog(null, 0, 'b.id=:id', ['id' => $param[0]])[0];
 
         if ($this->data['comment']['status'] == 0) {
             $model->update_it('comments', ['status' => 1], 'id=:id', ['id' => $param[0]]);
@@ -2029,6 +2027,8 @@ class HomeController extends HController
         //-----
         $factor = new FactorModel();
         $this->data['planVals']['buyers'] = $factor->getBuyers(['plan_id' => $param[0], 'payed' => true]);
+        //-----
+
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'جزئیات طرح‌ها');
@@ -2145,6 +2145,7 @@ class HomeController extends HController
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده فاکتورهای ثبت شده');
 
         $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
         $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
         $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
@@ -2164,92 +2165,20 @@ class HomeController extends HController
             $this->redirect(base_url('admin/manageFactor'));
         }
 
-        // Select all send status labels
-        $this->data['allSendStatus'] = $model->select_it(null, 'send_status', '*', null, [], null, 'priority ASC');
-
-        // Select current send_status from factor
-        $sendStatus = $model->select_it(null, 'factors', 'send_status', 'id=:id', ['id' => $param[0]])[0]['send_status'];
-
-        // Submit a form for change send status code
-        $this->load->library('HForm/Form');
-        $form = new Form();
-        $this->data['errors'] = [];
-        $this->data['form_token'] = $form->csrfToken('sendStatus');
-        $form->setFieldsName(['send-status'])->setMethod('post');
+        $factorModel = new FactorModel();
+        // Select current factor
+        $this->data['factor'] = $factorModel->getFactors('f.id=:fId', ['fId' => $param[0]], 1);
+        $this->data['factor']['payment'] = $model->select_it(null, self::PAYMENT_TABLE_ZARINPAL, [
+            'payment_code', 'payment_status', 'amount', 'payment_date'
+        ], 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['factor']['u_id'], 'pId' => $this->data['factor']['p_id']]);
+        //-----
+        $this->load->library('HPayment/vendor/autoload');
         try {
-            $form->beforeCheckCallback(function ($values) use ($form, $sendStatus) {
-                if (!in_array($values['send-status'], array_column($this->data['allSendStatus'], 'id'))) {
-                    $form->setError('وضعیت ارسال انتخاب شده نامعتبر است.');
-                }
-
-                if ($sendStatus != $values['send_status']) {
-                    // Send SMS to user to notify its factor status has changed
-
-                }
-            })->afterCheckCallback(function ($values) use ($form, $model, $param) {
-                $res = $model->update_it('factors', [
-                    'send_status' => (int)$values['send-status']
-                ], 'id=:id', ['id' => $param[0]]);
-
-                if (!$res) {
-                    $form->setError('بروزرسانی وضعیت ارسال با خطا مواجه شد.');
-                }
-            });
-        } catch (Exception $e) {
+            $pay = PaymentFactory::get_instance(PaymentFactory::BANK_TYPE_ZARINPAL);
+            $this->data['paymentClass'] = $pay;
+        } catch (\HPayment\PaymentException $e) {
             die($e->getMessage());
         }
-
-        $res = $form->checkForm()->isSuccess();
-        if ($form->isSubmit()) {
-            if ($res) {
-                $this->data['success'] = 'وضعیت ارسال برورسانی شد.';
-            } else {
-                $this->data['errors'] = $form->getError();
-                $this->data['statusVals'] = $form->getValues();
-            }
-        }
-
-        // Select current factor
-        $this->data['factor'] = $model->join_it(null, 'factors AS f', 'users AS u', [
-            'f.id', 'f.factor_code', 'f.user_id', 'f.first_name', 'f.last_name', 'f.mobile', 'f.method_code', 'f.payment_title', 'f.payment_status',
-            'f.send_status', 'f.amount', 'f.shipping_title', 'f.shipping_price', 'f.final_amount', 'f.coupon_title', 'f.coupon_amount', 'f.coupon_unit',
-            'f.discount_price', 'f.shipping_address', 'f.shipping_receiver', 'f.shipping_province', 'f.shipping_city', 'f.shipping_postal_code',
-            'f.shipping_phone', 'f.want_factor', 'f.payment_date', 'f.shipping_date', 'f.order_date', 'u.id AS u_id'
-        ], 'f.user_id=u.id', 'f.id=:id', ['id' => $param[0]],
-            null, 'f.id DESC', null, null, false, 'LEFT')[0];
-        // Select current factor status label
-        $this->data['factorStatus'] = $model->select_it(null, 'send_status', ['name', 'badge'],
-            'id=:id', ['id' => $this->data['factor']['send_status']])[0];
-        // Select gateway table if gateway code is one of the bank payment gateway's code
-        foreach ($this->gatewayTables as $table => $codeArr) {
-            if (array_search($this->data['factor']['method_code'], $codeArr) !== false) {
-                $gatewayTable = $table;
-                break;
-            }
-        }
-        if (isset($gatewayTable)) {
-            $successCode = $this->gatewaySuccessCode[$gatewayTable];
-            if ($model->is_exist($gatewayTable, 'factor_code=:fc AND status=:s',
-                ['fc' => $this->data['factor']['factor_code'], 's' => $successCode])) {
-                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
-                    'factor_code=:fc AND status=:s', ['fc' => $this->data['factor']['factor_code'], 's' => $successCode],
-                    null, 'payment_date DESC');
-            } else {
-                $this->data['factor']['payment_info'] = $model->select_it(null, $gatewayTable, ['payment_code'],
-                    'factor_code=:fc', ['fc' => $this->data['factor']['factor_code']], null, 'payment_date DESC');
-            }
-            if (count($this->data['factor']['payment_info'])) {
-                $this->data['factor']['payment_info'] = $this->data['factor']['payment_info'][0];
-            } else {
-                unset($this->data['factor']['payment_info']);
-            }
-        }
-        // Select current factor item(s)
-        $this->data['factorItems'] = $model->join_it(null, 'factors_item AS fi', 'products AS p', [
-            'fi.product_color', 'fi.product_color_hex', 'fi.product_count', 'fi.product_unit_price', 'fi.product_price',
-            'p.product_title', 'p.image', 'p.product_code',
-        ], 'fi.product_code=p.product_code', 'fi.factor_code=:fc', ['fc' => $this->data['factor']['factor_code']],
-            null, 'fi.id DESC', null, null, false, 'LEFT');
 
         // Base configuration
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده سفارش');

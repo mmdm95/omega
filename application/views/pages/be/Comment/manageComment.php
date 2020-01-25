@@ -104,10 +104,10 @@
                                                             <?= jDateTime::date('Y/m/d - H:i', $comment['created_on']); ?>
                                                         </td>
                                                         <td>
-                                                            <?php if ($comment['status'] == 2): ?>
+                                                            <?php if ($comment['publish'] == 2): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-success">تایید شده</span>
-                                                            <?php elseif ($comment['status'] == 1): ?>
+                                                            <?php elseif ($comment['publish'] == 1): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-info">مشاهده شده</span>
                                                             <?php else: ?>
