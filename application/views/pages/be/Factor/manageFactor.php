@@ -82,7 +82,7 @@
                                                                 <img src=""
                                                                      data-src="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
                                                                      alt="<?= $factor['full_name'] ?? $factor['f_full_name']; ?>"
-                                                                     class="img-rounded img-lg img-fit img-preview lazy">
+                                                                     class="img-rounded img-lg img-fit img-preview lazy position-left">
                                                             </a>
                                                             <?php if (!empty($factor['u_id'])): ?>
                                                                 <a href="<?= base_url('admin/editUser/' . $factor['u_id']); ?>"
@@ -99,7 +99,7 @@
                                                                 <img src=""
                                                                      data-src="<?= base_url($factor['p_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
                                                                      alt="<?= $factor['title']; ?>"
-                                                                     class="img-rounded img-lg img-fit img-preview lazy">
+                                                                     class="img-rounded img-lg img-fit img-preview lazy position-left">
                                                             </a>
                                                             <?php if (!empty($factor['p_id'])): ?>
                                                                 <a href="<?= base_url('event/detail/' . $factor['slug']); ?>"

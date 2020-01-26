@@ -2261,7 +2261,8 @@ class HomeController extends HController
 
         $factorModel = new FactorModel();
         // Select current factor
-        $this->data['factor'] = $factorModel->getFactors('f.id=:fId', ['fId' => $param[0]], 1);
+        $this->data['factor'] = $factorModel->getFactors('f.id=:fId', ['fId' => $param[0]], 1)[0];
+        $this->data['factor']['f_options'] = json_decode($this->data['factor']['f_options'], true);
         $this->data['factor']['payment'] = $model->select_it(null, self::PAYMENT_TABLE_ZARINPAL, [
             'payment_code', 'payment_status', 'amount', 'payment_date'
         ], 'user_id=:uId AND plan_id=:pId', ['uId' => $this->data['factor']['u_id'], 'pId' => $this->data['factor']['p_id']]);

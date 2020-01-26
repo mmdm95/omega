@@ -89,6 +89,7 @@ use HPayment\Payment; ?>
                                                     </small>
                                                     <strong>
                                                         <?= convertNumbersToPersian(number_format((int)convertNumbersToPersian($factor['total_amount'], true) - (int)convertNumbersToPersian($factor['payed_amount'], true))); ?>
+                                                        تومان
                                                     </strong>
                                                 </h6>
                                             </div>
@@ -163,14 +164,26 @@ use HPayment\Payment; ?>
                                                 </h6>
                                             </div>
 
-                                            <div class="col-md-12 text-center p-15 border border-grey-300">
+                                            <div class="col-md-6 text-center p-15 border border-grey-300">
                                                 <h6 class="no-margin">
                                                     <small class="text-grey-800">
                                                         کاربر ثبت کننده :
                                                     </small>
                                                     <strong>
-                                                        <a href="<?= base_url('admin/editUser/' . $factor['u_id']); ?>">
-                                                            <img src="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                        <?php if (!empty($factor['u_id'])): ?>
+                                                            <a href="<?= base_url('admin/editUser/' . $factor['u_id']); ?>">
+                                                                <img src="<?= base_url($factor['u_image']); ?>"
+                                                                     alt="<?= $factor['full_name'] ?? $factor['f_full_name']; ?>"
+                                                                     class="img-lg img-fit mr-15">
+
+                                                                <?php if (mb_strlen($factor['f_username']) == 11): ?>
+                                                                    <?= convertNumbersToPersian($factor['f_username']); ?>
+                                                                <?php else: ?>
+                                                                    <?= $factor['f_username']; ?>
+                                                                <?php endif; ?>
+                                                            </a>
+                                                        <?php else: ?>
+                                                            <img src="<?= base_url(PROFILE_DEFAULT_IMAGE); ?>"
                                                                  alt="<?= $factor['full_name'] ?? $factor['f_full_name']; ?>"
                                                                  class="img-lg img-fit mr-15">
 
@@ -179,12 +192,12 @@ use HPayment\Payment; ?>
                                                             <?php else: ?>
                                                                 <?= $factor['f_username']; ?>
                                                             <?php endif; ?>
-                                                        </a>
+                                                        <?php endif; ?>
                                                     </strong>
                                                 </h6>
                                             </div>
 
-                                            <div class="col-md-12 text-center p-15 border border-grey-300">
+                                            <div class="col-md-6 text-center p-15 border border-grey-300">
                                                 <h6 class="no-margin">
                                                     <small class="text-grey-800">
                                                         طرح ثبت شده :
@@ -232,10 +245,19 @@ use HPayment\Payment; ?>
                                                 <?php foreach ($factor['payment'] as $key => $payment): ?>
                                                     <tr>
                                                         <td><?= convertNumbersToPersian(($key + 1)); ?></td>
-                                                        <td>
-                                                            <?= $payment['factor_code']; ?>
+                                                        <td class="info">
+                                                            <?= $payment['payment_code']; ?>
                                                         </td>
-                                                        <td>
+                                                        <?php
+                                                        if ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL) {
+                                                            $payType = 'success';
+                                                        } elseif ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_CANCELED_ZARINPAL) {
+                                                            $payType = 'warning';
+                                                        } else {
+                                                            $payType = 'danger';
+                                                        }
+                                                        ?>
+                                                        <td class="<?= $payType; ?>">
                                                             <?php if ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL): ?>
                                                                 تراکنش انجام شده
                                                             <?php elseif ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_CANCELED_ZARINPAL): ?>
@@ -247,7 +269,12 @@ use HPayment\Payment; ?>
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($payment['amount'], true))); ?>
+                                                            <?php if (!empty($payment['amount'])): ?>
+                                                                <?= convertNumbersToPersian(number_format(convertNumbersToPersian($payment['amount'], true))); ?>
+                                                                تومان
+                                                            <?php else: ?>
+                                                                <i class="icon-minus2 text-danger"></i>
+                                                            <?php endif; ?>
                                                         </td>
                                                         <td>
                                                             <?= jDateTime::date('j F Y در ساعت H:i', $payment['payment_date']); ?>
@@ -270,7 +297,7 @@ use HPayment\Payment; ?>
                                         </div>
                                     </div>
                                     <div class="panel-body">
-                                        <?php foreach ($factor['options'] as $key => $option): ?>
+                                        <?php foreach ($factor['f_options'] as $key => $option): ?>
                                             <div class="pl-20 pr-20 pt-5 pb-5 bg-slate-400">
                                                 <h4 class="iranyekan-regular m-0">
                                                     <?= $option['title']; ?>

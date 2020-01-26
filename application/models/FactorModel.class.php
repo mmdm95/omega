@@ -17,8 +17,9 @@ class FactorModel extends HModel
     {
         $select = $this->select();
         $select->cols([
-            'f.user_id AS u_id', 'f.factor_code', 'f.username AS f_username', 'f.full_name AS f_full_name', 'f.options AS f_options',
-            'p.id AS p_id', 'p.title', 'p.slug', 'p.image AS p_image', 'u.id AS u_id', 'u.username', 'u.full_name', 'u.image AS u_image'
+            'f.id', 'f.user_id AS u_id', 'f.factor_code', 'f.username AS f_username', 'f.full_name AS f_full_name', 'f.options AS f_options',
+            'f.payed_amount', 'f.total_amount', 'f.created_at', 'p.id AS p_id', 'p.title', 'p.slug', 'p.image AS p_image',
+            'u.id AS u_id', 'u.username', 'u.full_name', 'u.image AS u_image'
         ])->from($this->table);
 
         try {
