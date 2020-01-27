@@ -1428,7 +1428,7 @@ class HomeController extends HController
                     'respond_on' => time()
                 ], 'id=:id', ['id' => $this->data['param'][0]]);
 
-                if(!$res) {
+                if (!$res) {
                     $form->setError('عملیات با خطا مواجه شد!');
                 }
             });
@@ -2115,7 +2115,8 @@ class HomeController extends HController
                         'تعداد فرزند',
                         'هزینه پرداخت شده (تومان)‌',
                         'هزینه کل (تومان)',
-                        'تاریخ ثبت نام در طرح'
+                        'تاریخ ثبت نام در طرح',
+                        'آیتم های خریداری شده'
                     ]
                 ];
                 $totalPayedAmount = 0;
@@ -2152,6 +2153,15 @@ class HomeController extends HController
                     $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['payed_amount'], true));
                     $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['total_amount'], true));
                     $spreadsheetArray[($k + 1)][] = jDateTime::date('j F Y در ساعت H:i');
+                    // Add options
+                    $theOptions = '';
+                    $optionCounter = 1;
+                    foreach (json_decode($buyer['options'], true) as $option) {
+                        foreach ($option['name'] as $name) {
+                            $theOptions .= $optionCounter++ . '-' . $name . PHP_EOL;
+                        }
+                    }
+                    $spreadsheetArray[($k + 1)][] = $theOptions;
                     //-----
                     $totalPayedAmount += (int)convertNumbersToPersian($buyer['payed_amount'], true);
                     $totalAmount += (int)convertNumbersToPersian($buyer['total_amount'], true);
@@ -2409,7 +2419,7 @@ class HomeController extends HController
                     'respond_on' => time()
                 ], 'id=:id', ['id' => $this->data['param'][0]]);
 
-                if(!$res) {
+                if (!$res) {
                     $form->setError('عملیات با خطا مواجه شد!');
                 }
             });

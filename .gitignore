@@ -214,6 +214,7 @@ public/loadtestertool.xml
 public/atatus-php-1.3.0-x64-redhat/
 public/audio/
 
+public/users
 public/uploads
 framework/core/config.json
 application/config/dbConfig.php
