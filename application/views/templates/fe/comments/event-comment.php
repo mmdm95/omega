@@ -4,7 +4,7 @@
             <div>
                 <a href="javascript:void(0);" class="cmnt_avatar">
                     <img src="<?= base_url(PROFILE_DEFAULT_IMAGE); ?>" alt=""
-                         class="media-object rounded-circle">
+                         class="media-object rounded-circle img-xlg-height img-thumbnail">
                 </a>
             </div>
             <div class="media-body">
@@ -17,6 +17,11 @@
                             <?= jDateTime::date('j F Y', $comment['created_on']); ?>
                         </span>
                     </div>
+                    <?php if ($comment['is_buyer']): ?>
+                        <a href="javascript:void(0);" class="reply bg-success text-white">
+                            خریدار این طرح
+                        </a>
+                    <?php endif; ?>
                 </div>
                 <p>
                     <?= $comment['body']; ?>
@@ -31,7 +36,7 @@
                         <div>
                             <a href="#" class="cmnt_avatar">
                                 <img src="<?= asset_url('fe/img/omega-comment.png'); ?>"
-                                     class="media-object rounded-circle"
+                                     class="media-object rounded-circle img-xlg-height img-thumbnail"
                                      alt="omega">
                             </a>
                         </div>

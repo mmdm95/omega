@@ -60,7 +60,7 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>کاربر</th>
+                                                    <th>نام</th>
                                                     <th>تصویر نوشته</th>
                                                     <th>عنوان نوشته</th>
                                                     <th>تاریخ ارسال نظر</th>
@@ -90,12 +90,12 @@
                                                                data-popup="lightbox">
                                                                 <img src=""
                                                                      data-src="<?= base_url() . $comment['image']; ?>"
-                                                                     alt="<?= $comment['product_title']; ?>"
+                                                                     alt="<?= $comment['title']; ?>"
                                                                      class="img-rounded img-preview lazy">
                                                             </a>
                                                         </td>
                                                         <td>
-                                                            <a href="<?= base_url('blog/' . url_title($comment['title'])); ?>"
+                                                            <a href="<?= base_url('blog/detail/' . $comment['slug']); ?>"
                                                                target="_blank">
                                                                 <?= $comment['title']; ?>
                                                             </a>

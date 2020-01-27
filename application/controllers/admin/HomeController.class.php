@@ -830,8 +830,8 @@ class HomeController extends HController
         $form = new Form();
         $this->data['form_token'] = $form->csrfToken('editCategory');
         $form->setFieldsName(['name', 'keywords', 'publish'])
-            ->setDefaults('status', 'off')
-            ->setMethod('post');
+            ->setDefaults('publish', 'off')
+            ->setMethod('post', [], ['publish']);
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form) {
                 $form->isRequired(['name', 'publish'], 'فیلدهای ضروری را خالی نگذارید.');
@@ -1383,10 +1383,10 @@ class HomeController extends HController
 
         $model = new Model();
         $cmtPr = $model->join_it(null, 'comments AS c', 'blog AS a', [
-            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title',
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title', 'a.slug'
         ], 'c.blog_id=a.id', null, [], null, null, null, null, true, 'LEFT');
         $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
-            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'u.id AS user_id'
+            'c.id', 'c.name', 'c.blog_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'c.slug', 'u.id AS user_id'
         ], 'c.mobile=u.username', null, [], null, 'c.created_on DESC', null, null, false, 'RIGHT');
 
         // Base configuration
@@ -1413,12 +1413,44 @@ class HomeController extends HController
             $this->redirect(base_url('admin/manageComment'));
         }
 
+        $this->data['param'] = $param;
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_answer'] = $form->csrfToken('commentAnswer');
+        $form->setFieldsName(['answer'])
+            ->setMethod('post');
+        try {
+            $form->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('comments', [
+                    'responder_id' => $this->data['identity']->id,
+                    'respond' => trim($values['answer']),
+                    'respond_on' => time()
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if(!$res) {
+                    $form->setError('عملیات با خطا مواجه شد!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['answerSuccess'] = 'پاسخ با موفقیت ثبت شد.';
+            } else {
+                $this->data['answerErrors'] = $form->getError();
+            }
+        }
+
         $blog = new BlogModel();
         $this->data['comment'] = $model->select_it(null, 'comments', '*', 'id=:id', ['id' => $param[0]])[0];
-        $this->data['blog'] = $blog->getAllBlog(null, 0, 'b.id=:id', ['id' => $param[0]])[0];
+        $this->data['blog'] = $blog->getAllBlog(null, 0, 'b.id=:id', ['id' => $this->data['comment']['blog_id']])[0];
 
-        if ($this->data['comment']['status'] == 0) {
-            $model->update_it('comments', ['status' => 1], 'id=:id', ['id' => $param[0]]);
+        if ($this->data['comment']['publish'] == 0) {
+            $model->update_it('comments', ['publish' => 1], 'id=:id', ['id' => $param[0]]);
         }
 
         // Base configuration
@@ -1474,9 +1506,9 @@ class HomeController extends HController
             message('error', 200, 'نظر وجود ندارد.');
         }
 
-        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
+        $curStat = $model->select_it(null, $table, 'publish', 'id=:id', ['id' => $id])[0]['publish'];
         $newStat = $curStat < 2 ? 2 : $curStat;
-        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
+        $res = $model->update_it($table, ['publish' => $newStat], 'id=:id', ['id' => $id]);
         if ($res) {
             message('success', 200, 'نظر تایید شد.');
         }
@@ -1502,9 +1534,9 @@ class HomeController extends HController
             message('error', 200, 'نظر وجود ندارد.');
         }
 
-        $curStat = $model->select_it(null, $table, 'status', 'id=:id', ['id' => $id])[0]['status'];
+        $curStat = $model->select_it(null, $table, 'publish', 'id=:id', ['id' => $id])[0]['publish'];
         $newStat = $curStat == 2 ? 1 : $curStat;
-        $res = $model->update_it($table, ['status' => $newStat], 'id=:id', ['id' => $id]);
+        $res = $model->update_it($table, ['publish' => $newStat], 'id=:id', ['id' => $id]);
         if ($res) {
             message('success', 200, 'عدم تایید نظر با موفقیت انجام شد.');
         }
@@ -2057,6 +2089,30 @@ class HomeController extends HController
                         '#',
                         'نام کاربری',
                         'نام و نام خانوادگی',
+                        'نام پدر',
+                        'شماره تلفن',
+                        'شماره رابط',
+                        'استان',
+                        'شهر',
+                        'آدرس',
+                        'کد پستی',
+                        'کد ملی',
+                        'شماره شناسنامه',
+                        'محل صدور شناسنامه',
+                        'جنسیت',
+                        'مقطع تحصیلی',
+                        'مدرسه',
+                        'رشته دبیرستان',
+                        'معدل',
+                        'بیماری خاص',
+                        'توضیح بیماری خاص',
+                        'وضعیت حساسیت',
+                        'توضیح حساسیت',
+                        'وضعیت سربازی',
+                        'محل خدمت',
+                        'سال پایان خدمت',
+                        'وضعیت تأهل',
+                        'تعداد فرزند',
                         'هزینه پرداخت شده (تومان)‌',
                         'هزینه کل (تومان)',
                         'تاریخ ثبت نام در طرح'
@@ -2067,19 +2123,32 @@ class HomeController extends HController
                 $totalBuyers = count($this->data['planVals']['buyers']);
                 foreach ($this->data['planVals']['buyers'] as $k => $buyer) {
                     $spreadsheetArray[($k + 1)][] = $k + 1;
-                    // User's image
-//                    $drawing = new Drawing();
-//                    $drawing->setName($this->data['planVals']['f_username']);
-//                    $drawing->setDescription($this->data['planVals']['f_username']);
-//                    $drawing->setPath(base_url($this->data['planVals']['u_image'] ?? PROFILE_DEFAULT_IMAGE)); // put your path and image here
-//                    $drawing->setCoordinates('');
-//                    $drawing->setWidth(50);
-//                    $drawing->getShadow()->setVisible(true);
-//                    $drawing->getShadow()->setDirection(0);
-//                    $drawing->setWorksheet($spreadsheet->getActiveSheet());
-
                     $spreadsheetArray[($k + 1)][] = $buyer['f_username'];
                     $spreadsheetArray[($k + 1)][] = $buyer['f_full_name'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['father_name'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['phone'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['connector_phone'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['province'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['city'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['address'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['postal_code'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['n_code'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['id_code'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['birth_certificate_place'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['gender'] == GENDER_MALE ? 'آقا' : 'خانم';
+                    $spreadsheetArray[($k + 1)][] = EDU_GRADES[$buyer['grade']] ?? '';
+                    $spreadsheetArray[($k + 1)][] = $buyer['school'];
+                    $spreadsheetArray[($k + 1)][] = EDU_FIELDS[$buyer['field']] ?? '';
+                    $spreadsheetArray[($k + 1)][] = $buyer['gpa'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['illness'] == 1 ? 'بله' : 'خیر';
+                    $spreadsheetArray[($k + 1)][] = $buyer['illness_desc'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['allergy'] == 1 ? 'بله' : 'خیر';
+                    $spreadsheetArray[($k + 1)][] = $buyer['allergy_desc'];
+                    $spreadsheetArray[($k + 1)][] = MILITARY_STATUS[$buyer['military_status']] ?? '';
+                    $spreadsheetArray[($k + 1)][] = $buyer['military_place'];
+                    $spreadsheetArray[($k + 1)][] = $buyer['military_end_year'];
+                    $spreadsheetArray[($k + 1)][] = MARITAL_STATUS[$buyer['marital_status']] ?? '';
+                    $spreadsheetArray[($k + 1)][] = $buyer['children_count'] > 0 ? $buyer['children_count'] : 0;
                     $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['payed_amount'], true));
                     $spreadsheetArray[($k + 1)][] = number_format(convertNumbersToPersian($buyer['total_amount'], true));
                     $spreadsheetArray[($k + 1)][] = jDateTime::date('j F Y در ساعت H:i');
@@ -2202,7 +2271,7 @@ class HomeController extends HController
         $id = $_POST['postedId'];
         $stat = $_POST['stat'];
         $table = 'plans';
-        if (!isset($id) || !isset($stat) || !in_array($stat, [PLAN_STATUS_ACTIVATE, PLAN_STATUS_DEACTIVATE, PLAN_STATUS_FULL, PLAN_STATUS_CLOSED])) {
+        if (!isset($id) || !isset($stat) || !in_array($stat, [PLAN_STATUS_ACTIVATE, PLAN_STATUS_DEACTIVATE, PLAN_STATUS_FULL, PLAN_STATUS_IN_PROGRESS, PLAN_STATUS_CLOSED])) {
             message('error', 200, 'ورودی نامعتبر است.');
         }
 
@@ -2218,6 +2287,8 @@ class HomeController extends HController
                 message('warning', 200, 'وضعیت طرح به غیر فعال تغییر یافت.');
             } elseif ($stat == PLAN_STATUS_FULL) {
                 message('warning', 200, 'وضعیت طرح به پر شده تغییر یافت.');
+            } elseif ($stat == PLAN_STATUS_IN_PROGRESS) {
+                message('warning', 200, 'وضعیت طرح به در حال برگزاری تغییر یافت.');
             } elseif ($stat == PLAN_STATUS_CLOSED) {
                 message('warning', 200, 'وضعیت طرح به بسته شده تغییر یافت.');
             }
@@ -2283,6 +2354,176 @@ class HomeController extends HController
         $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
 
         $this->_render_page('pages/be/Factor/viewFactor');
+    }
+
+    public function managePlanCommentAction()
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+        $cmtPr = $model->join_it(null, 'plan_comments AS c', 'plans AS a', [
+            'c.id', 'c.name', 'c.plan_id', 'c.mobile', 'c.publish', 'c.created_on', 'a.image', 'a.title', 'a.slug'
+        ], 'c.plan_id=a.id', null, [], null, null, null, null, true, 'LEFT');
+        $this->data['comments'] = $model->join_it($cmtPr, 'users AS u', 'c', [
+            'c.id', 'c.name', 'c.plan_id', 'c.mobile', 'c.publish', 'c.created_on', 'c.image', 'c.title', 'c.slug', 'u.id AS user_id'
+        ], 'c.mobile=u.username', null, [], null, 'c.created_on DESC', null, null, false, 'RIGHT');
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مدیریت نظرات');
+
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/datatables.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/tables/datatables/numeric-comma.min.js');
+        $this->data['js'][] = $this->asset->script('be/js/pages/datatables_advanced.js');
+
+        $this->_render_page('pages/be/PlanComment/manageComment');
+    }
+
+    public function viewPlanCommentAction($param)
+    {
+        if (!$this->auth->isLoggedIn()) {
+            $this->redirect(base_url('admin/login'));
+        }
+
+        $model = new Model();
+
+        if (!isset($param[0]) || !is_numeric($param[0]) || !$model->is_exist('plan_comments', 'id=:id', ['id' => $param[0]])) {
+            $this->redirect(base_url('admin/managePlanComment'));
+        }
+
+        $this->data['param'] = $param;
+
+        $this->load->library('HForm/Form');
+        $form = new Form();
+        $this->data['form_token_plan_answer'] = $form->csrfToken('planCommentAnswer');
+        $form->setFieldsName(['answer'])
+            ->setMethod('post');
+        try {
+            $form->afterCheckCallback(function ($values) use ($model, $form) {
+                $res = $model->update_it('plan_comments', [
+                    'responder_id' => $this->data['identity']->id,
+                    'respond' => trim($values['answer']),
+                    'respond_on' => time()
+                ], 'id=:id', ['id' => $this->data['param'][0]]);
+
+                if(!$res) {
+                    $form->setError('عملیات با خطا مواجه شد!');
+                }
+            });
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+
+        $res = $form->checkForm()->isSuccess();
+        if ($form->isSubmit()) {
+            if ($res) {
+                $this->data['answerSuccess'] = 'پاسخ با موفقیت ثبت شد.';
+            } else {
+                $this->data['answerErrors'] = $form->getError();
+            }
+        }
+
+        $this->data['comment'] = $model->select_it(null, 'plan_comments', '*', 'id=:id', ['id' => $param[0]])[0];
+        $this->data['event'] = $model->select_it(null, 'plans', [
+            'title', 'slug', 'image', 'total_price', 'base_price'
+        ], 'id=:id', ['id' => $this->data['comment']['plan_id']])[0];
+
+        if ($this->data['comment']['publish'] == 0) {
+            $model->update_it('plan_comments', ['publish' => 1], 'id=:id', ['id' => $param[0]]);
+        }
+
+        // Base configuration
+        $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'مشاهده نظر');
+
+        // Extra js
+        $this->data['js'][] = $this->asset->script('be/js/admin.main.js');
+        $this->data['js'][] = $this->asset->script('be/js/plugins/media/fancybox.min.js');
+
+        $this->_render_page('pages/be/PlanComment/viewComment');
+    }
+
+    public function deletePlanCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = @$_POST['postedId'];
+        $table = 'plan_comments';
+        if (!isset($id)) {
+            message('error', 200, 'نظر نامعتبر است.');
+        }
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'نظر با موفقیت حذف شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function acceptPlanCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $table = 'plan_comments';
+        if (!isset($id)) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $curStat = $model->select_it(null, $table, 'publish', 'id=:id', ['id' => $id])[0]['publish'];
+        $newStat = $curStat < 2 ? 2 : $curStat;
+        $res = $model->update_it($table, ['publish' => $newStat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'نظر تایید شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
+    }
+
+    public function declinePlanCommentAction()
+    {
+        if (!$this->auth->isLoggedIn() || !is_ajax()) {
+            message('error', 403, 'دسترسی غیر مجاز');
+        }
+
+        $model = new Model();
+
+        $id = $_POST['postedId'];
+        $table = 'plan_comments';
+        if (!isset($id)) {
+            message('error', 200, 'ورودی نامعتبر است.');
+        }
+
+        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+            message('error', 200, 'نظر وجود ندارد.');
+        }
+
+        $curStat = $model->select_it(null, $table, 'publish', 'id=:id', ['id' => $id])[0]['publish'];
+        $newStat = $curStat == 2 ? 1 : $curStat;
+        $res = $model->update_it($table, ['publish' => $newStat], 'id=:id', ['id' => $id]);
+        if ($res) {
+            message('success', 200, 'عدم تایید نظر با موفقیت انجام شد.');
+        }
+
+        message('error', 200, 'عملیات با خطا مواجه شد.');
     }
 
     public function addUsefulLinkAction()

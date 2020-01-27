@@ -60,7 +60,7 @@ class BlogController extends AbstractController
         ], 'publish=:pub', ['pub' => 1], null, ['id DESC'], 5);
         //-----
         $this->data['comments'] = $blog->getBlogComments('c.blog_id=:bId AND c.publish=:pub',
-            ['bId' => $this->data['blog']['id'], 'pub' => 2], ['id DESC'], 5);
+            ['bId' => $this->data['blog']['id'], 'pub' => 2], ['c.id DESC'], 5);
         $this->data['commentsCount'] = $model->it_count('comments',
             'blog_id=:bId AND publish=:pub', ['bId' => $this->data['blog']['id'], 'pub' => 2]);
         //-----
@@ -78,6 +78,9 @@ class BlogController extends AbstractController
 
         $this->data['title'] = titleMaker(' | ', set_value($this->setting['main']['title'] ?? ''), 'بلاگ');
 
+        // Extra js
+        $this->data['js'][] = $this->asset->script('fe/js/blogJs.js');
+
         $this->_render_page([
             'pages/fe/blog-details-standard',
         ]);
@@ -88,6 +91,7 @@ class BlogController extends AbstractController
         if (!is_ajax()) {
             message('error', 200, 'دسترسی غیر مجاز');
         }
+
         if (empty($_POST['blogId']) || empty($_POST['page']) || !is_numeric($_POST['blogId'])) {
             message('error', 200, 'پارامترهای وارد شده نامعتبر است.');
         }
@@ -98,14 +102,14 @@ class BlogController extends AbstractController
         $blog = new BlogModel();
         $offset = ($page - 1) * 5;
         $data['comments'] = $blog->getBlogComments('c.blog_id=:bId AND c.publish=:pub',
-            ['bId' => $_POST['blogId'], 'pub' => 1], ['id DESC'], 5, $offset);
+            ['bId' => $_POST['blogId'], 'pub' => 2], ['c.id DESC'], 5, $offset);
 
         $model = new Model();
         $commentsCount = $model->it_count('comments',
-            'blog_id=:bId AND publish=:pub', ['bId' => $_POST['blogId'], 'pub' => 1]);
+            'blog_id=:bId AND publish=:pub', ['bId' => $_POST['blogId'], 'pub' => 2]);
 
         message('success', 200,
-            [$this->load->view('templates/fe/comments/comment', $data, true), $commentsCount > ($page * 5)]);
+            [$this->load->view('templates/fe/comments/blog-comment', $data, true), $commentsCount > ($page * 5)]);
     }
 
     //-----
@@ -113,8 +117,8 @@ class BlogController extends AbstractController
     public function searchAction($param)
     {
         $query = isset($param[1]) ? urldecode($param[1]) : (isset($param[0]) ? urldecode($param[0]) : '');
-        if(empty($query)) {
-            if(isset($_GET['blog-query'])) {
+        if (empty($query)) {
+            if (isset($_GET['blog-query'])) {
                 $param = [$_GET['blog-query']];
                 $query = urldecode($param[0]);
             } else {
@@ -234,28 +238,28 @@ class BlogController extends AbstractController
         $form = new Form();
         $this->data['form_token_blog_comment'] = $form->csrfToken('blogComment');
         $form->setFieldsName([
-            'name', 'mobile', 'body', 'captcha'
+            'blog-name', 'blog-mobile', 'blog-body', 'blogCaptcha'
         ])->setMethod('post');
         try {
             $form->beforeCheckCallback(function ($values) use ($model, $form, $param) {
-                $form->isRequired(['name', 'body', 'captcha'], 'فیلدهای اجباری را خالی نگذارید.');
+                $form->isRequired(['blog-name', 'blog-body', 'blogCaptcha'], 'فیلدهای اجباری را خالی نگذارید.');
 
                 if (!count($form->getError())) {
-                    if ($model->is_exist('comments', 'ip_address=:ip AND created_on<:t',
-                        ['ip' => get_client_ip_env(), 't' => (strtotime('Y-m-d') - 86400)])) { // 86400 ==> 1 day
+                    if ($model->is_exist('comments', 'ip_address=:ip AND created_on>:t',
+                        ['ip' => get_client_ip_env(), 't' => (strtotime(date('Y/m/d', time())) - 86400)])) { // 86400 ==> 1 day
                         $form->setError('دیدگاه شما ثبت شده است.');
                     } else {
-                        $form->validatePersianName('name', 'نام باید حروف فارسی باشد.');
+                        $form->validatePersianName('blog-name', 'نام باید حروف فارسی باشد.');
                         //-----
                         if (!empty($values['mobile'])) {
-                            $form->validatePersianMobile('mobile');
+                            $form->validatePersianMobile('blog-mobile');
                         }
                         //-----
                         $config = getConfig('config');
                         if (!isset($config['captcha_session_name']) ||
                             !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                             !isset($param['captcha']) ||
-                            encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['registerCaptcha']) {
+                            encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['blogCaptcha']) {
                             $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                         }
                     }
@@ -263,9 +267,9 @@ class BlogController extends AbstractController
             })->afterCheckCallback(function ($values) use ($model, $form) {
                 $res = $model->insert_it('comments', [
                     'blog_id' => $this->data['blog']['id'],
-                    'name' => trim($values['name']),
-                    'mobile' => convertNumbersToPersian(trim($values['mobile']), true),
-                    'body' => trim($values['body']),
+                    'name' => trim($values['blog-name']),
+                    'mobile' => convertNumbersToPersian(trim($values['blog-mobile']), true),
+                    'body' => trim($values['blog-body']),
                     'publish' => 0,
                     'ip_address' => get_client_ip_env(),
                     'created_on' => time(),
@@ -285,6 +289,7 @@ class BlogController extends AbstractController
                 $this->data['blogCommentSuccess'] = 'دیدگاه شما ثبت شد.پس از تأیید، دیدگاه در سایت نمایش داده می‌شود.';
             } else {
                 $this->data['blogCommentErrors'] = $form->getError();
+                $this->data['blogCommentValues'] = $form->getValues();
             }
         }
     }

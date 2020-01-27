@@ -7915,6 +7915,10 @@ strong, b {
     }
 }
 
+.img-xlg-height {
+    max-height: 85px !important;
+}
+
 .img-lg {
     width: 44px !important;
     height: 44px !important;

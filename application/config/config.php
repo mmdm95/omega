@@ -67,6 +67,14 @@ defined('EDU_FIELDS') OR define('EDU_FIELDS', [
     4 => 'هنرستان',
 ]);
 
+// Custom military status
+defined('MILITARY_STATUS') OR define('MILITARY_STATUS', [
+    1 => 'دارای کارت پایان خدمت',
+    2 => 'معافیت دائم',
+    3 => 'معافیت موقت',
+    4 => 'معافیت تحصیلی',
+]);
+
 // Gender
 defined('GENDER_MALE') OR define('GENDER_MALE', 1);
 defined('GENDER_FEMALE') OR define('GENDER_FEMALE', 2);
@@ -75,6 +83,13 @@ defined('GENDER_FEMALE') OR define('GENDER_FEMALE', 2);
 defined('MARRIAGE_MARRIED') OR define('MARRIAGE_MARRIED', 1);
 defined('MARRIAGE_SINGLE') OR define('MARRIAGE_SINGLE', 2);
 defined('MARRIAGE_DEAD') OR define('MARRIAGE_DEAD', 3);
+
+// Custom marital status
+defined('MARITAL_STATUS') OR define('MARITAL_STATUS', [
+    MARRIAGE_MARRIED => 'متأهل',
+    MARRIAGE_SINGLE => 'مجرد',
+    MARRIAGE_DEAD => 'فوت همسر'
+]);
 
 //===============================================
 

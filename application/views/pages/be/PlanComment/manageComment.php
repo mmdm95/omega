@@ -21,7 +21,7 @@
                     <div class="page-title">
                         <h5>
                             <i class="icon-circle position-left"></i> <span
-                                    class="text-semibold">سفارشات</span>
+                                    class="text-semibold">نظرات</span>
                         </h5>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                                 داشبورد
                             </a>
                         </li>
-                        <li class="active">سفارشات</li>
+                        <li class="active">نظرات</li>
                     </ul>
                 </div>
             </div>
@@ -47,7 +47,7 @@
                             <div class="col-sm-12">
                                 <div class="panel panel-white">
                                     <div class="panel-heading">
-                                        <h6 class="panel-title">سفارشات</h6>
+                                        <h6 class="panel-title">نظرات</h6>
                                         <div class="heading-elements">
                                             <ul class="icons-list">
                                                 <li><a data-action="collapse"></a></li>
@@ -60,81 +60,75 @@
                                                 <thead>
                                                 <tr>
                                                     <th>#</th>
-                                                    <th>کاربر</th>
-                                                    <th>طرح</th>
-                                                    <th>شماره فاکتور</th>
-                                                    <th>تاریخ ثبت فاکتور</th>
-                                                    <th>مبلغ پرداخت شده/مبلغ کل</th>
-                                                    <th>وضعیت پرداخت</th>
+                                                    <th>نام</th>
+                                                    <th>تصویر طرح</th>
+                                                    <th>عنوان طرح</th>
+                                                    <th>تاریخ ارسال نظر</th>
+                                                    <th>وضعیت نظر</th>
                                                     <th>عملیات</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
                                                 <!-- Load categories data -->
-                                                <?php foreach ($factors as $key => $factor): ?>
+                                                <?php foreach ($comments as $key => $comment): ?>
                                                     <tr>
                                                         <td width="50px">
                                                             <?= convertNumbersToPersian($key + 1); ?>
                                                         </td>
                                                         <td>
-                                                            <a data-url="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
+                                                            <?php if (!empty($comment['user_id'])): ?>
+                                                                <a href="<?= base_url('admin/editUser/' . $comment['user_id']); ?>"
+                                                                   class="btn-link">
+                                                                    <?= $comment['name']; ?>
+                                                                </a>
+                                                            <?php else: ?>
+                                                                <?= $comment['name']; ?>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <a data-url="<?= base_url() . $comment['image']; ?>"
                                                                data-popup="lightbox">
                                                                 <img src=""
-                                                                     data-src="<?= base_url($factor['u_image'] ?? PROFILE_DEFAULT_IMAGE); ?>"
-                                                                     alt="<?= $factor['full_name'] ?? $factor['f_full_name']; ?>"
-                                                                     class="img-rounded img-lg img-fit img-preview lazy position-left">
+                                                                     data-src="<?= base_url() . $comment['image']; ?>"
+                                                                     alt="<?= $comment['title']; ?>"
+                                                                     class="img-rounded img-preview lazy">
                                                             </a>
-                                                            <?php if (!empty($factor['u_id'])): ?>
-                                                                <a href="<?= base_url('admin/editUser/' . $factor['u_id']); ?>"
-                                                                   class="btn-link">
-                                                                    <?= $factor['full_name'] ?? $factor['username']; ?>
-                                                                </a>
-                                                            <?php else: ?>
-                                                                <?= $factor['f_full_name'] ?? $factor['f_username']; ?>
-                                                            <?php endif; ?>
                                                         </td>
                                                         <td>
-                                                            <?php if (!empty($factor['p_id'])): ?>
-                                                                <a href="<?= base_url('event/detail/' . $factor['slug']); ?>"
-                                                                   class="btn-link">
-                                                                    <?= $factor['title']; ?>
-                                                                </a>
-                                                            <?php else: ?>
-                                                                ناشناخته
-                                                            <?php endif; ?>
+                                                            <a href="<?= base_url('event/detail/' . $comment['slug']); ?>"
+                                                               target="_blank">
+                                                                <?= $comment['title']; ?>
+                                                            </a>
                                                         </td>
                                                         <td>
-                                                            <?= $factor['factor_code']; ?>
+                                                            <?= jDateTime::date('Y/m/d - H:i', $comment['created_on']); ?>
                                                         </td>
                                                         <td>
-                                                            <?= jDateTime::date('j F Y در ساعت H:i', $factor['created_at']); ?>
-                                                        </td>
-                                                        <td>
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($factor['payed_amount'], true))); ?>
-                                                            تومان
-                                                            /
-                                                            <?= convertNumbersToPersian(number_format(convertNumbersToPersian($factor['total_amount'], true))); ?>
-                                                            تومان
-                                                        </td>
-                                                        <td align="center">
-                                                            <?php if (!empty($factor['payed_amount'])): ?>
+                                                            <?php if ($comment['publish'] == 2): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-success">
-                                                                    پرداخت شده
-                                                                </span>
-                                                            <?php elseif ($factor['payment_status']): ?>
+                                                                 border-left-lg border-left-success">تایید شده</span>
+                                                            <?php elseif ($comment['publish'] == 1): ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
-                                                                 border-left-lg border-left-danger">
-                                                                    پرداخت نشده
-                                                                </span>
+                                                                 border-left-lg border-left-info">مشاهده شده</span>
+                                                            <?php else: ?>
+                                                                <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
+                                                                 border-left-lg border-left-danger">مشاهده نشده</span>
                                                             <?php endif; ?>
                                                         </td>
                                                         <td style="width: 115px;" class="text-center">
                                                             <ul class="icons-list">
                                                                 <li class="text-black">
-                                                                    <a href="<?= base_url(); ?>admin/viewFactor/<?= $factor['id']; ?>"
+                                                                    <a href="<?= base_url('admin/viewPlanComment/' . $comment['id']); ?>"
                                                                        title="مشاهده" data-popup="tooltip">
                                                                         <i class="icon-eye"></i>
+                                                                    </a>
+                                                                </li>
+                                                                <li class="text-danger-600">
+                                                                    <a class="deletePlanCommentBtn"
+                                                                       title="حذف" data-popup="tooltip">
+                                                                        <input type="hidden"
+                                                                               value="<?= $comment['id']; ?>">
+                                                                        <i class="icon-trash"></i>
                                                                     </a>
                                                                 </li>
                                                             </ul>

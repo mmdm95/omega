@@ -150,7 +150,7 @@ class Model extends HModel
             $select->where($where);
         }
         if (isset($groupByOrHaving) && count($groupByOrHaving)) {
-            if(isset($groupByOrHaving['groupBy']) || isset($groupByOrHaving['having'])) {
+            if (isset($groupByOrHaving['groupBy']) || isset($groupByOrHaving['having'])) {
                 if (isset($groupByOrHaving['groupBy'])) {
                     $select->groupBy($groupByOrHaving['groupBy']);
                 }

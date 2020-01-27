@@ -84,16 +84,16 @@
                                         </p>
                                         <div class="row">
                                             <div class="form-group col-md-12 mt-10">
-                                        <textarea rows="5" cols="12" class="form-control"
-                                                  name="question"
-                                                  style="min-height: 100px; resize: vertical;"
-                                                  placeholder="سؤال"><?= $faqVals['question'] ?? ''; ?></textarea>
+                                                <textarea rows="5" cols="12" class="form-control"
+                                                          name="question"
+                                                          style="min-height: 100px; resize: vertical;"
+                                                          placeholder="سؤال"><?= $faqVals['question'] ?? ''; ?></textarea>
                                             </div>
                                             <div class="form-group col-md-12 mt-10">
-                                        <textarea rows="5" cols="12" class="form-control"
-                                                  name="answer"
-                                                  style="min-height: 100px; resize: vertical;"
-                                                  placeholder="پاسخ"><?= $faqVals['answer'] ?? ''; ?></textarea>
+                                                <textarea rows="5" cols="12" class="form-control"
+                                                          name="answer"
+                                                          style="min-height: 100px; resize: vertical;"
+                                                          placeholder="پاسخ"><?= $faqVals['answer'] ?? ''; ?></textarea>
                                             </div>
                                             <div class="text-right col-md-12">
                                                 <?php if (isset($param[0]) && strtolower($param[0]) == 'edit'): ?>

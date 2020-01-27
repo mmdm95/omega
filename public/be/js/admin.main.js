@@ -142,23 +142,6 @@
         });
         //**********
 
-        //********** ManagePlan Action
-        $('.deletePlanBtn').on('click', function (e) {
-            e.preventDefault();
-            var del_btn = $(this);
-
-            delete_something_action(this, 'deletePlan', function () {
-                $(del_btn).closest('tr').fadeOut(800, function () {
-                    if ($.fn.DataTable) {
-                        dataTable.DataTable().row($(this)).remove().draw();
-                    } else {
-                        $(this).remove();
-                    }
-                });
-            });
-        });
-        //**********
-
         //********** ManageComments Action (inside of viewComment)
         $('#delCommentBtn').on('click', function (e) {
             e.preventDefault();
@@ -191,6 +174,79 @@
             var del_btn = $(this);
 
             delete_something_action(this, 'declineComment', function () {
+                setTimeout(function () {
+                    window.location.reload();
+                }, 2000);
+            });
+        });
+        //**********
+
+        //********** ManagePlan Action
+        $('.deletePlanBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deletePlan', function () {
+                $(del_btn).closest('tr').fadeOut(800, function () {
+                    if ($.fn.DataTable) {
+                        dataTable.DataTable().row($(this)).remove().draw();
+                    } else {
+                        $(this).remove();
+                    }
+                });
+            });
+        });
+        //**********
+
+        //********** ManagePlanComments Action
+        $('.deletePlanCommentBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deletePlanComment', function () {
+                $(del_btn).closest('tr').fadeOut(800, function () {
+                    if ($.fn.DataTable) {
+                        dataTable.DataTable().row($(this)).remove().draw();
+                    } else {
+                        $(this).remove();
+                    }
+                });
+            });
+        });
+        //**********
+
+        //********** ManagePlanComments Action (inside of viewPlanComment)
+        $('#delPlanCommentBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'deletePlanComment', function () {
+                setTimeout(function () {
+                    window.location.href = default_rout + 'managePlanComment';
+                }, 2000);
+            });
+        });
+        //**********
+
+        //********** ManagePlanComments Action (inside of viewPlanComment)
+        $('#acceptPlanCommentBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'acceptPlanComment', function () {
+                setTimeout(function () {
+                    window.location.reload();
+                }, 2000);
+            });
+        });
+        //**********
+
+        //********** ManagePlanComments Action (inside of viewPlanComment)
+        $('#declinePlanCommentBtn').on('click', function (e) {
+            e.preventDefault();
+            var del_btn = $(this);
+
+            delete_something_action(this, 'declinePlanComment', function () {
                 setTimeout(function () {
                     window.location.reload();
                 }, 2000);

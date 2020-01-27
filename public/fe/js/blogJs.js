@@ -9,7 +9,7 @@
             load_more_cmt_btn,
             comments_container,
             //-----
-            page = 2,
+            page_num = 2,
             //-----
             comment_url = baseUrl + 'blog/ajaxLoadMoreComments';
 
@@ -22,21 +22,21 @@
                 //-----
                 var d = {
                     blogId: blog_id,
-                    page: page
+                    page: page_num
                 };
                 //-----
                 omega.ajaxRequest({
                     method: 'POST',
                     url: comment_url,
                     data: d,
-                    contentType: false,
-                    processData: false,
                 }, function (response) {
                     // console.log(response);
                     // console.log(JSON.parse(response));
                     var res = JSON.parse(response);
                     if (res.success) {
                         if(res.success.msg) {
+                            page_num++;
+                            //-----
                             if (res.success.msg[0]) {
                                 comments_container.append(res.success.msg[0]);
                             }
@@ -46,7 +46,13 @@
                         } else {
                             omega.showMessage('خطا در واکشی اطلاعات!', 'خطا', 'error', omega.messageIcon.danger);
                         }
+                    } else {
+                        if(res.error.msg) {
+                            omega.showMessage(res.error.msg, 'خطا', 'error', omega.messageIcon.danger);
+                        }
                     }
+                    //-----
+                    $this.find('i').removeClass('la-spin');
                 });
             });
         }

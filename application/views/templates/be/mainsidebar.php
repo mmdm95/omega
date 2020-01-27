@@ -250,6 +250,14 @@
                             </span>
                         </a>
                     </li>
+                    <li>
+                        <a href="<?= base_url(); ?>admin/managePlanComment">
+                            <i class="icon-comment-discussion"></i>
+                            <span>
+                                نظرات
+                            </span>
+                        </a>
+                    </li>
                     <!-- /main -->
                     <!-- فرعی -->
                     <li class="navigation-header"><span>فرعی</span> <i class="icon-menu"></i></li>

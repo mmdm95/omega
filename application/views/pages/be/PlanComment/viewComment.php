@@ -32,7 +32,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="<?= base_url(); ?>admin/manageComment">
+                            <a href="<?= base_url(); ?>admin/managePlanComment">
                                 مدیریت نظرات
                             </a>
                         </li>
@@ -76,7 +76,7 @@
                                         <div class="heading-elements">
                                             <?php if ($comment['publish'] < 2): ?>
                                                 <a href="javascript:void(0);"
-                                                   id="acceptCommentBtn"
+                                                   id="acceptPlanCommentBtn"
                                                    class="btn btn-default btn-rounded heading-btn-group border-success-600 text-success-600 p-10"
                                                    title="تایید" data-popup="tooltip">
                                                     <input type="hidden" value="<?= $comment['id']; ?>">
@@ -85,14 +85,14 @@
                                             <?php endif; ?>
                                             <?php if ($comment['publish'] == 2): ?>
                                                 <a href="javascript:void(0);"
-                                                   id="declineCommentBtn"
+                                                   id="declinePlanCommentBtn"
                                                    class="btn btn-default btn-rounded heading-btn-group border-orange-600 text-orange-600 p-10"
                                                    title="عدم تأیید" data-popup="tooltip">
                                                     <input type="hidden" value="<?= $comment['id']; ?>">
                                                     <i class="icon-cross2" aria-hidden="true"></i>
                                                 </a>
                                             <?php endif; ?>
-                                            <a id="delCommentBtn"
+                                            <a id="delPlanCommentBtn"
                                                class="btn btn-default btn-rounded heading-btn-group border-danger-600 text-danger-600 p-10"
                                                title="حذف" data-popup="tooltip">
                                                 <input type="hidden" value="<?= $comment['id']; ?>">
@@ -150,9 +150,9 @@
                                                 <div class="panel panel-body">
                                                     <div class="media">
                                                         <div class="media-left">
-                                                            <a href="<?= base_url($blog['image']); ?>"
+                                                            <a href="<?= base_url($event['image']); ?>"
                                                                data-popup="lightbox">
-                                                                <img src="<?= base_url($blog['image']); ?>"
+                                                                <img src="<?= base_url($event['image']); ?>"
                                                                      style="width: 70px; height: 70px;"
                                                                      class="img-circle" alt="">
                                                             </a>
@@ -160,13 +160,22 @@
 
                                                         <div class="media-body">
                                                             <h6 class="media-heading">
-                                                                <a href="<?= base_url('blog/detail/' . $blog['slug']); ?>"
+                                                                <a href="<?= base_url('event/detail/' . $event['slug']); ?>"
                                                                    target="_blank">
-                                                                    <?= $blog['title']; ?>
+                                                                    <?= $event['title']; ?>
                                                                 </a>
                                                             </h6>
-                                                            <p class="text-grey">
-                                                                <?= character_limiter($blog['abstract'], 150); ?>
+                                                            <p class="mt-15">
+                                                                <span class="label label-success">
+                                                                    هزینه طرح:
+                                                                    <?= convertNumbersToPersian(number_format(convertNumbersToPersian($event['total_price'], true))); ?>
+                                                                    تومان
+                                                                </span>
+                                                                <span class="label label-info">
+                                                                    هزینه ورودی:
+                                                                    <?= convertNumbersToPersian(number_format(convertNumbersToPersian($event['base_price'], true))); ?>
+                                                                    تومان
+                                                                </span>
                                                             </p>
                                                         </div>
                                                     </div>
@@ -193,9 +202,9 @@
                                                             </span>
                                                         </h6>
                                                     <?php endif; ?>
-                                                    <form action="<?= base_url('admin/viewComment/' . $param[0]); ?>"
+                                                    <form action="<?= base_url('admin/viewPlanComment/' . $param[0]); ?>"
                                                           method="post">
-                                                        <?= $form_token_answer; ?>
+                                                        <?= $form_token_plan_answer; ?>
 
                                                         <textarea rows="5" cols="12" class="form-control"
                                                                   name="answer"
