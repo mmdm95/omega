@@ -296,7 +296,7 @@
 
                                     <div class="panel panel-white">
                                         <div class="panel-heading">
-                                            <h6 class="panel-title">گالری تصاویر</h6>
+                                            <h6 class="panel-title">تصاویر بروشور</h6>
                                             <div class="heading-elements">
                                                 <ul class="icons-list">
                                                     <li><a data-action="collapse"></a></li>
@@ -304,12 +304,7 @@
                                             </div>
                                         </div>
                                         <div class="panel-body slide-items">
-                                            <div class="col-sm-12 mb-20 text-left">
-                                                <div class="display-inline-block alert alert-primary
-                                                no-border-right no-border-top no-border-bottom border-lg p-10 no-margin-bottom"
-                                                     style="width: calc(100% - 50px);">
-                                                    انتخاب حداقل یک تصویر اجباری است
-                                                </div>
+                                            <div class="col-sm-12 mb-20 text-right">
                                                 <a href="javascript:void(0);"
                                                    class="btn btn-primary btn-icon add-slide-image ml-5"
                                                    title="اضافه کردن بروشور جدید" data-popup="tooltip">
@@ -540,7 +535,7 @@
                                                                         <a class="display-inline-block"
                                                                            style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
                                                                             <img
-                                                                                    src="<?= set_value($vid ?? '', '', asset_url('be/images/file-icons/Video.png'), asset_url('be/images/video-placeholder.png')); ?>"
+                                                                                    src="<?= set_value($vid ?? '', '', asset_url('images/file-icons/Video.png'), asset_url('be/images/video-placeholder.png')); ?>"
                                                                                     class="img-rounded" alt=""
                                                                                     style="width: 100px; height: 100px; object-fit: contain;"
                                                                                     data-base-url="<?= base_url(); ?>">
@@ -889,7 +884,7 @@
                                     <div class="panel panel-white">
                                         <button type="submit"
                                                 class="col-xs-12 col-sm-6 col-sm-push-6 btn btn-primary submit-button pt-15 pb-15 no-border-radius-left">
-                                            افزودن طرح
+                                            ویرایش طرح
                                             <i class="icon-arrow-left12 position-right"></i>
                                         </button>
                                         <a href="<?= base_url('admin/managePlan'); ?>"

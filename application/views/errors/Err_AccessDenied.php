@@ -21,7 +21,7 @@
             margin: 0;
             padding: 0;
             background-color: #fdfdfd;
-            font-family: IRANSansWeb sans-serif;
+            font-family: IRANSansWeb, sans-serif;
             direction: rtl;
             text-align: right;
         }

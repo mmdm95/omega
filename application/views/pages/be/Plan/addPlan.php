@@ -535,7 +535,7 @@
                                                                         <a class="display-inline-block"
                                                                            style="-webkit-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);-moz-box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);box-shadow: 0 0 5px 1px rgba(0, 0, 0, 0.4);">
                                                                             <img
-                                                                                    src="<?= set_value($vid ?? '', '', asset_url('be/images/file-icons/Video.png'), asset_url('be/images/video-placeholder.png')); ?>"
+                                                                                    src="<?= set_value($vid ?? '', '', asset_url('images/file-icons/Video.png'), asset_url('be/images/video-placeholder.png')); ?>"
                                                                                     class="img-rounded" alt=""
                                                                                     style="width: 100px; height: 100px; object-fit: contain;"
                                                                                     data-base-url="<?= base_url(); ?>">

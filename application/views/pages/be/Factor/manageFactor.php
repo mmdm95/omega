@@ -122,7 +122,7 @@
                                                                  border-left-lg border-left-success">
                                                                     پرداخت شده
                                                                 </span>
-                                                            <?php elseif ($factor['payment_status']): ?>
+                                                            <?php else: ?>
                                                                 <span class="label label-striped no-border-top no-border-right no-border-bottom border-left
                                                                  border-left-lg border-left-danger">
                                                                     پرداخت نشده

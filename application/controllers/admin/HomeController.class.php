@@ -326,23 +326,28 @@ class HomeController extends HController
 
         $id = @$_POST['postedId'];
         $table = 'users';
-        if (!isset($id) || $id == $this->data['identity']->id) {
-            message('error', 200, 'کاربر نامعتبر است.');
-        }
-        if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
-            message('error', 200, 'کاربر وجود ندارد.');
-        }
 
-        $uRole = $model->select_it(null, 'users_roles', 'role_id', 'user_id=:uId', ['uId' => $id]);
-        if (!count($uRole) || $uRole[0]['role_id'] > $this->data['identity']->role_id) {
-            $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
-            if ($res) {
-                message('success', 200, 'کاربر با موفقیت حذف شد.');
+        try {
+            if (!isset($id) || $id == $this->data['identity']->id) {
+                message('error', 200, 'کاربر نامعتبر است.');
+            }
+            if (!$model->is_exist($table, 'id=:id', ['id' => $id])) {
+                message('error', 200, 'کاربر وجود ندارد.');
             }
 
-            message('error', 200, 'عملیات با خطا مواجه شد.');
-        } else {
-            message('error', 200, 'عملیات غیر مجاز است!');
+            $uRole = $model->select_it(null, 'users_roles', 'role_id', 'user_id=:uId', ['uId' => $id]);
+            if (!count($uRole) || $uRole[0]['role_id'] > $this->data['identity']->role_id) {
+                $res = $model->delete_it($table, 'id=:id', ['id' => $id]);
+                if ($res) {
+                    message('success', 200, 'کاربر با موفقیت حذف شد.');
+                }
+
+                message('error', 200, 'عملیات با خطا مواجه شد.');
+            } else {
+                message('error', 200, 'عملیات غیر مجاز است!');
+            }
+        } catch (Exception $e) {
+            message('error', 200, 'امکان حذف کاربر وجود ندارد.');
         }
     }
 
@@ -373,7 +378,7 @@ class HomeController extends HController
             message('error', 200, 'کاربر وجود ندارد.');
         }
 
-        $res = $model->update_it($table, ['stat' => $stat], 'id=:id', ['id' => $id]);
+        $res = $model->update_it($table, ['active' => $stat], 'id=:id', ['id' => $id]);
         if ($res) {
             if ($stat == 1) {
                 message('success', 200, 'کاربر فعال شد.');

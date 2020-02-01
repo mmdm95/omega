@@ -1,63 +1,53 @@
-<?php defined('BASE_PATH') OR exit('No direct script access allowed'); ?>
-
 <!DOCTYPE html>
-<html lang="fa">
-
+<html lang="fa" style="height:100%">
 <head>
-    <meta charset="utf-8"/>
-    <link rel="apple-touch-icon" sizes="76x76"
-          href="<?= $favIcon; ?>">
-    <link rel="icon" type="image/png"
-          href="<?= $favIcon; ?>">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no'
-          name='viewport'/>
-    <title><?= $setting['main']['title'] ?? ''; ?></title>
-    <!--     Fonts and icons     -->
-    <link rel="stylesheet" href="<?= asset_url() ?>fe/fonts/font-awesome/css/font-awesome.min.css"/>
-    <!-- CSS Files -->
-    <link href="<?= asset_url() ?>fe/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="<?= asset_url() ?>fe/css/now-ui-kit.css" rel="stylesheet"/>
-    <link href="<?= asset_url(); ?>fe/css/plugins/iziToast.css" rel="stylesheet" />
-    <link href="<?= asset_url() ?>fe/css/main.css" rel="stylesheet"/>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>
+        ۴۰۴ - صفحه پیدا نشد
+    </title>
+
+    <style>
+        @font-face {
+            font-family: "IRANSansWeb";
+            font-style: normal;
+            font-weight: 400;
+            src: local("IRANSansWeb"), local("../fonts/IRANSansWeb"),
+            url("<?= base_url('framework'); ?>/fonts/IRANSansWeb.woff") format("woff"),
+            url("<?= base_url('framework'); ?>/fonts/IRANSansWeb.ttf") format("truetype")
+        }
+
+        body {
+            font-family: IRANSansWeb, sans-serif;
+            direction: rtl;
+            margin: 0;
+            height: 100%;
+            color: #fff;
+            background-color: #616ba3;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        
+        h1, h2 {
+            text-shadow: 2px 5px 5px rgba(0, 0, 0, 0.26);
+        }
+    </style>
 </head>
-
-<body class="index-page sidebar-collapse">
-<script>
-    var baseUrl = '<?= base_url(); ?>';
-    var siteLogo = '<?= $logo ?? ''; ?>';
-    //-----
-    var siteAction = '<?= ACTION; ?>';
-</script>
-
-<?php $this->view('templates/fe/home-menu-responsive-part', $data); ?>
-
-<div class="wrapper default">
-    <!-- header -->
-    <?php $this->view('templates/fe/home-menu-part', $data); ?>
-    <!-- header -->
-
-    <!-- main -->
-    <?php $this->view('templates/fe/404/main'); ?>
-    <!-- main -->
-
-    <!-- footer -->
-    <?php $this->view('templates/fe/home-footer-part', $data); ?>
-    <!-- footer -->
+<body>
+<div style="height:auto; min-height:100%; ">
+    <div style="text-align: center; width:800px; margin-left: -400px; position:absolute; top: 30%; left:50%;">
+        <h1 style="margin:0; font-size:150px; line-height:150px; font-weight:bold;">۴۰۴</h1>
+        <h2 style="margin-top:20px;font-size: 30px; padding-bottom: 20px; border-bottom: 3px solid #fff; display: inline-block;">
+            صفحه پیدا نشد!
+        </h2>
+        <div></div>
+        <a href="<?= base_url('index'); ?>" style="text-decoration: none; padding: 10px 15px; border: 2px solid #fff; border-radius: 5px; color: #fff;">
+            بازگشت به صفحه اصلی
+        </a>
+    </div>
 </div>
 </body>
-<!--   Core JS Files   -->
-<script src="<?= asset_url() ?>fe/js/core/jquery.3.2.1.min.js" type="text/javascript"></script>
-<script src="<?= asset_url() ?>fe/js/core/popper.min.js" type="text/javascript"></script>
-<script src="<?= asset_url() ?>fe/js/core/bootstrap.min.js" type="text/javascript"></script>
-<!-- Control Center for Now Ui Kit: parallax effects, scripts for the example pages etc -->
-<script src="<?= asset_url() ?>fe/js/now-ui-kit.js" type="text/javascript"></script>
-<!--  Jquery easing -->
-<script src="<?= asset_url() ?>fe/js/plugins/jquery.easing.1.3.min.js" type="text/javascript"></script>
-<!-- iziToast Js -->
-<script src="<?= asset_url(); ?>fe/js/plugins/iziToast.js" type="text/javascript"></script>
-<!-- Main Js -->
-<script src="<?= asset_url(); ?>fe/js/main.js" type="text/javascript"></script>
-<!-- Cart Js -->
-<script src="<?= asset_url(); ?>fe/js/cartJs.js" type="text/javascript"></script>
 </html>

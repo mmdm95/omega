@@ -330,8 +330,7 @@
                     }, function (data, status) {
                         var opts, action = false;
 
-                        console.log(data);
-
+                        // console.log(data);
                         data = JSON.parse(data);
                         if (status == 'success') {
                             if (data.success) {
