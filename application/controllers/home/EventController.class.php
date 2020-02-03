@@ -62,6 +62,12 @@ class EventController extends AbstractController
             ['pId' => $this->data['event']['id'], 'pub' => 2], ['pc.id DESC'], 5);
         $this->data['commentsCount'] = $model->it_count('plan_comments',
             'plan_id=:pId AND publish=:pub', ['pId' => $this->data['event']['id'], 'pub' => 2]);
+        //-----
+        $this->data['isPayed'] = false;
+        if($this->auth->isLoggedIn()) {
+            $this->data['isPayed'] = $model->is_exist('factors', 'user_id=:uId AND plan_id=:pId',
+                ['uId' => $this->data['identity']->id, 'pId' => $this->data['event']['id']]);
+        }
 
         // Comment form submit
         $this->_commentSubmit(['captcha' => ACTION]);

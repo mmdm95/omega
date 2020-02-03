@@ -223,10 +223,11 @@ abstract class AbstractController extends HController
             if ($res) {
                 $message = 'در حال پردازش عملیات ورود';
                 $delay = 1;
+
                 if (isset($_GET['back_url'])) {
                     $this->redirect($_GET['back_url'], $message, $delay);
                 }
-                $this->redirect(base_url('user/profile'), $message, $delay);
+                $this->redirect(base_url('user/dashboard'), $message, $delay);
             } else {
                 $this->data['loginErrors'] = $form->getError();
                 $this->data['loginValues'] = $form->getValues();
