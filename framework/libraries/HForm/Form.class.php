@@ -711,7 +711,7 @@ class Form implements HIForm
 //            if (preg_match('/^[\x{600}-\x{6FF}]+$/u', str_replace("\\\\", "", $value))) {
 
             // Only persian characters
-            if (preg_match('/^[پچجحخهعغفقثصضشسیبلاتنمکگوئدذرزطظژؤإأءًٌٍَُِّ\s]+$/u', $value)) {
+            if (preg_match('/^[پچجحخهعغفقثصضشسیبلاتنمکگوئدذرزطظژؤإأآءًٌٍَُِّ\s]+$/u', $value)) {
                 return true;
             }
             return false;

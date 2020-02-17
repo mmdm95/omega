@@ -246,7 +246,7 @@ use HPayment\Payment; ?>
                                                     <tr>
                                                         <td><?= convertNumbersToPersian(($key + 1)); ?></td>
                                                         <td class="info">
-                                                            <?= $payment['payment_code']; ?>
+                                                            <?= !empty($payment['payment_code']) ? $payment['payment_code'] : '<i class="icon-minus2"></i>'; ?>
                                                         </td>
                                                         <?php
                                                         if ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_SUCCESS_ZARINPAL) {
@@ -264,8 +264,10 @@ use HPayment\Payment; ?>
                                                                 تراکنش لغو شده
                                                             <?php elseif ($payment['payment_status'] == Payment::PAYMENT_TRANSACTION_FAILED_ZARINPAL): ?>
                                                                 تراکنش ناموفق بوده
-                                                            <?php else: ?>
+                                                            <?php elseif(!empty($paymentClass->get_message($payment['payment_status']))): ?>
                                                                 <?= $paymentClass->get_message($payment['payment_status']); ?>
+                                                            <?php else: ?>
+                                                                پرداخت انجام نشده
                                                             <?php endif; ?>
                                                         </td>
                                                         <td>

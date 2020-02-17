@@ -95,7 +95,9 @@ abstract class AbstractController extends HController
             ->setDefaults('role', AUTH_ROLE_GUEST)
             ->setMethod('post', [], ['role']);
         try {
-            $form->beforeCheckCallback(function ($values) use ($model, $form, $param) {
+            $form->beforeCheckCallback(function (&$values) use ($model, $form, $param) {
+                $values['mobile'] = convertNumbersToPersian($values['mobile'], true);
+
                 $form->isRequired(['mobile', 'password', 're_password', 'role', 'registerCaptcha'], 'فیلدهای ضروری را خالی نگذارید.');
                 if ($model->is_exist('users', 'username=:name AND active=:a',
                     ['name' => $values['mobile'], 'a' => 1])) {
@@ -111,7 +113,7 @@ abstract class AbstractController extends HController
                 if (!isset($config['captcha_session_name']) ||
                     !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                     !isset($param['captcha']) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['registerCaptcha']) {
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != strtolower($values['registerCaptcha'])) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
             })->afterCheckCallback(function ($values) use ($model, $form) {
@@ -197,12 +199,14 @@ abstract class AbstractController extends HController
         $form->setFieldsName(['username', 'password', 'remember', 'loginCaptcha'])
             ->setMethod('post', [], ['remember']);
         try {
-            $form->afterCheckCallback(function ($values) use ($model, $form, $param) {
+            $form->afterCheckCallback(function (&$values) use ($model, $form, $param) {
+                $values['username'] = convertNumbersToPersian($values['username'], true);
+
                 $config = getConfig('config');
                 if (!isset($config['captcha_session_name']) ||
                     !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                     !isset($param['captcha']) ||
-                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['loginCaptcha']) {
+                    encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != strtolower($values['loginCaptcha'])) {
                     $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                 }
                 // If there is no captcha error

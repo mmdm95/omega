@@ -2025,9 +2025,9 @@ class HomeController extends HController
         $model = new Model();
         $this->data['plans'] = $model->select_it(null, 'plans', '*', null, [], null, ['id DESC']);
         foreach ($this->data['plans'] as &$plan) {
-            $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
-                ['plan_id'], null, null, null, true);
-            $plan['filled'] = $model->it_count($sub, null, ['pId' => $plan['id'], 'pa' => 0], false, true);
+            $plan['filled'] = count($model->select_it(null, 'factors', 'id',
+                'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa',
+                ['pId' => $plan['id'], 'pa' => 0]));
         }
 
         // Base configuration
@@ -2065,9 +2065,9 @@ class HomeController extends HController
         $this->data['planVals']['video_gallery'] = array_column($model->select_it(null, 'plan_videos', 'video',
             'plan_id=:pId', ['pId' => $param[0]]), 'video');
         //-----
-        $sub = $model->select_it(null, 'factors', ['COUNT(*)'], 'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa', [],
-            ['plan_id'], null, null, null, true);
-        $this->data['planVals']['filled'] = $model->it_count($sub, null, ['pId' => $this->data['planVals']['id'], 'pa' => 0], false, true);
+        $this->data['planVals']['filled'] = count($model->select_it(null, 'factors', 'id',
+            'plan_id=:pId AND payed_amount IS NOT NULL AND payed_amount>:pa',
+            ['pId' => $this->data['planVals']['id'], 'pa' => 0]));
         //-----
         $factor = new FactorModel();
         $this->data['planVals']['buyers'] = $factor->getBuyers(['plan_id' => $param[0], 'payed' => true]);

@@ -259,7 +259,7 @@ class BlogController extends AbstractController
                         if (!isset($config['captcha_session_name']) ||
                             !isset($_SESSION[$config['captcha_session_name']][$param['captcha']]) ||
                             !isset($param['captcha']) ||
-                            encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != $values['blogCaptcha']) {
+                            encryption_decryption(ED_DECRYPT, $_SESSION[$config['captcha_session_name']][$param['captcha']]) != strtolower($values['blogCaptcha'])) {
                             $form->setError('کد وارد شده با کد تصویر مغایرت دارد. دوباره تلاش کنید.');
                         }
                     }
