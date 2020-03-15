@@ -123,7 +123,7 @@ class BlogController extends AbstractController
                 $query = urldecode($param[0]);
             } else {
                 $param = ['all'];
-                $query = 'نمایش خمه';
+                $query = 'نمایش همه';
             }
         }
         //-----
